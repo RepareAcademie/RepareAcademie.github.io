@@ -203,6 +203,26 @@ dialog h3{font-family:var(--display);font-size:1.7rem;margin:0 0 .5rem;line-heig
   .sec.causes .ic,.sec.outils .ic,.sec.etapes .ic,.sec.precautions .ic,.sec.echec .ic{filter:brightness(.9)}
   .fig img{background:#000}
 }
+.stepfig{margin:.6rem 0 0;max-width:300px;cursor:zoom-in;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#F4F6F3}
+.stepfig svg{display:block;width:100%;height:auto}
+.stepfig:focus-visible{outline:3px solid var(--copper)}
+.say{display:inline-flex;align-items:center;gap:.35rem;margin-top:.5rem;background:transparent;border:1.5px solid var(--line);color:var(--ink);border-radius:999px;padding:.3rem .75rem;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer}
+.say.on,.btn-say.on{background:#B4442E;border-color:#B4442E;color:#fff}
+.btn-say{display:inline-flex;align-items:center;gap:.5rem;margin-top:1rem;background:#fff;color:#0E3B36;border:none;border-radius:999px;padding:.7rem 1.2rem;font:inherit;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.mic{display:inline-flex;align-items:center;gap:.4rem;border:1.5px solid var(--copper);background:color-mix(in srgb,var(--copper) 12%,transparent);color:var(--ink);border-radius:999px;padding:.3rem .8rem;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer}
+.mic.on{background:#B4442E;border-color:#B4442E;color:#fff;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.75}}
+#rpChat{margin-top:1.5rem}
+#rpChat .sec{border-left:6px solid var(--copper)}
+.bub{border-radius:14px;padding:.75rem .95rem;margin:.6rem 0;max-width:92%}
+.bub.q{background:var(--board);color:#fff;margin-left:auto;width:fit-content}
+.bub.a{background:var(--paper);border:1px solid var(--line)}
+.bub.a h3{font-family:var(--display);font-size:1.2em;margin:.3rem 0}
+.bub.a ol,.bub.a ul{padding-left:1.25rem;margin:.3rem 0}
+.bub.a p{margin:.3rem 0}
+.chatrow{display:flex;gap:.5rem;align-items:flex-end;margin-top:.75rem}
+.chatrow textarea{min-height:52px;flex:1}
+.qchips{display:flex;flex-wrap:wrap;gap:.4rem;margin:.25rem 0 .5rem}
 /* Zoom plein écran */
 dialog.zoom{max-width:none;width:100vw;height:100dvh;max-height:none;margin:0;border-radius:0;background:#0b0f0e;color:#fff}
 .zoom .zbar{position:sticky;top:0;display:flex;gap:.5rem;align-items:center;padding:.6rem .75rem;background:#0b0f0e;border-bottom:1px solid #2a3834;z-index:2}
@@ -265,7 +285,7 @@ dialog.zoom{max-width:none;width:100vw;height:100dvh;max-height:none;margin:0;bo
 
     <div class="bench">
       <h2>Analyser une panne</h2>
-      <p class="sub">Plus vous donnez de détails, plus la méthode est précise.</p>
+      <p class="sub">Plus vous donnez de détails, plus la méthode est précise. 3 diagnostics offerts à l’inscription, puis réservé aux abonnés.</p>
       <div class="row2">
         <div>
           <label class="f" for="brand">Marque</label>
@@ -283,6 +303,7 @@ dialog.zoom{max-width:none;width:100vw;height:100dvh;max-height:none;margin:0;bo
       <label class="f" for="desc">Description de la panne</label>
       <textarea id="desc" placeholder="Ex. Le téléphone ne charge plus. Quand je branche le câble, rien ne s’affiche. Il est tombé dans l’eau la semaine dernière."></textarea>
       <div class="chips" aria-label="Exemples de pannes">
+        <button class="mic" type="button" id="micDesc">🎤 Parler</button>
         <button class="chip" type="button">Ne charge plus</button>
         <button class="chip" type="button">Écran noir mais il vibre</button>
         <button class="chip" type="button">Bloqué sur le logo</button>
@@ -382,6 +403,22 @@ dialog.zoom{max-width:none;width:100vw;height:100dvh;max-height:none;margin:0;bo
     </div>
   </div>
   <div id="rpContent"></div>
+  <div class="wrap"><section id="rpChat" class="sec" hidden>
+    <h2><span class="ic" style="background:#FBEFD9;color:#8A5413"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/></svg></span>Parler avec l’IA</h2>
+    <p style="margin:.2rem 0 .4rem;color:var(--muted)">Une question sur cette réparation ? Écrivez-la ou touchez le micro et parlez.</p>
+    <div class="qchips">
+      <button class="chip qchip" type="button">Explique-moi l’étape 1 plus simplement</button>
+      <button class="chip qchip" type="button">Quelles pièces acheter et à quel prix ?</button>
+      <button class="chip qchip" type="button">Et si je n’ai pas les outils ?</button>
+    </div>
+    <div id="chatList"></div>
+    <div class="chatrow">
+      <textarea id="chatInput" placeholder="Votre question…" aria-label="Votre question pour l’IA"></textarea>
+      <button class="btn btn-copper" type="button" id="chatSend">Envoyer</button>
+    </div>
+    <div class="actions" style="margin-top:.5rem"><button class="mic" type="button" id="micChat">🎤 Parler à l’IA</button></div>
+    <div class="notice" id="chatMsg" hidden></div>
+  </section></div>
 </section>
 
 <footer>
@@ -510,13 +547,13 @@ const CONFIG = {
   adminEmail: "pofficielvideo@gmail.com",
   telephonePaiement: "+223 77 37 02 54",
   whatsapp: "22377370254",
-  diagnosticsGratuitsParJour: 3,
+  diagnosticsOfferts: 3, // diagnostics offerts une seule fois, à l’inscription (0 = aucun)
   modeleIA: "gemini-3.5-flash-lite",
   plans: [
     { id:"gratuit", nom:"Gratuit", prix:"0", periode:"FCFA", jours:0, badge:"",
-      avantages:["3 diagnostics par jour","Première leçon de chaque cours","Photos acceptées"], bouton:"Commencer" },
+      avantages:["3 diagnostics offerts à l’inscription","Première leçon de chaque cours"], bouton:"Créer mon compte" },
     { id:"pro", nom:"Pro", prix:"5 000", periode:"FCFA / mois", jours:30, badge:"Le plus choisi",
-      avantages:["Diagnostics illimités","Tous les cours et leçons","Nouvelles leçons chaque mois","Aide par WhatsApp"], bouton:"Choisir Pro" },
+      avantages:["Diagnostic par description ou photo, illimité","Discussion avec l’IA et lecture à voix haute","Tous les cours et leçons","Aide par WhatsApp"], bouton:"Choisir Pro" },
     { id:"atelier", nom:"Atelier", prix:"45 000", periode:"FCFA / an", jours:365, badge:"",
       avantages:["Tout le plan Pro pendant 12 mois","Attestation de formation","Schémas de cartes mères","Aide prioritaire"], bouton:"Choisir Atelier" }
   ]
@@ -778,19 +815,20 @@ $("#telBack").addEventListener("click", () => { $("#telStep1").hidden = false; $
 /* ==========================================================
    DIAGNOSTIC
    ========================================================== */
-function usedToday(){ return profil?.diagJour === today() ? (profil.diagNb || 0) : 0; }
+const essaisUtilises = () => profil?.diagEssai || 0;
+const essaisRestants = () => Math.max(0, CONFIG.diagnosticsOfferts - essaisUtilises());
 function renderQuota(){
-  const q = $("#quota");
-  if (!user) { q.textContent = "Connectez-vous pour lancer un diagnostic"; return; }
+  const q = $("#quota"), n = CONFIG.diagnosticsOfferts;
+  if (!user) { q.textContent = n ? `${n} diagnostics offerts à l’inscription` : "Réservé aux abonnés Pro et Atelier"; return; }
   if (isActive()) { q.textContent = "Abonné : diagnostics illimités"; return; }
-  const left = Math.max(0, CONFIG.diagnosticsGratuitsParJour - usedToday());
-  q.textContent = `${left} diagnostic${left>1?"s":""} gratuit${left>1?"s":""} restant${left>1?"s":""} aujourd’hui`;
+  const left = essaisRestants();
+  q.textContent = left ? `${left} diagnostic${left>1?"s":""} offert${left>1?"s":""} restant${left>1?"s":""}` : "Essai terminé : réservé aux abonnés Pro et Atelier";
 }
 async function compterDiag(){
   if (isActive()) return;
-  const n = usedToday() + 1;
-  profil.diagJour = today(); profil.diagNb = n;
-  try { await F.updateDoc(F.doc(db,"users",user.uid), { diagJour: today(), diagNb: n }); } catch(e){ console.warn(e); }
+  const n = essaisUtilises() + 1;
+  profil.diagEssai = n;
+  try { await F.updateDoc(F.doc(db,"users",user.uid), { diagEssai: n }); } catch(e){ console.warn(e); }
 }
 
 document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => {
@@ -828,12 +866,14 @@ $("#analyze").addEventListener("click", async () => {
   if (!user) { openDlg("#loginDlg"); return; }
   const desc = $("#desc").value.trim();
   if (!desc && !photo) { show(notice, "Décrivez la panne ou ajoutez une photo pour lancer l’analyse."); return; }
-  if (!isActive() && usedToday() >= CONFIG.diagnosticsGratuitsParJour) {
-    show(notice, "Vos diagnostics gratuits du jour sont utilisés. Passez à l’abonnement Pro pour des diagnostics illimités.");
-    setTimeout(() => location.hash = "abonnements", 1200); return;
+  if (!isActive() && !essaisRestants()) {
+    show(notice, CONFIG.diagnosticsOfferts
+      ? `Vos ${CONFIG.diagnosticsOfferts} diagnostics offerts sont utilisés. Abonnez-vous à Pro ou Atelier pour analyser vos pannes sans limite.`
+      : "Le diagnostic est réservé aux abonnés Pro et Atelier. Abonnez-vous pour analyser vos pannes sans limite.");
+    setTimeout(() => $("#abonnements").scrollIntoView({ behavior:"smooth" }), 1500); return;
   }
   const btn = $("#analyze"); btn.disabled = true; enCours = true;
-  rapportCourant = { txt:"", photo: photo ? photo.url : null, marque: $("#brand").value, modele: $("#model").value.trim(), desc, date: Date.now() };
+  rapportCourant = { txt:"", photo: photo ? photo.url : null, marque: $("#brand").value, modele: $("#model").value.trim(), desc, date: Date.now(), chat: [] };
   location.hash = "rapport";
   renderRapport(false);
 
@@ -854,8 +894,8 @@ Utilise exactement ce format :
 ## Pièces
 - (une pièce par ligne, ou « Aucune »)
 ## Réparation pas à pas
-1. **Titre de l’étape** : explication en 1 ou 2 phrases
-(5 à 8 étapes, en commençant par les vérifications simples)
+1. **Titre de l’étape** : explication en 1 ou 2 phrases [action: code]
+(5 à 8 étapes, en commençant par les vérifications simples. À la fin de chaque étape, mets [action: code] avec le code du dessin qui montre le geste, choisi parmi : power, volume-haut, volume-bas, volume-haut-bas, power-volume-bas, power-volume-haut, brancher-cable, tiroir-sim, chauffer, ventouse, mediator, batterie, nettoyer-connecteur, devisser, multimetre, souder, alcool, allumer, ordinateur, parametres, aucune)
 ## Précautions
 - …
 ## Si ça ne marche pas
@@ -875,6 +915,7 @@ Utilise exactement ce format :
     }
     if (!rapportCourant.txt.trim()) throw new Error("vide");
     cancelAnimationFrame(raf);
+    enCours = false;
     renderRapport(true);
     sauverRapport();
     await compterDiag();
@@ -886,6 +927,7 @@ Utilise exactement ce format :
     const msg = /quota|429|exhausted/i.test(m) ? "Le service d’analyse est très demandé. Réessayez dans une minute."
       : /api.*not.*enabled|403|PERMISSION/i.test(m) ? "Le service d’analyse n’est pas encore activé dans Firebase (AI Logic)."
       : "L’analyse a été coupée. Vérifiez votre connexion et réessayez.";
+    enCours = false;
     if (rapportCourant.txt.trim()) { renderRapport(true); sauverRapport(); }
     else { location.hash = "diagnostic"; }
     show(notice, msg);
@@ -1032,15 +1074,18 @@ function renderRapport(fini){
     r.duree && `<span class="chip2">⏱ ${esc(r.duree)}</span>`, r.cout && `<span class="chip2">💰 ${esc(r.cout)}</span>`].filter(Boolean).join("");
   const figs = [];
   if (R.photo) figs.push(`<figure class="fig" tabindex="0" data-zoom="photo"><img src="${R.photo}" alt="Photo du défaut envoyée"><figcaption>Votre photo <span>Toucher pour zoomer</span></figcaption></figure>`);
-  if (zone) figs.push(`<figure class="fig" tabindex="0" data-zoom="schema">${phoneSVG(zone)}<figcaption>Zone concernée : ${esc(ZONES[zone])} <span>Toucher pour zoomer</span></figcaption></figure>`);
+  if (zone) figs.push(`<figure class="fig" tabindex="0" data-zoom="schema" data-zone="${zone}">${phoneSVG(zone)}<figcaption>Zone concernée : ${esc(ZONES[zone])} <span>Toucher pour zoomer</span></figcaption></figure>`);
   const secs = r.sections.map(s => {
     const k = typeSection(s.titre);
     let body = "";
     if (k === "outils" && s.items.length) body = `<ul class="tools">${s.items.map(i => `<li>${iconPour(i)}<span>${inl(i)}</span></li>`).join("")}</ul>`;
     else if (s.items.length) body = `<ul>${s.items.map(i => `<li>${inl(i)}</li>`).join("")}</ul>`;
     if (s.ol.length) body += `<ol class="stepcards">${s.ol.map((i, j) => {
-      const h = inl(i).replace(/<\/strong>\s*[:\-–]\s*/, "</strong>");
-      return `<li><div class="num">${iconPour(i)}<b>${j + 1}</b></div><div>${h}</div></li>`; }).join("")}</ol>`;
+      const act = fini || j < s.ol.length - 1 ? actionDe(i) : null, t = sansTag(i);
+      const h = inl(t).replace(/<\/strong>\s*[:\-–]\s*/, "</strong>");
+      const fig = act ? `<figure class="stepfig" tabindex="0" data-zoom="action" data-act="${act}">${ACTIONS[act]()}</figure>` : "";
+      const say = fini && voixOK ? `<button class="say" type="button" data-say="${esc("Étape " + (j + 1) + " : " + t.replace(/\*\*/g, ""))}">🔊 Écouter</button>` : "";
+      return `<li><div class="num">${iconPour(t)}<b>${j + 1}</b></div><div>${h}${fig}${say}</div></li>`; }).join("")}</ol>`;
     if (s.paras.length) body += s.paras.map(p => `<p>${inl(p)}</p>`).join("");
     return `<section class="sec ${k}"><h2><span class="ic">${ICSEC[k]}</span>${inl(s.titre)}</h2>${body}</section>`;
   }).join("");
@@ -1050,18 +1095,16 @@ function renderRapport(fini){
       <h1>${r.titre ? inl(r.titre) : "Analyse en cours…"}</h1>
       ${r.resume.length ? `<p class="resume">${r.resume.map(inl).join(" ")}</p>` : ""}
       ${chips ? `<div class="chips2">${chips}</div>` : ""}
+      ${fini && voixOK ? `<button class="btn-say" type="button" data-say="__rapport">🔊 Écouter le diagnostic</button>` : ""}
     </div></div>
     <div class="wrap" style="padding-top:2.25rem">
       ${figs.length ? `<div class="rp-figs">${figs.join("")}</div>` : ""}
       ${secs}
       ${fini ? "" : `<div class="rp-wait"><div class="spin"></div><span>L’analyse continue…</span></div>`}
-      ${fini ? `<div class="actions"><a class="btn btn-copper" href="#diagnostic">Analyser une autre panne</a></div>` : ""}
+      ${fini && voixOK ? `<div class="actions"><button class="btn-say" type="button" data-say="__rapport" style="margin-top:0">🔊 Écouter tout le diagnostic</button></div>` : ""}
     </div>`;
-  document.querySelectorAll("#rpContent [data-zoom]").forEach(el => {
-    const open = () => ouvrirZoom(el.dataset.zoom === "photo" ? `<img src="${R.photo}" alt="Photo du défaut">` : phoneSVG(zone));
-    el.addEventListener("click", open);
-    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
-  });
+  brancherZooms($("#rpContent"));
+  renderChat();
 }
 function sauverRapport(){ try { localStorage.setItem("ra_rapport", JSON.stringify(rapportCourant)); } catch(_) { try { localStorage.setItem("ra_rapport", JSON.stringify({ ...rapportCourant, photo:null })); } catch(__){} } }
 function chargerRapport(){ try { return JSON.parse(localStorage.getItem("ra_rapport") || "null"); } catch(_) { return null; } }
@@ -1088,6 +1131,250 @@ $("#rpShare").addEventListener("click", () => {
   const t = rapportCourant.txt.replace(/\*\*/g, "*").replace(/^#{1,3}\s*/gm, "").slice(0, 3000);
   window.open("https://wa.me/?text=" + encodeURIComponent(t + "\n\n" + CONFIG.nomSite + " : " + location.origin), "_blank", "noopener");
 });
+
+/* ==========================================================
+   DESSINS DES ACTIONS (boutons, câble, ouverture, soudure…)
+   ========================================================== */
+const K = "#1d2b28", O = "#C9822B", G = "#9aa8a3";
+function fleche(x1, y1, x2, y2, c = O){
+  const a = Math.atan2(y2 - y1, x2 - x1), L = 8;
+  const p1 = [x2 - L * Math.cos(a - .45), y2 - L * Math.sin(a - .45)], p2 = [x2 - L * Math.cos(a + .45), y2 - L * Math.sin(a + .45)];
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="3" stroke-linecap="round"/><polygon points="${x2},${y2} ${p1[0].toFixed(1)},${p1[1].toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}" fill="${c}"/>`;
+}
+const doigt = (x, y) => `<path d="M${x - 9} ${y - 6}h16a6 6 0 010 12h-16a6 6 0 010-12z" fill="#E8B48A" stroke="#8A5413" stroke-width="1.5"/><path d="M${x - 9} ${y - 3.5}a3.5 3.5 0 000 7h3v-7z" fill="#F6E1CF" stroke="#8A5413" stroke-width="1"/>`;
+const tel = (o = {}) => {
+  const x = o.x ?? 55, y = o.y ?? 8, w = o.w ?? 50, h = o.h ?? 100;
+  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="9" fill="#fff" stroke="${K}" stroke-width="2.5"/>
+  <rect x="${x + 4}" y="${y + 9}" width="${w - 8}" height="${h - 22}" rx="2" fill="${o.ecran || "#E9EEEC"}" stroke="${G}"/>
+  <rect x="${x + w / 2 - 6}" y="${y + 4}" width="12" height="2.5" rx="1.2" fill="${G}"/>
+  <rect x="${x + w / 2 - 6}" y="${y + h - 7}" width="12" height="3" rx="1.5" fill="${o.port ? O : G}"/>`;
+};
+const cadre = (inner, label) => `<svg viewBox="0 0 160 132" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(label)}">
+  <rect width="160" height="132" rx="10" fill="#F4F6F3"/>${inner}
+  <text x="80" y="126" font-size="9.5" font-weight="700" text-anchor="middle" fill="${K}" font-family="Arial">${esc(label)}</text></svg>`;
+
+function boutons(appuyes, label){
+  const pos = { haut:[30,14], bas:[46,14], power:[68,12] };
+  let s = tel();
+  for (const [k, [yy, hh]] of Object.entries(pos)) {
+    const on = appuyes.includes(k);
+    s += `<rect x="105" y="${yy}" width="5" height="${hh}" rx="2" fill="${on ? O : "#fff"}" stroke="${on ? O : K}" stroke-width="1.5"/>`;
+    s += `<text x="${k === "power" ? 47 : 47}" y="${yy + hh / 2 + 3}" font-size="7" text-anchor="end" fill="${on ? "#8A5413" : G}" font-family="Arial" font-weight="700">${k === "haut" ? "Vol +" : k === "bas" ? "Vol −" : "Marche"}</text>`;
+    s += `<line x1="49" y1="${yy + hh / 2}" x2="56" y2="${yy + hh / 2}" stroke="${on ? O : G}" stroke-width="1" stroke-dasharray="2 1.5"/>`;
+    if (on) s += fleche(126, yy + hh / 2, 114, yy + hh / 2) + doigt(137, yy + hh / 2);
+  }
+  return cadre(s, label);
+}
+const ACTIONS = {
+  "power": () => boutons(["power"], "Appuyer sur le bouton Marche"),
+  "volume-haut": () => boutons(["haut"], "Appuyer sur Volume +"),
+  "volume-bas": () => boutons(["bas"], "Appuyer sur Volume −"),
+  "volume-haut-bas": () => boutons(["haut","bas"], "Volume + et Volume − ensemble"),
+  "power-volume-bas": () => boutons(["power","bas"], "Marche + Volume − ensemble"),
+  "power-volume-haut": () => boutons(["power","haut"], "Marche + Volume + ensemble"),
+  "brancher-cable": () => cadre(tel({ y:4, h:92, port:true }) + `<rect x="74" y="102" width="12" height="9" rx="2" fill="${K}"/><path d="M80 111 C80 116 70 116 70 120" stroke="${K}" stroke-width="3" fill="none"/>` + fleche(100, 112, 100, 98), "Brancher le câble"),
+  "tiroir-sim": () => cadre(tel() + `<rect x="38" y="40" width="19" height="9" rx="2" fill="${O}"/><rect x="41" y="42" width="9" height="5" rx="1" fill="#fff"/><line x1="14" y1="24" x2="52" y2="40" stroke="${K}" stroke-width="2.5" stroke-linecap="round"/><circle cx="14" cy="24" r="4" fill="none" stroke="${K}" stroke-width="2"/>` + fleche(36, 60, 18, 60), "Sortir le tiroir SIM avec l’aiguille"),
+  "chauffer": () => cadre(tel() + `<rect x="4" y="40" width="30" height="15" rx="3" fill="${K}"/><rect x="34" y="43" width="9" height="9" rx="1" fill="#555"/><rect x="12" y="55" width="9" height="20" rx="2" fill="${K}"/>` +
+      [0,1,2].map(i => `<path d="M46 ${41 + i * 7} q3 -3 6 0 t6 0" stroke="${O}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`).join(""), "Chauffer à 80–90 °C"),
+  "ventouse": () => cadre(tel() + `<ellipse cx="80" cy="86" rx="13" ry="5" fill="${O}" stroke="#8A5413"/><line x1="80" y1="86" x2="80" y2="70" stroke="${K}" stroke-width="3"/><circle cx="80" cy="66" r="5" fill="none" stroke="${K}" stroke-width="2.5"/>` + fleche(122, 92, 122, 66), "Soulever avec la ventouse"),
+  "mediator": () => cadre(tel() + `<polygon points="104,60 128,48 132,58 106,66" fill="${O}" stroke="#8A5413"/>` + fleche(140, 72, 140, 98), "Glisser le médiator dans le joint"),
+  "batterie": () => cadre(`<rect x="45" y="8" width="70" height="100" rx="9" fill="#fff" stroke="${K}" stroke-width="2.5"/><rect x="52" y="14" width="56" height="20" rx="2" fill="#CFD8D5"/><text x="80" y="27" font-size="7" text-anchor="middle" fill="${K}" font-family="Arial">carte mère</text><rect x="52" y="44" width="56" height="58" rx="3" fill="#DCEBE7" stroke="${G}"/><text x="80" y="76" font-size="8" text-anchor="middle" fill="${K}" font-family="Arial">batterie</text><rect x="73" y="35" width="14" height="7" rx="1" fill="${O}"/><line x1="128" y1="18" x2="88" y2="38" stroke="${K}" stroke-width="3" stroke-linecap="round"/>` + fleche(98, 40, 98, 24), "Déconnecter la batterie en premier"),
+  "nettoyer-connecteur": () => cadre(`<rect x="18" y="44" width="124" height="54" rx="14" fill="#fff" stroke="${K}" stroke-width="2.5"/><rect x="58" y="74" width="44" height="12" rx="6" fill="#333" stroke="${O}" stroke-width="2.5"/><line x1="80" y1="14" x2="80" y2="72" stroke="#2F6FAE" stroke-width="3.5" stroke-linecap="round"/>` +
+      [[68,92],[92,95],[86,104],[72,104]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="1.8" fill="#8a6d4b"/>`).join("") + fleche(112, 60, 112, 78), "Nettoyer le connecteur sans métal"),
+  "devisser": () => cadre(`<circle cx="80" cy="58" r="26" fill="#DFE4E2" stroke="${K}" stroke-width="2.5"/><path d="M68 58h24M80 46v24" stroke="${K}" stroke-width="4" stroke-linecap="round"/><path d="M118 40 A42 42 0 0 0 52 22" stroke="${O}" stroke-width="3" fill="none" stroke-linecap="round"/><polygon points="52,22 62,18 58,29" fill="${O}"/>`, "Dévisser (sens inverse des aiguilles)"),
+  "multimetre": () => cadre(`<rect x="12" y="12" width="48" height="80" rx="6" fill="#E3B23C" stroke="${K}" stroke-width="2"/><rect x="18" y="18" width="36" height="16" rx="2" fill="#DCEBE7" stroke="${K}"/><text x="36" y="30" font-size="9" text-anchor="middle" font-family="Arial" font-weight="700" fill="${K}">4.0V</text><circle cx="36" cy="58" r="11" fill="#fff" stroke="${K}" stroke-width="2"/><rect x="92" y="54" width="58" height="36" rx="3" fill="#2C6B4F"/><rect x="110" y="62" width="18" height="12" fill="#222"/><path d="M28 92 C30 112 96 108 112 70" stroke="#B4442E" stroke-width="2.5" fill="none"/><path d="M44 92 C50 108 120 112 132 76" stroke="${K}" stroke-width="2.5" fill="none"/>`, "Mesurer avec le multimètre"),
+  "souder": () => cadre(`<rect x="16" y="64" width="128" height="42" rx="4" fill="#2C6B4F"/><rect x="62" y="74" width="34" height="20" rx="2" fill="#222"/><line x1="146" y1="10" x2="100" y2="70" stroke="${K}" stroke-width="6" stroke-linecap="round"/><line x1="100" y1="70" x2="94" y2="78" stroke="#999" stroke-width="3" stroke-linecap="round"/>` +
+      [0,1].map(i => `<path d="M${84 - i * 8} 66 q-4 -6 0 -12 t0 -12" stroke="#9aa8a3" stroke-width="2" fill="none"/>`).join(""), "Souder avec du flux"),
+  "alcool": () => cadre(`<path d="M24 34h22v52a4 4 0 01-4 4H28a4 4 0 01-4-4z" fill="#E1ECF7" stroke="${K}" stroke-width="2"/><rect x="29" y="22" width="12" height="12" fill="${K}"/><text x="35" y="66" font-size="8" text-anchor="middle" font-family="Arial" font-weight="700" fill="#1F4E7A">IPA</text><rect x="70" y="60" width="78" height="42" rx="4" fill="#2C6B4F"/><path d="M100 48 l-6 -10 m14 8 l0 -12 m10 14 l6 -10" stroke="#2F6FAE" stroke-width="2.5" stroke-linecap="round"/>` + fleche(52, 50, 88, 56, "#2F6FAE"), "Nettoyer à l’alcool isopropylique"),
+  "allumer": () => cadre(tel({ ecran:"#FFF4DF" }) + `<path d="M68 58l9 9 17-20" stroke="#2F7D4F" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="105" y="68" width="5" height="12" rx="2" fill="${O}"/>` + fleche(126, 74, 114, 74) + doigt(137, 74), "Allumer et tester"),
+  "ordinateur": () => cadre(`<rect x="8" y="18" width="78" height="50" rx="4" fill="#fff" stroke="${K}" stroke-width="2.5"/><rect x="13" y="23" width="68" height="40" fill="#DCEBE7"/><path d="M2 72h90l-6 8H8z" fill="${K}"/>` + tel({ x:112, y:30, w:36, h:70, port:true }) + `<path d="M92 74 C104 74 104 112 130 104" stroke="${K}" stroke-width="2.5" fill="none"/>`, "Brancher le téléphone à l’ordinateur"),
+  "parametres": () => cadre(tel() + `<g transform="translate(80 46)" stroke="${O}" stroke-width="3" fill="none"><circle r="7"/><path d="M0-13v4M0 9v4M-13 0h4M9 0h4M-9-9l3 3M6 6l3 3M-9 9l3-3M6-6l3-3"/></g><path d="M64 70h32M64 78h24M64 86h28" stroke="${G}" stroke-width="3" stroke-linecap="round"/>`, "Ouvrir les Paramètres")
+};
+function actionDe(texte){
+  const m = texte.match(/\[\s*action\s*:\s*([a-z\-]+)\s*\]/i);
+  if (m) { const k = m[1].toLowerCase(); return ACTIONS[k] ? k : null; }
+  const n = norm(texte);
+  const vh = /volume\s*(\+|haut|plus)/.test(n), vb = /volume\s*(-|−|bas|moins)/.test(n), pw = /(bouton\s*(power|marche|d.alimentation|allumage)|power)/.test(n);
+  if (vh && vb) return "volume-haut-bas";
+  if (pw && vb) return "power-volume-bas";
+  if (pw && vh) return "power-volume-haut";
+  if (vb && /appui|maint|enfonc|press/.test(n)) return "volume-bas";
+  if (vh && /appui|maint|enfonc|press/.test(n)) return "volume-haut";
+  if (/tiroir|carte sim/.test(n)) return "tiroir-sim";
+  if (/ventouse/.test(n)) return "ventouse";
+  if (/mediator|spatule/.test(n)) return "mediator";
+  if (/chauff|air chaud/.test(n)) return "chauffer";
+  if (/deconnect.*batter|batter.*deconnect/.test(n)) return "batterie";
+  if (/nettoy.*connecteur|connecteur.*nettoy|poussiere/.test(n)) return "nettoyer-connecteur";
+  if (/devis|vis\b/.test(n)) return "devisser";
+  if (/multimetre|mesur/.test(n)) return "multimetre";
+  if (/soud/.test(n)) return "souder";
+  if (/alcool|isopropyl/.test(n)) return "alcool";
+  if (/ordinateur|pc\b|odin|flash tool/.test(n)) return "ordinateur";
+  if (/parametre|reglage/.test(n)) return "parametres";
+  if (/branch.*(cable|chargeur)|(cable|chargeur).*branch|autre cable|un autre chargeur/.test(n)) return "brancher-cable";
+  if (pw) return "power";
+  return null;
+}
+const sansTag = t => t.replace(/\s*\[\s*action\s*:[^\]]*\]\s*/gi, " ").trim();
+
+/* ==========================================================
+   LECTURE À VOIX HAUTE
+   ========================================================== */
+const voixOK = "speechSynthesis" in window;
+let lectureBtn = null;
+function texteParle(t){ return sansTag(t).replace(/\*\*/g, "").replace(/^#+\s*/gm, "").replace(/[•·]/g, ",").replace(/−/g, "moins").replace(/(\d)\s*°C/g, "$1 degrés").replace(/FCFA/g, "francs CFA"); }
+function arreterLecture(){
+  if (!voixOK) return;
+  speechSynthesis.cancel();
+  if (lectureBtn) { lectureBtn.classList.remove("on"); lectureBtn.innerHTML = lectureBtn.dataset.label; }
+  lectureBtn = null;
+}
+function lire(texte, btn){
+  if (!voixOK) return;
+  if (lectureBtn === btn) { arreterLecture(); return; }
+  arreterLecture();
+  const morceaux = texteParle(texte).split(/(?<=[.!?:;])\s+|\n+/).map(s => s.trim()).filter(Boolean);
+  const voix = speechSynthesis.getVoices().find(v => /^fr/i.test(v.lang));
+  lectureBtn = btn;
+  if (btn) { btn.dataset.label = btn.dataset.label || btn.innerHTML; btn.classList.add("on"); btn.innerHTML = "⏹ Arrêter la lecture"; }
+  morceaux.forEach((m, i) => {
+    const u = new SpeechSynthesisUtterance(m);
+    u.lang = "fr-FR"; if (voix) u.voice = voix; u.rate = 0.98;
+    if (i === morceaux.length - 1) u.onend = () => { if (lectureBtn === btn) arreterLecture(); };
+    speechSynthesis.speak(u);
+  });
+}
+if (voixOK) speechSynthesis.getVoices();
+function texteRapport(){
+  const r = parseRapport(rapportCourant?.txt || "");
+  const out = [r.titre + ".", r.resume.join(" ")];
+  if (r.diff) out.push(`Difficulté : ${r.diff}. Durée : ${r.duree}. Coût estimé : ${r.cout}.`);
+  for (const s of r.sections) {
+    out.push(s.titre + ".");
+    s.items.forEach(i => out.push(i + "."));
+    s.ol.forEach((i, j) => out.push(`Étape ${j + 1} : ${i}.`));
+    s.paras.forEach(p => out.push(p));
+  }
+  return out.join("\n");
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-say]"); if (!b) return;
+  if (b.dataset.say === "__rapport") lire(texteRapport(), b);
+  else if (b.dataset.say.startsWith("__chat")) { const c = rapportCourant?.chat?.[+b.dataset.say.slice(6)]; if (c) lire(c.a, b); }
+  else lire(b.dataset.say, b);
+});
+window.addEventListener("hashchange", () => { if (location.hash !== "#rapport") arreterLecture(); });
+
+/* ==========================================================
+   DICTÉE (parler au lieu d’écrire)
+   ========================================================== */
+const Reco = window.SpeechRecognition || window.webkitSpeechRecognition;
+function brancherMicro(btn, champ, apres){
+  if (!Reco) { btn.hidden = true; return; }
+  let reco = null;
+  btn.addEventListener("click", () => {
+    if (reco) { reco.stop(); return; }
+    arreterLecture();
+    reco = new Reco(); reco.lang = "fr-FR"; reco.interimResults = true; reco.continuous = false;
+    const base = champ.value ? champ.value.trim() + " " : "";
+    btn.classList.add("on"); btn.dataset.label = btn.dataset.label || btn.innerHTML; btn.innerHTML = "● J’écoute… touchez pour finir";
+    reco.onresult = ev => { let t = ""; for (const r of ev.results) t += r[0].transcript; champ.value = base + t; };
+    reco.onerror = ev => { if (ev.error === "not-allowed") alertMicro(champ); };
+    reco.onend = () => { btn.classList.remove("on"); btn.innerHTML = btn.dataset.label; reco = null; if (apres && champ.value.trim()) apres(); };
+    try { reco.start(); } catch(_) { reco = null; btn.classList.remove("on"); btn.innerHTML = btn.dataset.label; }
+  });
+}
+function alertMicro(champ){
+  const p = document.createElement("p"); p.className = "notice";
+  p.textContent = "Le micro est bloqué. Autorisez le micro pour ce site dans les réglages du navigateur (icône à gauche de l’adresse), puis réessayez.";
+  champ.insertAdjacentElement("afterend", p); setTimeout(() => p.remove(), 8000);
+}
+brancherMicro($("#micDesc"), $("#desc"));
+
+/* ==========================================================
+   CONVERSATION AVEC L’IA APRÈS LE DIAGNOSTIC
+   ========================================================== */
+function mdLite(src){
+  let html = "", list = null;
+  const close = () => { if (list) { html += `</${list}>`; list = null; } };
+  for (const raw of src.split("\n")) {
+    const line = raw.trim(); if (!line) { close(); continue; }
+    let m;
+    if ((m = line.match(/^#{1,3}\s*(.+)$/))) { close(); html += `<h3>${inl(m[1])}</h3>`; }
+    else if ((m = line.match(/^\d+[.)]\s+(.+)$/))) {
+      if (list !== "ol") { close(); html += '<ol>'; list = "ol"; }
+      const act = actionDe(m[1]);
+      html += `<li>${inl(sansTag(m[1]))}${act ? `<figure class="stepfig" tabindex="0" data-zoom="action" data-act="${act}">${ACTIONS[act]()}</figure>` : ""}</li>`;
+    }
+    else if ((m = line.match(/^[-*•]\s+(.+)$/))) { if (list !== "ul") { close(); html += "<ul>"; list = "ul"; } html += `<li>${inl(sansTag(m[1]))}</li>`; }
+    else { close(); html += `<p>${inl(sansTag(line))}</p>`; }
+  }
+  close(); return html;
+}
+function renderChat(){
+  const box = $("#rpChat");
+  if (!rapportCourant || !rapportCourant.txt || enCours) { box.hidden = true; return; }
+  box.hidden = false;
+  const chat = rapportCourant.chat || [];
+  $("#chatList").innerHTML = chat.map((c, i) => `
+    <div class="bub q">${esc(c.q)}</div>
+    <div class="bub a">${mdLite(c.a) || '<div class="rp-wait"><div class="spin"></div><span>L’IA répond…</span></div>'}
+      ${c.fini && voixOK ? `<button class="say" type="button" data-say="__chat${i}">🔊 Écouter la réponse</button>` : ""}</div>`).join("");
+  brancherZooms($("#chatList"));
+}
+let chatEnCours = false;
+async function envoyerQuestion(){
+  const champ = $("#chatInput"), q = champ.value.trim(), msg = $("#chatMsg");
+  show(msg, "");
+  if (!q || chatEnCours) return;
+  if (!isActive() && !essaisRestants()) { show(msg, "Vos essais offerts sont utilisés. La discussion avec l’IA continue avec l’abonnement Pro ou Atelier."); return; }
+  chatEnCours = true; $("#chatSend").disabled = true; champ.value = "";
+  rapportCourant.chat = rapportCourant.chat || [];
+  const c = { q, a:"", fini:false }; rapportCourant.chat.push(c);
+  renderChat(); $("#chatList").lastElementChild.scrollIntoView({ block:"end", behavior:"smooth" });
+  const hist = rapportCourant.chat.slice(0, -1).slice(-4).map(x => `Client : ${x.q}\nToi : ${x.a}`).join("\n\n");
+  const prompt = `Tu es un réparateur de téléphones expert au Mali qui aide un client. Voici le diagnostic que tu lui as déjà donné :
+---
+${sansTag(rapportCourant.txt).slice(0, 6000)}
+---
+${hist ? "Conversation précédente :\n" + hist + "\n\n" : ""}Nouvelle question du client : ${q}
+
+Réponds tout de suite, en français simple, court et précis (8 lignes maximum), sans phrase d’introduction. Si tu donnes des étapes, numérote-les (1. 2. 3.) et ajoute à la fin de chaque étape, si une image aide, une étiquette parmi : [action: power], [action: volume-haut], [action: volume-bas], [action: volume-haut-bas], [action: power-volume-bas], [action: power-volume-haut], [action: brancher-cable], [action: tiroir-sim], [action: chauffer], [action: ventouse], [action: mediator], [action: batterie], [action: nettoyer-connecteur], [action: devisser], [action: multimetre], [action: souder], [action: alcool], [action: allumer], [action: ordinateur], [action: parametres].`;
+  let raf = 0;
+  try{
+    const model = await getModel();
+    const res = await model.generateContentStream(prompt);
+    for await (const chunk of res.stream) {
+      let t = ""; try { t = chunk.text(); } catch(_) {}
+      if (!t) continue;
+      c.a += t;
+      if (!raf) raf = requestAnimationFrame(() => { raf = 0; renderChat(); });
+    }
+    cancelAnimationFrame(raf);
+    if (!c.a.trim()) throw new Error("vide");
+    c.fini = true; renderChat(); sauverRapport();
+    await compterDiag(); renderQuota();
+  }catch(e){
+    console.error(e); cancelAnimationFrame(raf);
+    c.fini = true; if (!c.a.trim()) c.a = "La réponse n’a pas pu arriver. Vérifiez votre connexion et reposez la question.";
+    renderChat();
+  }finally{ chatEnCours = false; $("#chatSend").disabled = false; }
+}
+$("#chatSend").addEventListener("click", envoyerQuestion);
+$("#chatInput").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); envoyerQuestion(); } });
+brancherMicro($("#micChat"), $("#chatInput"), envoyerQuestion);
+document.querySelectorAll(".qchip").forEach(b => b.addEventListener("click", () => { $("#chatInput").value = b.textContent; envoyerQuestion(); }));
+
+function brancherZooms(root){
+  root.querySelectorAll("[data-zoom]").forEach(el => {
+    if (el.dataset.zb) return; el.dataset.zb = "1";
+    const open = () => ouvrirZoom(el.dataset.zoom === "photo" ? `<img src="${rapportCourant.photo}" alt="Photo du défaut">`
+      : el.dataset.zoom === "action" ? ACTIONS[el.dataset.act]() : phoneSVG(el.dataset.zone));
+    el.addEventListener("click", open);
+    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+  });
+}
 
 /* ==========================================================
    COURS
