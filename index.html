@@ -420,7 +420,7 @@ const CONFIG = {
   telephonePaiement: "+223 77 37 02 54",
   whatsapp: "22377370254",
   diagnosticsGratuitsParJour: 3,
-  modeleIA: "gemini-3.8-flash",
+  modeleIA: "gemini-3.5-flash-lite",
   plans: [
     { id:"gratuit", nom:"Gratuit", prix:"0", periode:"FCFA", jours:0, badge:"",
       avantages:["3 diagnostics par jour","Première leçon de chaque cours","Photos acceptées"], bouton:"Commencer" },
@@ -496,9 +496,8 @@ async function getModel(){
   const AI = await import(`${FB}/firebase-ai.js`);
   const ai = AI.getAI(app, { backend: new AI.GoogleAIBackend() });
   aiModel = AI.getGenerativeModel(ai, { model: CONFIG.modeleIA, generationConfig: {
-    responseMimeType: "application/json",
-    maxOutputTokens: 2500,
-    thinkingConfig: { thinkingLevel: AI.ThinkingLevel?.LOW ?? "LOW" }
+    maxOutputTokens: 2000,
+    temperature: 0.4
   } });
   return aiModel;
 }
@@ -743,66 +742,84 @@ $("#analyze").addEventListener("click", async () => {
   }
   const btn = $("#analyze"); btn.disabled = true;
   $("#result").hidden = false;
-  $("#report").innerHTML = '<div class="thinking"><div class="spin"></div><span id="chrono">Analyse de la panne en cours…</span></div>';
+  $("#report").innerHTML = '<div class="thinking"><div class="spin"></div><span>Analyse en cours…</span></div>';
   $("#result").scrollIntoView({ block:"start" });
-  const t0 = Date.now();
-  const etapesAttente = ["Lecture de la description…", "Recherche des causes probables…", "Préparation de la méthode de réparation…", "Presque fini…"];
-  const chrono = setInterval(() => {
-    const s = Math.round((Date.now() - t0) / 1000), el = $("#chrono");
-    if (el) el.textContent = `${etapesAttente[Math.min(etapesAttente.length - 1, Math.floor(s / 5))]} ${s} s`;
-  }, 1000);
 
-  const prompt = `Tu es un réparateur de téléphones mobiles expert qui forme des techniciens en Afrique de l’Ouest (Mali). Réponds en français simple et précis.
+  const prompt = `Tu es un réparateur de téléphones expert au Mali. Un client te demande de l’aide. Réponds tout de suite, en français simple, court et précis, sans phrase d’introduction.
 Téléphone : ${$("#brand").value} ${$("#model").value}
-Description du client : ${desc || "(aucune, voir la photo)"}
-${photo ? "Une photo du défaut est jointe : analyse-la attentivement et dis ce que tu y vois." : ""}
+Panne décrite : ${desc || "(aucune description, regarde la photo)"}
+${photo ? "Une photo du défaut est jointe : dis brièvement ce que tu y vois." : ""}
 
-Réponds UNIQUEMENT avec un objet JSON valide, sans texte autour, avec exactement ces clés :
-{"panne":"titre court du diagnostic","resume":"2 phrases qui expliquent le problème","causes":["cause la plus probable","..."],"difficulte":"Facile ou Moyen ou Difficile","duree":"ex. 30 à 45 min","outils":["..."],"pieces":["..."],"cout":"estimation en FCFA de la pièce et de la main-d’œuvre au Mali","etapes":[{"titre":"...","detail":"explication précise"}],"precautions":["..."],"si_echec":"que faire si la réparation ne règle pas le problème"}
-Donne 5 à 8 étapes concrètes, courtes et dans l’ordre (2 phrases maximum par étape). Si l’information manque, commence par les vérifications qui permettent de trouver la cause.`;
+Utilise exactement ce format :
+## (titre court du diagnostic)
+(2 phrases qui expliquent le problème)
+**Difficulté :** Facile, Moyen ou Difficile · **Durée :** … · **Coût estimé :** … FCFA
+## Causes probables
+- (de la plus probable à la moins probable, 2 à 4 lignes)
+## Outils et pièces
+- …
+## Réparation pas à pas
+1. **Titre de l’étape** : explication en 1 ou 2 phrases
+(5 à 8 étapes, en commençant par les vérifications simples)
+## Précautions
+- …
+## Si ça ne marche pas
+(1 ou 2 phrases)`;
 
+  let txt = "";
   try{
     const model = await getModel();
     const parts = [prompt];
     if (photo) parts.push({ type: "inlineData", inlineData: { data: photo.data, mimeType: photo.mime } });
-    const res = await model.generateContent(parts);
-    let txt = res.response.text().trim().replace(/^```(?:json)?\s*/i, "").replace(/```$/, "").trim();
-    const r = JSON.parse(txt.slice(txt.indexOf("{"), txt.lastIndexOf("}") + 1));
+    const res = await model.generateContentStream(parts);
+    let attente = true;
+    for await (const chunk of res.stream) {
+      let t = ""; try { t = chunk.text(); } catch(_) {}
+      if (!t) continue;
+      txt += t;
+      if (attente) { attente = false; }
+      $("#report").innerHTML = md(txt) + '<div class="thinking" style="margin-top:.75rem"><div class="spin"></div></div>';
+    }
+    if (!txt.trim()) throw new Error("vide");
+    $("#report").innerHTML = md(txt) + '<div class="actions"><a class="btn btn-ghost" href="#diagnostic">Analyser une autre panne</a></div>';
     await compterDiag();
     renderQuota();
-    renderReport(r);
   }catch(e){
     console.error(e);
-    $("#result").hidden = true;
     const m = String(e?.message || "");
-    show(notice, /quota|429|exhausted/i.test(m) ? "Le service d’analyse est très demandé. Réessayez dans une minute."
+    const msg = /quota|429|exhausted/i.test(m) ? "Le service d’analyse est très demandé. Réessayez dans une minute."
       : /api.*not.*enabled|403|PERMISSION/i.test(m) ? "Le service d’analyse n’est pas encore activé dans Firebase (AI Logic)."
-      : "L’analyse a échoué. Vérifiez votre connexion et réessayez.");
-  }finally{ clearInterval(chrono); btn.disabled = false; }
+      : "L’analyse a été coupée. Vérifiez votre connexion et réessayez.";
+    if (txt.trim()) { $("#report").innerHTML = md(txt); show(notice, msg); }
+    else { $("#result").hidden = true; show(notice, msg); }
+  }finally{ btn.disabled = false; }
 });
 
-const list =a => (a && a.length) ? "<ul>" + a.map(x => "<li>" + esc(x) + "</li>").join("") + "</ul>" : "<p>—</p>";
-function renderReport(r){
-  const d = (r.difficulte || "").toLowerCase();
-  const dc = d.startsWith("fac") ? "d1" : d.startsWith("dif") ? "d3" : "d2";
-  $("#report").innerHTML = `
-    <h2>${esc(r.panne || "Diagnostic")}</h2>
-    <p>${esc(r.resume)}</p>
-    <div class="meta">
-      <span class="tag ${dc}">Difficulté : ${esc(r.difficulte || "—")}</span>
-      <span class="tag">Durée : ${esc(r.duree || "—")}</span>
-      <span class="tag">Coût estimé : ${esc(r.cout || "—")}</span>
-    </div>
-    <div class="cols">
-      <div><h3>Causes probables</h3>${list(r.causes)}</div>
-      <div><h3>Outils</h3>${list(r.outils)}</div>
-      <div><h3>Pièces</h3>${list(r.pieces)}</div>
-    </div>
-    <h3>Méthode de réparation</h3>
-    <ol class="steps">${(r.etapes || []).map(s => `<li><div><strong>${esc(s.titre)}</strong>${esc(s.detail)}</div></li>`).join("")}</ol>
-    ${(r.precautions && r.precautions.length) ? `<div class="warnbox"><h3>Précautions</h3>${list(r.precautions)}</div>` : ""}
-    ${r.si_echec ? `<p style="margin-top:1rem"><strong>Si ça ne marche pas :</strong> ${esc(r.si_echec)}</p>` : ""}
-    <div class="actions"><a class="btn btn-ghost" href="#diagnostic">Analyser une autre panne</a></div>`;
+/* Mise en forme du texte de l’IA (titres, listes, gras) */
+function md(src){
+  const inline = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  let html = "", list = null, first = true;
+  const close = () => { if (list) { html += `</${list}>`; list = null; } };
+  for (const raw of src.split("\n")) {
+    const line = raw.trim();
+    if (!line) { close(); continue; }
+    let m;
+    if ((m = line.match(/^#{1,3}\s*(.+)$/))) {
+      close();
+      html += first ? `<h2>${inline(m[1])}</h2>` : `<h3 style="margin-top:1.25rem">${inline(m[1])}</h3>`;
+      first = false;
+    } else if ((m = line.match(/^\d+[.)]\s+(.+)$/))) {
+      if (list !== "ol") { close(); html += '<ol class="steps">'; list = "ol"; }
+      html += `<li><div>${inline(m[1]).replace(/<\/strong>\s*[:\-–]\s*/, "</strong>")}</div></li>`;
+    } else if ((m = line.match(/^[-*•]\s+(.+)$/))) {
+      if (list !== "ul") { close(); html += '<ul style="padding-left:1.2rem;margin:.25rem 0">'; list = "ul"; }
+      html += `<li>${inline(m[1])}</li>`;
+    } else {
+      close(); html += `<p style="margin:.4rem 0">${inline(line)}</p>`;
+    }
+  }
+  close();
+  return html;
 }
 
 /* ==========================================================
