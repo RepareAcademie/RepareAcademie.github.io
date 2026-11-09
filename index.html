@@ -84,7 +84,6 @@ textarea{min-height:110px;resize:vertical}
 .notice{margin-top:.75rem;padding:.7rem .85rem;border-radius:8px;background:color-mix(in srgb,var(--warn) 13%,transparent);color:var(--ink);font-size:.95rem}
 .okmsg{margin-top:.75rem;padding:.7rem .85rem;border-radius:8px;background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ink);font-size:.95rem}
 
-#result{padding:2.25rem 0}
 .report{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1.4rem}
 .report h2{font-family:var(--display);font-size:2rem;margin:0 0 .4rem;line-height:1.05}
 .meta{display:flex;flex-wrap:wrap;gap:.5rem;margin:.5rem 0 1.25rem}
@@ -154,6 +153,72 @@ dialog h3{font-family:var(--display);font-size:1.7rem;margin:0 0 .5rem;line-heig
 .num{font-family:var(--display);font-size:1.6rem;font-weight:700;color:var(--copper-ink)}
 .pay-list{display:grid;gap:.5rem;margin:.5rem 0 0;padding:0;list-style:none}
 .pay-list li{border:1px solid var(--line);border-radius:8px;padding:.55rem .75rem;font-size:.95rem}
+
+/* ===== Page du rapport de diagnostic ===== */
+#rapportPage{--rfs:1.08rem;font-size:var(--rfs);padding:0 0 4rem;background:var(--paper)}
+.rp-bar{position:sticky;top:62px;z-index:8;background:var(--card);border-bottom:1px solid var(--line)}
+.rp-bar .wrap{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;padding-top:.6rem;padding-bottom:.6rem}
+.rp-bar .sp{flex:1}
+.rp-bar .btn{padding:.5rem .8rem;font-size:.92rem}
+.rp-hero{background:var(--board);color:#fff;padding:1.75rem 0 2rem}
+.rp-hero .kicker{color:#CFE0DB;font-size:.95rem;margin:0 0 .35rem}
+.rp-hero h1{font-family:var(--display);font-weight:800;font-size:clamp(2rem,6.5vw,3.4rem);line-height:1;margin:0 0 .75rem}
+.rp-hero .resume{color:#E4EEEB;max-width:62ch;margin:0 0 1rem;font-size:1.05em}
+.chips2{display:flex;flex-wrap:wrap;gap:.5rem}
+.chip2{display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:999px;padding:.35rem .8rem;font-weight:600;font-size:.95em}
+.chip2 .dot{width:10px;height:10px;border-radius:50%;background:#E3B23C}
+.chip2.d1 .dot{background:#5DBB82}.chip2.d3 .dot{background:#E57A62}
+.rp-figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin:-1.25rem 0 1.5rem;position:relative}
+.fig{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1rem;margin:0;cursor:zoom-in;box-shadow:0 6px 20px rgba(0,0,0,.08)}
+.fig:focus-visible{outline:3px solid var(--copper)}
+.fig figcaption{font-weight:600;margin-top:.6rem;display:flex;justify-content:space-between;gap:.5rem;align-items:center}
+.fig figcaption span{font-weight:500;color:var(--muted);font-size:.88em}
+.fig img{display:block;width:100%;max-height:340px;object-fit:contain;border-radius:8px;background:#000}
+.fig svg{display:block;width:100%;max-height:340px}
+.sec{border-radius:14px;padding:1.15rem 1.2rem;margin:0 0 1rem;border:1px solid var(--line);background:var(--card)}
+.sec h2{font-family:var(--display);font-size:1.55em;margin:0 0 .6rem;display:flex;align-items:center;gap:.55rem;line-height:1.1}
+.sec h2 .ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:none}
+.sec h2 .ic svg{width:20px;height:20px}
+.sec ul{margin:.25rem 0;padding-left:1.25rem}
+.sec li{margin:.3rem 0}
+.sec p{margin:.35rem 0}
+.sec.causes{border-left:6px solid #D99A2B}.sec.causes .ic{background:#FBEFD9;color:#8A5413}
+.sec.outils{border-left:6px solid #2F6FAE}.sec.outils .ic{background:#E1ECF7;color:#1F4E7A}
+.sec.etapes{border-left:6px solid var(--board-2)}.sec.etapes .ic{background:#DCEBE7;color:#0E3B36}
+.sec.precautions{border-left:6px solid #B4442E;background:color-mix(in srgb,#B4442E 6%,var(--card))}.sec.precautions .ic{background:#F6DDD7;color:#8E2F1D}
+.sec.echec{border-left:6px solid #6B7773}.sec.echec .ic{background:#E7EAE8;color:#3B4643}
+.sec.autre .ic{background:var(--paper);color:var(--ink)}
+.tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.6rem;list-style:none;padding:0!important;margin:.25rem 0 0}
+.tools li{display:flex;align-items:center;gap:.6rem;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:.6rem .7rem;margin:0;font-weight:500;line-height:1.25}
+.tools li svg{width:30px;height:30px;flex:none;color:#2F6FAE}
+.stepcards{list-style:none;padding:0!important;margin:.25rem 0 0;display:grid;gap:.75rem;counter-reset:st}
+.stepcards li{counter-increment:st;display:grid;grid-template-columns:auto 1fr;gap:.85rem;align-items:start;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:.85rem;margin:0}
+.stepcards .num{width:52px;height:52px;border-radius:12px;background:var(--board);color:#fff;display:grid;place-items:center;position:relative}
+.stepcards .num svg{width:28px;height:28px;color:#F2B970}
+.stepcards .num b{position:absolute;top:-8px;left:-8px;background:var(--copper);color:#1B1206;font-family:var(--display);font-size:1rem;border-radius:999px;min-width:24px;height:24px;display:grid;place-items:center;padding:0 .3rem}
+.stepcards strong{display:block;font-size:1.05em;margin-bottom:.15rem}
+.rp-wait{display:flex;align-items:center;gap:.75rem;color:var(--muted);padding:1rem 0}
+.rp-photo-zone{fill:var(--copper)}
+@media (prefers-color-scheme:dark){
+  .sec.causes .ic,.sec.outils .ic,.sec.etapes .ic,.sec.precautions .ic,.sec.echec .ic{filter:brightness(.9)}
+  .fig img{background:#000}
+}
+/* Zoom plein écran */
+dialog.zoom{max-width:none;width:100vw;height:100dvh;max-height:none;margin:0;border-radius:0;background:#0b0f0e;color:#fff}
+.zoom .zbar{position:sticky;top:0;display:flex;gap:.5rem;align-items:center;padding:.6rem .75rem;background:#0b0f0e;border-bottom:1px solid #2a3834;z-index:2}
+.zoom .zbar .sp{flex:1}
+.zoom .zbar button{background:#1d2725;color:#fff;border:1px solid #2f3d39;border-radius:8px;font:inherit;font-weight:700;min-width:44px;height:40px;cursor:pointer}
+.zoom .zbody{overflow:auto;height:calc(100dvh - 58px);display:block;touch-action:pan-x pan-y pinch-zoom}
+.zoom .zinner{margin:0 auto;transition:width .15s}
+.zoom .zinner img,.zoom .zinner svg{display:block;width:100%;height:auto}
+.zoom .zinner svg{background:#fff;border-radius:6px}
+@media print{
+  header.top,.rp-bar,footer,#site,#admin{display:none!important}
+  #rapportPage{display:block!important}
+  .rp-hero{background:#fff;color:#000}.rp-hero h1,.rp-hero .resume,.rp-hero .kicker{color:#000}
+  .chip2{color:#000;border-color:#999}
+  .sec,.fig{break-inside:avoid}
+}
 
 /* Admin */
 #admin{padding:2.5rem 0 4rem}
@@ -242,9 +307,7 @@ dialog h3{font-family:var(--display);font-size:1.7rem;margin:0 0 .5rem;line-heig
   </div>
 </section>
 
-<section id="result" aria-live="polite" hidden>
-  <div class="wrap"><div class="report" id="report"></div></div>
-</section>
+
 
 <section class="block" id="cours">
   <div class="wrap">
@@ -306,12 +369,40 @@ dialog h3{font-family:var(--display);font-size:1.7rem;margin:0 0 .5rem;line-heig
   </div>
 </section>
 
+<section id="rapportPage" hidden aria-live="polite">
+  <div class="rp-bar">
+    <div class="wrap">
+      <a class="btn btn-ghost" href="#diagnostic">← Nouvelle analyse</a>
+      <span class="sp"></span>
+      <button class="btn btn-ghost" type="button" id="rpSmaller" aria-label="Texte plus petit">A−</button>
+      <button class="btn btn-ghost" type="button" id="rpBigger" aria-label="Texte plus grand">A+</button>
+      <button class="btn btn-ghost" type="button" id="rpTab">Nouvel onglet</button>
+      <button class="btn btn-ghost" type="button" id="rpShare">WhatsApp</button>
+      <button class="btn btn-ghost" type="button" id="rpPrint">PDF</button>
+    </div>
+  </div>
+  <div id="rpContent"></div>
+</section>
+
 <footer>
   <div class="wrap">
     <span>© <span id="year"></span> Répar’Académie</span>
     <span id="contactLine"></span>
   </div>
 </footer>
+
+
+
+<dialog id="zoomDlg" class="zoom" aria-label="Image agrandie">
+  <div class="zbar">
+    <button type="button" id="zOut" aria-label="Dézoomer">−</button>
+    <button type="button" id="zIn" aria-label="Zoomer">+</button>
+    <button type="button" id="zReset">100 %</button>
+    <span class="sp"></span>
+    <button type="button" data-close aria-label="Fermer">✕</button>
+  </div>
+  <div class="zbody"><div class="zinner" id="zInner"></div></div>
+</dialog>
 
 <!-- Connexion -->
 <dialog id="loginDlg" aria-labelledby="loginTitle">
@@ -716,11 +807,11 @@ $("#photo").addEventListener("change", async e => {
     c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
     c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
     const url = c.toDataURL("image/jpeg", 0.8);
-    photo = { data: url.split(",")[1], mime: "image/jpeg" };
+    photo = { data: url.split(",")[1], mime: "image/jpeg", url };
     $("#previewImg").src = url;
   }catch(err){
     const url = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(f); });
-    photo = { data: url.split(",")[1], mime: f.type || "image/jpeg" };
+    photo = { data: url.split(",")[1], mime: f.type || "image/jpeg", url };
     $("#previewImg").src = url;
   }
   $("#preview").style.display = "flex";
@@ -731,6 +822,7 @@ $("#removePhoto").addEventListener("click", () => {
   $("#dropText").textContent = "Touchez pour prendre ou choisir une photo";
 });
 
+let enCours = false;
 $("#analyze").addEventListener("click", async () => {
   const notice = $("#notice"); show(notice, "");
   if (!user) { openDlg("#loginDlg"); return; }
@@ -740,13 +832,13 @@ $("#analyze").addEventListener("click", async () => {
     show(notice, "Vos diagnostics gratuits du jour sont utilisés. Passez à l’abonnement Pro pour des diagnostics illimités.");
     setTimeout(() => location.hash = "abonnements", 1200); return;
   }
-  const btn = $("#analyze"); btn.disabled = true;
-  $("#result").hidden = false;
-  $("#report").innerHTML = '<div class="thinking"><div class="spin"></div><span>Analyse en cours…</span></div>';
-  $("#result").scrollIntoView({ block:"start" });
+  const btn = $("#analyze"); btn.disabled = true; enCours = true;
+  rapportCourant = { txt:"", photo: photo ? photo.url : null, marque: $("#brand").value, modele: $("#model").value.trim(), desc, date: Date.now() };
+  location.hash = "rapport";
+  renderRapport(false);
 
   const prompt = `Tu es un réparateur de téléphones expert au Mali. Un client te demande de l’aide. Réponds tout de suite, en français simple, court et précis, sans phrase d’introduction.
-Téléphone : ${$("#brand").value} ${$("#model").value}
+Téléphone : ${rapportCourant.marque} ${rapportCourant.modele}
 Panne décrite : ${desc || "(aucune description, regarde la photo)"}
 ${photo ? "Une photo du défaut est jointe : dis brièvement ce que tu y vois." : ""}
 
@@ -754,10 +846,13 @@ Utilise exactement ce format :
 ## (titre court du diagnostic)
 (2 phrases qui expliquent le problème)
 **Difficulté :** Facile, Moyen ou Difficile · **Durée :** … · **Coût estimé :** … FCFA
+**Zone :** un seul mot parmi : écran, batterie, connecteur, carte mère, haut-parleur, écouteur, micro, caméra, boutons, logiciel, eau, réseau
 ## Causes probables
 - (de la plus probable à la moins probable, 2 à 4 lignes)
-## Outils et pièces
-- …
+## Outils
+- (un outil par ligne, nom court)
+## Pièces
+- (une pièce par ligne, ou « Aucune »)
 ## Réparation pas à pas
 1. **Titre de l’étape** : explication en 1 ou 2 phrases
 (5 à 8 étapes, en commençant par les vérifications simples)
@@ -766,61 +861,233 @@ Utilise exactement ce format :
 ## Si ça ne marche pas
 (1 ou 2 phrases)`;
 
-  let txt = "";
+  let raf = 0;
   try{
     const model = await getModel();
     const parts = [prompt];
     if (photo) parts.push({ type: "inlineData", inlineData: { data: photo.data, mimeType: photo.mime } });
     const res = await model.generateContentStream(parts);
-    let attente = true;
     for await (const chunk of res.stream) {
       let t = ""; try { t = chunk.text(); } catch(_) {}
       if (!t) continue;
-      txt += t;
-      if (attente) { attente = false; }
-      $("#report").innerHTML = md(txt) + '<div class="thinking" style="margin-top:.75rem"><div class="spin"></div></div>';
+      rapportCourant.txt += t;
+      if (!raf) raf = requestAnimationFrame(() => { raf = 0; if (location.hash === "#rapport") renderRapport(false); });
     }
-    if (!txt.trim()) throw new Error("vide");
-    $("#report").innerHTML = md(txt) + '<div class="actions"><a class="btn btn-ghost" href="#diagnostic">Analyser une autre panne</a></div>';
+    if (!rapportCourant.txt.trim()) throw new Error("vide");
+    cancelAnimationFrame(raf);
+    renderRapport(true);
+    sauverRapport();
     await compterDiag();
     renderQuota();
   }catch(e){
     console.error(e);
+    cancelAnimationFrame(raf);
     const m = String(e?.message || "");
     const msg = /quota|429|exhausted/i.test(m) ? "Le service d’analyse est très demandé. Réessayez dans une minute."
       : /api.*not.*enabled|403|PERMISSION/i.test(m) ? "Le service d’analyse n’est pas encore activé dans Firebase (AI Logic)."
       : "L’analyse a été coupée. Vérifiez votre connexion et réessayez.";
-    if (txt.trim()) { $("#report").innerHTML = md(txt); show(notice, msg); }
-    else { $("#result").hidden = true; show(notice, msg); }
-  }finally{ btn.disabled = false; }
+    if (rapportCourant.txt.trim()) { renderRapport(true); sauverRapport(); }
+    else { location.hash = "diagnostic"; }
+    show(notice, msg);
+    if (rapportCourant.txt.trim()) $("#rpContent").insertAdjacentHTML("afterbegin", `<div class="wrap"><p class="notice">${esc(msg)}</p></div>`);
+  }finally{ enCours = false; btn.disabled = false; }
 });
 
-/* Mise en forme du texte de l’IA (titres, listes, gras) */
-function md(src){
-  const inline = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-  let html = "", list = null, first = true;
-  const close = () => { if (list) { html += `</${list}>`; list = null; } };
-  for (const raw of src.split("\n")) {
-    const line = raw.trim();
-    if (!line) { close(); continue; }
+/* ==========================================================
+   RAPPORT DE DIAGNOSTIC (page dédiée, images, zoom)
+   ========================================================== */
+const norm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+const inl = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\*\*/g, "");
+
+/* Icônes (dessins vectoriels nets à tous les zooms) */
+const IC = {
+  tournevis:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5l6 6-2.5 2.5-6-6z"/><path d="M12 6l-8.5 8.5a1.5 1.5 0 000 2.1l3.9 3.9a1.5 1.5 0 002.1 0L18 12"/><path d="M7 14l3 3"/></svg>',
+  spatule:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l9-9"/><path d="M13 11l5-6 2 2-6 5z"/><path d="M3 21l2-1"/></svg>',
+  ventouse:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17a8 6 0 0116 0z"/><path d="M12 11V4"/><path d="M9 4h6"/></svg>',
+  pince:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 16"/><path d="M18 3l-5 16"/><path d="M11 19l1 2 1-2"/></svg>',
+  fer:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21l5-5"/><rect x="7" y="9" width="9" height="5" rx="1.5" transform="rotate(-45 11.5 11.5)"/><path d="M15 9l4-4"/><path d="M19 5l2-2"/></svg>',
+  airchaud:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="12" height="7" rx="2"/><path d="M15 7h4v3h-4"/><path d="M7 12l-1 8h4l1-8"/><path d="M21 6c1 1 1 3 0 4"/></svg>',
+  multimetre:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><rect x="8" y="5" width="8" height="4" rx="1"/><circle cx="12" cy="14" r="3"/><path d="M12 14l2-2"/></svg>',
+  alcool:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2h4v4l2 3v11a2 2 0 01-2 2h-4a2 2 0 01-2-2V9l2-3z"/><path d="M8 13h8"/></svg>',
+  brosse:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4l6 6"/><path d="M4 20l10-10"/><path d="M15 5l-4 4 4 4 4-4"/></svg>',
+  loupe:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="6"/><path d="M15 15l6 6"/></svg>',
+  cable:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="7" rx="1.5"/><path d="M10 2v-0M12 9v6a4 4 0 01-4 4H5"/><path d="M10 5h4"/></svg>',
+  batterie:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="18" rx="2"/><path d="M10 2h4"/><path d="M12 9l-2 4h4l-2 4"/></svg>',
+  ecran:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><rect x="8" y="5" width="8" height="12" rx="1"/></svg>',
+  connecteur:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="16" height="6" rx="3"/><path d="M8 12h8"/></svg>',
+  puce:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M9 3v4M15 3v4M9 17v4M15 17v4M3 9h4M3 15h4M17 9h4M17 15h4"/></svg>',
+  son:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9a4 4 0 010 6"/></svg>',
+  logiciel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>',
+  colle:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 8h6v12a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/><path d="M11 8V4h2v4"/><path d="M12 2v2"/></svg>',
+  test:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>',
+  attention:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg>',
+  cle:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 005.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>',
+  causes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5"/><path d="M11 8v3l2 2"/></svg>',
+  etapes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.5M4 12h.5M4 18h.5"/></svg>',
+  echec:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1015.5-6.2"/><path d="M19 3v4h-4"/></svg>'
+};
+const MOTS = [
+  [/tournevis|vis\b|devis/, "tournevis"], [/spatule|mediator|ouvr|decoll|separ/, "spatule"], [/ventouse/, "ventouse"],
+  [/pince|brucelle/, "pince"], [/fer a souder|soud|etain|flux|tresse/, "fer"], [/air chaud|station|chauff|plaque/, "airchaud"],
+  [/multimetre|mesur|tension|continuite|alimentation stabilisee|volt|amper/, "multimetre"], [/alcool|isopropyl|nettoy/, "alcool"],
+  [/brosse|ultrason/, "brosse"], [/loupe|microscope|inspect|observ|regard/, "loupe"], [/cable|chargeur|testeur usb|usb/, "cable"],
+  [/batter/, "batterie"], [/ecran|vitre|dalle|lcd|oled|tactile|afficheur/, "ecran"], [/connecteur|port|prise|nappe/, "connecteur"],
+  [/carte|puce|ic\b|circuit|condensateur|composant|pmic|court-circuit/, "puce"], [/haut-parleur|ecouteur|son|micro|audio/, "son"],
+  [/logiciel|systeme|firmware|micrologiciel|reinitial|mise a jour|odin|flash|recuperation|redemarr/, "logiciel"],
+  [/colle|adhesif|b-7000|b7000/, "colle"], [/test|verifi|essai|allum/, "test"], [/attention|danger|precaution/, "attention"]
+];
+const iconPour = t => { const n = norm(t); for (const [re, k] of MOTS) if (re.test(n)) return IC[k]; return IC.cle; };
+
+/* Schéma du téléphone avec la zone concernée en surbrillance */
+const ZONES = {
+  ecran:"Écran / vitre", batterie:"Batterie", connecteur:"Connecteur de charge", carte:"Carte mère", hautparleur:"Haut-parleur",
+  ecouteur:"Écouteur d’appel", micro:"Micro", camera:"Caméra", boutons:"Boutons", logiciel:"Logiciel", eau:"Dégâts des eaux", reseau:"Réseau / antenne"
+};
+function zoneDe(v){
+  const n = norm(v);
+  if (/connect|charge|port/.test(n)) return "connecteur";
+  if (/batter/.test(n)) return "batterie";
+  if (/ecouteur/.test(n)) return "ecouteur";
+  if (/haut|speaker|sonnerie/.test(n)) return "hautparleur";
+  if (/micro/.test(n)) return "micro";
+  if (/camera|photo/.test(n)) return "camera";
+  if (/bouton|power|volume/.test(n)) return "boutons";
+  if (/logiciel|systeme|software/.test(n)) return "logiciel";
+  if (/eau|oxyd|liquide/.test(n)) return "eau";
+  if (/reseau|antenne|signal|sim/.test(n)) return "reseau";
+  if (/carte|mere|circuit|puce/.test(n)) return "carte";
+  if (/ecran|vitre|tactile|dalle|lcd|oled/.test(n)) return "ecran";
+  return null;
+}
+function phoneSVG(z){
+  const C = "#C9822B", on = k => z === k;
+  const f = k => on(k) ? `fill="${C}" stroke="${C}"` : `fill="none" stroke="#5b6966"`;
+  const halo = { ecran:[100,112,70], batterie:[100,128,52], connecteur:[100,214,22], carte:[100,58,40], hautparleur:[128,212,18],
+    ecouteur:[100,24,20], micro:[72,212,16], camera:[126,24,16], boutons:[156,86,26], logiciel:[100,112,40], eau:[100,112,95], reseau:[100,112,95] }[z];
+  return `<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma du téléphone : zone ${esc(ZONES[z] || "")}">
+  <rect width="200" height="240" fill="#F4F6F3"/>
+  <rect x="50" y="8" width="100" height="216" rx="16" fill="#fff" stroke="#1d2b28" stroke-width="2.5"/>
+  <rect x="57" y="34" width="86" height="166" rx="5" ${on("ecran") ? `fill="${C}" fill-opacity=".35" stroke="${C}"` : `fill="#E9EEEC" stroke="#9aa8a3"`} stroke-width="1.5"/>
+  <rect x="62" y="40" width="76" height="34" rx="3" ${on("carte") ? `fill="${C}" fill-opacity=".55" stroke="${C}"` : `fill="none" stroke="#9aa8a3" stroke-dasharray="3 2"`}/>
+  <text x="100" y="60" font-size="8" text-anchor="middle" fill="#3b4643" font-family="Arial">carte mère</text>
+  <rect x="64" y="82" width="72" height="92" rx="4" ${on("batterie") ? `fill="${C}" fill-opacity=".55" stroke="${C}"` : `fill="none" stroke="#9aa8a3" stroke-dasharray="3 2"`}/>
+  <text x="100" y="131" font-size="8" text-anchor="middle" fill="#3b4643" font-family="Arial">batterie</text>
+  <rect x="86" y="19" width="28" height="5" rx="2.5" ${f("ecouteur")} stroke-width="1.5"/>
+  <circle cx="126" cy="22" r="4.5" ${f("camera")} stroke-width="1.5"/>
+  <rect x="150" y="62" width="5" height="30" rx="2" ${f("boutons")} stroke-width="1.5"/>
+  <rect x="150" y="100" width="5" height="18" rx="2" ${f("boutons")} stroke-width="1.5"/>
+  <rect x="87" y="209" width="26" height="8" rx="4" ${f("connecteur")} stroke-width="1.8"/>
+  <circle cx="72" cy="213" r="3" ${f("micro")} stroke-width="1.5"/>
+  <g ${f("hautparleur")} stroke-width="1.2"><circle cx="122" cy="213" r="2"/><circle cx="128" cy="213" r="2"/><circle cx="134" cy="213" r="2"/></g>
+  ${halo ? `<circle cx="${halo[0]}" cy="${halo[1]}" r="${halo[2]}" fill="${C}" opacity=".16"/><circle cx="${halo[0]}" cy="${halo[1]}" r="${halo[2]}" fill="none" stroke="${C}" stroke-width="1.5" stroke-dasharray="4 3"/>` : ""}
+  ${on("logiciel") ? `<g transform="translate(100 150)" stroke="${C}" stroke-width="3" fill="none"><circle r="9"/><path d="M0-16v5M0 11v5M-16 0h5M11 0h5M-11-11l3.5 3.5M7.5 7.5l3.5 3.5M-11 11l3.5-3.5M7.5-7.5l3.5-3.5"/></g>` : ""}
+  ${on("eau") ? `<g fill="#2F6FAE"><path d="M30 60c-5 8-7 12-7 15a7 7 0 0014 0c0-3-2-7-7-15z"/><path d="M172 140c-4 7-6 10-6 13a6 6 0 0012 0c0-3-2-6-6-13z"/><path d="M34 170c-3 5-5 8-5 10a5 5 0 0010 0c0-2-2-5-5-10z"/></g>` : ""}
+  ${on("reseau") ? `<g stroke="${C}" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M100 4a10 10 0 0110 0"/><path d="M92 0a22 22 0 0116 0"/><path d="M60 8h80M60 224h80"/></g>` : ""}
+</svg>`;
+}
+
+/* Lecture du texte de l’IA */
+function parseRapport(txt){
+  const r = { titre:"", resume:[], diff:"", duree:"", cout:"", zone:null, sections:[] };
+  let cur = null;
+  for (const raw of txt.split("\n")) {
+    const line = raw.trim(); if (!line) continue;
+    const n = norm(line);
     let m;
     if ((m = line.match(/^#{1,3}\s*(.+)$/))) {
-      close();
-      html += first ? `<h2>${inline(m[1])}</h2>` : `<h3 style="margin-top:1.25rem">${inline(m[1])}</h3>`;
-      first = false;
-    } else if ((m = line.match(/^\d+[.)]\s+(.+)$/))) {
-      if (list !== "ol") { close(); html += '<ol class="steps">'; list = "ol"; }
-      html += `<li><div>${inline(m[1]).replace(/<\/strong>\s*[:\-–]\s*/, "</strong>")}</div></li>`;
-    } else if ((m = line.match(/^[-*•]\s+(.+)$/))) {
-      if (list !== "ul") { close(); html += '<ul style="padding-left:1.2rem;margin:.25rem 0">'; list = "ul"; }
-      html += `<li>${inline(m[1])}</li>`;
-    } else {
-      close(); html += `<p style="margin:.4rem 0">${inline(line)}</p>`;
+      const t = m[1].replace(/\*\*/g, "").replace(/^\(|\)$/g, "").trim();
+      if (!r.titre) r.titre = t; else { cur = { titre:t, items:[], ol:[], paras:[] }; r.sections.push(cur); }
+      continue;
     }
+    if (/difficulte/.test(n) && !cur) {
+      const g = k => { const mm = line.replace(/\*\*/g, "").match(new RegExp(k + "[^:]*:\\s*([^·|]+)", "i")); return mm ? mm[1].trim() : ""; };
+      r.diff = g("Difficult"); r.duree = g("Dur"); r.cout = g("Co[uû]t"); continue;
+    }
+    if (/^\**\s*zone/.test(n)) { r.zone = zoneDe(line.replace(/^[^:]*:/, "")); continue; }
+    if (!cur) { r.resume.push(line); continue; }
+    if ((m = line.match(/^\d+[.)]\s+(.+)$/))) { cur.ol.push(m[1]); continue; }
+    if ((m = line.match(/^[-*•]\s+(.+)$/))) { cur.items.push(m[1]); continue; }
+    cur.paras.push(line);
   }
-  close();
-  return html;
+  return r;
 }
+function typeSection(t){
+  const n = norm(t);
+  if (/cause/.test(n)) return "causes";
+  if (/outil|piece|materiel/.test(n)) return "outils";
+  if (/etape|reparation|pas a pas|methode/.test(n)) return "etapes";
+  if (/precaution|attention|securite/.test(n)) return "precautions";
+  if (/marche pas|echec|sinon/.test(n)) return "echec";
+  return "autre";
+}
+const ICSEC = { causes:IC.causes, outils:IC.cle, etapes:IC.etapes, precautions:IC.attention, echec:IC.echec, autre:IC.cle };
+
+let rapportCourant = null; // { txt, photo, marque, modele, date }
+function renderRapport(fini){
+  const R = rapportCourant; if (!R) return;
+  const r = parseRapport(R.txt);
+  const d = norm(r.diff), dc = d.startsWith("fac") ? "d1" : d.startsWith("dif") ? "d3" : "d2";
+  const zone = r.zone || zoneDe(r.titre + " " + r.resume.join(" ") + " " + (R.desc || ""));
+  const chips = [r.diff && `<span class="chip2 ${dc}"><span class="dot"></span>Difficulté : ${esc(r.diff)}</span>`,
+    r.duree && `<span class="chip2">⏱ ${esc(r.duree)}</span>`, r.cout && `<span class="chip2">💰 ${esc(r.cout)}</span>`].filter(Boolean).join("");
+  const figs = [];
+  if (R.photo) figs.push(`<figure class="fig" tabindex="0" data-zoom="photo"><img src="${R.photo}" alt="Photo du défaut envoyée"><figcaption>Votre photo <span>Toucher pour zoomer</span></figcaption></figure>`);
+  if (zone) figs.push(`<figure class="fig" tabindex="0" data-zoom="schema">${phoneSVG(zone)}<figcaption>Zone concernée : ${esc(ZONES[zone])} <span>Toucher pour zoomer</span></figcaption></figure>`);
+  const secs = r.sections.map(s => {
+    const k = typeSection(s.titre);
+    let body = "";
+    if (k === "outils" && s.items.length) body = `<ul class="tools">${s.items.map(i => `<li>${iconPour(i)}<span>${inl(i)}</span></li>`).join("")}</ul>`;
+    else if (s.items.length) body = `<ul>${s.items.map(i => `<li>${inl(i)}</li>`).join("")}</ul>`;
+    if (s.ol.length) body += `<ol class="stepcards">${s.ol.map((i, j) => {
+      const h = inl(i).replace(/<\/strong>\s*[:\-–]\s*/, "</strong>");
+      return `<li><div class="num">${iconPour(i)}<b>${j + 1}</b></div><div>${h}</div></li>`; }).join("")}</ol>`;
+    if (s.paras.length) body += s.paras.map(p => `<p>${inl(p)}</p>`).join("");
+    return `<section class="sec ${k}"><h2><span class="ic">${ICSEC[k]}</span>${inl(s.titre)}</h2>${body}</section>`;
+  }).join("");
+  $("#rpContent").innerHTML = `
+    <div class="rp-hero"><div class="wrap">
+      <p class="kicker">${esc([R.marque, R.modele].filter(Boolean).join(" "))}${R.date ? " · " + esc(new Date(R.date).toLocaleString("fr-FR", { dateStyle:"medium", timeStyle:"short" })) : ""}</p>
+      <h1>${r.titre ? inl(r.titre) : "Analyse en cours…"}</h1>
+      ${r.resume.length ? `<p class="resume">${r.resume.map(inl).join(" ")}</p>` : ""}
+      ${chips ? `<div class="chips2">${chips}</div>` : ""}
+    </div></div>
+    <div class="wrap" style="padding-top:2.25rem">
+      ${figs.length ? `<div class="rp-figs">${figs.join("")}</div>` : ""}
+      ${secs}
+      ${fini ? "" : `<div class="rp-wait"><div class="spin"></div><span>L’analyse continue…</span></div>`}
+      ${fini ? `<div class="actions"><a class="btn btn-copper" href="#diagnostic">Analyser une autre panne</a></div>` : ""}
+    </div>`;
+  document.querySelectorAll("#rpContent [data-zoom]").forEach(el => {
+    const open = () => ouvrirZoom(el.dataset.zoom === "photo" ? `<img src="${R.photo}" alt="Photo du défaut">` : phoneSVG(zone));
+    el.addEventListener("click", open);
+    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+  });
+}
+function sauverRapport(){ try { localStorage.setItem("ra_rapport", JSON.stringify(rapportCourant)); } catch(_) { try { localStorage.setItem("ra_rapport", JSON.stringify({ ...rapportCourant, photo:null })); } catch(__){} } }
+function chargerRapport(){ try { return JSON.parse(localStorage.getItem("ra_rapport") || "null"); } catch(_) { return null; } }
+
+/* Zoom */
+let zScale = 1;
+function appliquerZoom(){ $("#zInner").style.width = (zScale * 100) + "%"; $("#zReset").textContent = Math.round(zScale * 100) + " %"; }
+function ouvrirZoom(html){ $("#zInner").innerHTML = html; zScale = 1; appliquerZoom(); openDlg("#zoomDlg"); }
+$("#zIn").addEventListener("click", () => { zScale = Math.min(5, zScale + .5); appliquerZoom(); });
+$("#zOut").addEventListener("click", () => { zScale = Math.max(1, zScale - .5); appliquerZoom(); });
+$("#zReset").addEventListener("click", () => { zScale = 1; appliquerZoom(); });
+$("#zInner").addEventListener("dblclick", () => { zScale = zScale > 1 ? 1 : 2.5; appliquerZoom(); });
+
+/* Taille du texte, onglet, partage, PDF */
+let rfs = 1.08; try { rfs = parseFloat(localStorage.getItem("ra_rfs")) || 1.08; } catch(_){}
+const majRfs = () => { $("#rapportPage").style.setProperty("--rfs", rfs + "rem"); try { localStorage.setItem("ra_rfs", rfs); } catch(_){} };
+majRfs();
+$("#rpBigger").addEventListener("click", () => { rfs = Math.min(1.6, +(rfs + .1).toFixed(2)); majRfs(); });
+$("#rpSmaller").addEventListener("click", () => { rfs = Math.max(.9, +(rfs - .1).toFixed(2)); majRfs(); });
+$("#rpTab").addEventListener("click", () => { sauverRapport(); window.open(location.pathname + "#rapport", "_blank"); });
+$("#rpPrint").addEventListener("click", () => window.print());
+$("#rpShare").addEventListener("click", () => {
+  if (!rapportCourant) return;
+  const t = rapportCourant.txt.replace(/\*\*/g, "*").replace(/^#{1,3}\s*/gm, "").slice(0, 3000);
+  window.open("https://wa.me/?text=" + encodeURIComponent(t + "\n\n" + CONFIG.nomSite + " : " + location.origin), "_blank", "noopener");
+});
 
 /* ==========================================================
    COURS
@@ -1054,14 +1321,26 @@ $("#admSearch").addEventListener("keydown", e => { if (e.key === "Enter") admCli
    NAVIGATION
    ========================================================== */
 let adminCharge = false;
+let pageAvant = "";
 function route(){
-  const admin = location.hash === "#admin" && isAdmin();
-  $("#site").hidden = admin; $("#admin").hidden = !admin;
+  const h = location.hash;
+  const admin = h === "#admin" && isAdmin();
+  const rapport = h === "#rapport";
+  $("#site").hidden = admin || rapport; $("#admin").hidden = !admin; $("#rapportPage").hidden = !rapport;
+  if (rapport && !enCours) {
+    rapportCourant = rapportCourant || chargerRapport();
+    if (rapportCourant && rapportCourant.txt) renderRapport(true);
+    else $("#rpContent").innerHTML = '<div class="wrap" style="padding:2rem 1rem"><p>Aucun diagnostic pour le moment.</p><a class="btn btn-copper" href="#diagnostic">Analyser une panne</a></div>';
+  }
   if (admin && !adminCharge) { adminCharge = true; admPaiements(); admClients(""); admLecons(); }
-  if (admin) window.scrollTo(0, 0);
+  const page = admin ? "admin" : rapport ? "rapport" : "site";
+  if (page !== pageAvant && page !== "site") window.scrollTo(0, 0);
+  if (page === "site" && pageAvant === "rapport" && h === "#diagnostic") setTimeout(() => $("#diagnostic").scrollIntoView(), 0);
+  pageAvant = page;
 }
 window.addEventListener("hashchange", route);
 renderCourses();
+route();
 </script>
 </body>
 </html>
