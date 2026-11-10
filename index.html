@@ -223,6 +223,35 @@ dialog h3{font-family:var(--display);font-size:1.7rem;margin:0 0 .5rem;line-heig
 .chatrow{display:flex;gap:.5rem;align-items:flex-end;margin-top:.75rem}
 .chatrow textarea{min-height:52px;flex:1}
 .qchips{display:flex;flex-wrap:wrap;gap:.4rem;margin:.25rem 0 .5rem}
+/* Fenêtre de leçon : toujours claire et lisible */
+dialog.lecon{--lfs:1.12rem;max-width:none;width:100vw;height:100dvh;max-height:none;margin:0;border-radius:0;padding:0;background:#FBFCFA;color:#14201E;color-scheme:light;font-size:var(--lfs)}
+.lecon .lc-bar{position:sticky;top:0;z-index:2;display:flex;gap:.5rem;align-items:center;padding:.6rem 1rem;background:#0E3B36;color:#fff}
+.lecon .lc-bar .sp{flex:1}
+.lecon .lc-zl{font-size:.85rem;color:#CFE0DB}
+.lecon .lc-btn{background:#fff;color:#0E3B36;border:none;border-radius:8px;font:inherit;font-size:.95rem;font-weight:700;padding:.45rem .8rem;cursor:pointer;min-width:44px}
+.lecon .lc-body{max-width:900px;margin:0 auto;padding:1.4rem 1.1rem 3rem;line-height:1.65}
+.lecon .lc-kicker{color:#4d5b57;font-size:.85em;margin:0 0 .35rem;display:flex;flex-wrap:wrap;gap:.4rem;align-items:center}
+.lecon h1{font-family:var(--display);font-weight:800;font-size:2.05em;line-height:1.05;margin:0 0 1rem;color:#0E3B36}
+.lecon .lc-h2{font-family:var(--display);font-size:1.5em;margin:1.8rem 0 .6rem;color:#0E3B36}
+.lecon .lc-texte{background:#fff;border:1px solid #D9DCD6;border-radius:12px;padding:1rem 1.15rem}
+.lecon .lc-texte ul,.lecon .lc-texte ol{padding-left:1.3rem}
+.lecon .lc-texte li{margin:.4rem 0}
+.lecon .lc-texte strong{color:#0E3B36}
+.lc-tag{font-size:.8em;font-weight:700;border-radius:999px;padding:.1rem .6rem}
+.lc-tag.free{background:#E6F4EA;color:#1E6B3F}.lc-tag.pro{background:#FBEFD9;color:#8A5413}
+.lc-figs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,17em),1fr));gap:1rem}
+.lc-fig{margin:0;background:#fff;border:2px solid #D9DCD6;border-radius:12px;overflow:hidden;cursor:zoom-in}
+.lc-fig:focus-visible{outline:3px solid #C9822B}
+.lc-fig.do{border-color:#2F7D4F}.lc-fig.dont{border-color:#B4442E}
+.lc-badge{font-weight:800;font-size:.9em;padding:.35rem .75rem;color:#fff}
+.lc-fig.do .lc-badge{background:#2F7D4F}.lc-fig.dont .lc-badge{background:#B4442E}
+.lc-fig svg{display:block;width:100%;height:auto}
+.lc-fig figcaption{padding:.5rem .75rem .7rem;font-weight:600;font-size:.95em;border-top:1px solid #eef0ec}
+.lc-fig figcaption span{display:block;font-weight:500;color:#6b7773;font-size:.8em}
+.lc-lock{background:#FBEFD9;border:1px solid #E3B23C;border-radius:12px;padding:1rem 1.15rem}
+.lc-nav{display:flex;justify-content:space-between;gap:.75rem;flex-wrap:wrap;margin-top:2rem}
+.lecon .btn-ghost{color:#14201E;border-color:#C9CEC8}
+.lecon .thinking{color:#4d5b57}
 /* Zoom plein écran */
 dialog.zoom{max-width:none;width:100vw;height:100dvh;max-height:none;margin:0;border-radius:0;background:#0b0f0e;color:#fff}
 .zoom .zbar{position:sticky;top:0;display:flex;gap:.5rem;align-items:center;padding:.6rem .75rem;background:#0b0f0e;border-bottom:1px solid #2a3834;z-index:2}
@@ -548,6 +577,18 @@ footer nav a{color:#E4EEEB}
     <button type="button" data-close aria-label="Fermer">✕</button>
   </div>
   <div class="zbody"><div class="zinner" id="zInner"></div></div>
+</dialog>
+
+<!-- Leçon -->
+<dialog id="leconDlg" class="lecon" aria-labelledby="lcTitre">
+  <div class="lc-bar">
+    <button type="button" data-close class="lc-btn">← Fermer</button>
+    <span class="sp"></span>
+    <span class="lc-zl">Texte</span>
+    <button type="button" id="lcMoins" class="lc-btn" aria-label="Texte plus petit">A−</button>
+    <button type="button" id="lcPlus" class="lc-btn" aria-label="Texte plus grand">A+</button>
+  </div>
+  <div class="lc-body" id="lcBody"></div>
 </dialog>
 
 <!-- Connexion -->
@@ -1516,6 +1557,158 @@ function brancherZooms(root){
 }
 
 /* ==========================================================
+   SCHÉMAS DES LEÇONS (chaque outil et chaque pièce est nommé)
+   ========================================================== */
+const FK = "#1d2b28", FG = "#6b7773", FO = "#C9822B", FV = "#2F7D4F", FR = "#B4442E", FBL = "#2F6FAE";
+const ft = (x, y, t, a = "start", s = 10.5, c = FK, w = 700) => `<text x="${x}" y="${y}" font-size="${s}" text-anchor="${a}" font-family="Arial" font-weight="${w}" fill="${c}">${esc(t)}</text>`;
+const fl = (px, py, tx, ty, t, a = "start", c = FK) => {
+  const w = String(t).length * 5.9;
+  let x = tx + (a === "end" ? -4 : a === "middle" ? 0 : 4);
+  if (a === "start" && x + w > 316) { a = "end"; x = tx - 4; }
+  else if (a === "end" && x - w < 4) { a = "start"; x = tx + 4; }
+  else if (a === "middle") x = Math.min(316 - w / 2, Math.max(4 + w / 2, x));
+  const y = Math.min(197, Math.max(11, ty + (a === "middle" ? (ty < py ? -4 : 12) : 4)));
+  return `<line x1="${px}" y1="${py}" x2="${tx}" y2="${ty}" stroke="${c === "#fff" ? "#cfe0db" : FG}" stroke-width="1.2"/><circle cx="${px}" cy="${py}" r="2.6" fill="${c === "#fff" ? "#fff" : FG}"/>` + ft(x, y, t, a, 10.5, c);
+};
+const fico = (n, x, y, s, c = FK) => (IC[n] || IC.cle).replace("<svg ", `<svg x="${x}" y="${y}" width="${s}" height="${s}" color="${c}" `);
+const fcroix = (x, y, r = 13) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${FR}"/><path d="M${x - r * .4} ${y - r * .4}l${r * .8} ${r * .8}M${x + r * .4} ${y - r * .4}l${-r * .8} ${r * .8}" stroke="#fff" stroke-width="3" stroke-linecap="round"/>`;
+const fcoche = (x, y, r = 13) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${FV}"/><path d="M${x - r * .45} ${y}l${r * .3} ${r * .35} ${r * .55} ${-r * .6}" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+const fsvg = (inner, label) => `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(label)}"><rect width="320" height="200" fill="#fff"/>${inner}</svg>`;
+const feclair = (x, y) => `<path d="M${x} ${y - 12}l-6 12h6l-3 12 10-15h-6l4-9z" fill="#F2B705" stroke="${FR}" stroke-width="1.2"/>`;
+const fflamme = (x, y) => `<path d="M${x} ${y}c-9-8-3-16 0-24 2 7 9 9 7 17 4-3 4-7 4-10 6 8 3 17-11 17z" fill="#E8590C"/><path d="M${x + 1} ${y}c-3-4-1-8 1-11 1 4 4 5 3 8-1 2-2 3-4 3z" fill="#FFD43B"/>`;
+const ftel = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(w, h) * .14}" fill="#fff" stroke="${FK}" stroke-width="2.5"/><rect x="${x + 5}" y="${y + 10}" width="${w - 10}" height="${h - 22}" rx="2" fill="#E9EEEC" stroke="#9aa8a3"/>`;
+const fcarte = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#2C6B4F"/>` + [...Array(5)].map((_, i) => `<path d="M${x + 8} ${y + 8 + i * (h - 16) / 4}h${w * .3}" stroke="#4E9A74" stroke-width="1.2"/>`).join("");
+const fbatt = (x, y, w, h, fill = "#DCEBE7") => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${fill}" stroke="${FK}" stroke-width="2"/>`;
+
+const FIGS = {
+  "outils": () => fsvg([["tournevis","Tournevis"],["spatule","Spatule"],["ventouse","Ventouse"],["pince","Pince brucelles"],["loupe","Loupe"],
+      ["fer","Fer à souder"],["airchaud","Air chaud"],["multimetre","Multimètre"],["alcool","Alcool IPA"],["brosse","Brosse douce"]]
+    .map(([n, t], i) => { const cx = 32 + (i % 5) * 64, y = i < 5 ? 14 : 106; return fico(n, cx - 20, y, 40, i < 5 ? FBL : FO) + ft(cx, y + 62, t, "middle", 10); }).join(""), "Les outils de base"),
+  "antistatique": () => fsvg(`<rect x="20" y="130" width="230" height="40" rx="6" fill="#DCEBE7" stroke="${FK}" stroke-width="1.5"/>` + ftel(110, 100, 60, 34) +
+      `<ellipse cx="70" cy="70" rx="22" ry="12" fill="none" stroke="${FBL}" stroke-width="5"/><path d="M92 72 C140 80 230 80 270 140" stroke="${FBL}" stroke-width="2.5" fill="none"/><rect x="262" y="140" width="22" height="16" rx="3" fill="${FK}"/>` +
+      fl(70, 58, 40, 24, "Bracelet antistatique") + fl(60, 165, 30, 190, "Tapis antistatique") + fl(273, 150, 300, 118, "Prise de terre", "end"), "Bracelet et tapis antistatiques"),
+  "batt-ok": () => fsvg(fcarte(30, 20, 260, 60) + fbatt(60, 95, 200, 80) + ft(160, 140, "Batterie", "middle", 12) +
+      `<rect x="150" y="68" width="34" height="14" rx="2" fill="${FO}"/><rect x="150" y="50" width="34" height="10" rx="2" fill="${FO}" opacity=".5"/><path d="M230 30 L190 58" stroke="#3B6EA5" stroke-width="7" stroke-linecap="round"/>` +
+      fl(60, 40, 40, 14, "Carte mère") + fl(167, 75, 120, 112, "Connecteur batterie", "end") + fl(222, 36, 230, 14, "Spatule en plastique", "end") + fcoche(296, 182), "Déconnecter la batterie avec une spatule en plastique"),
+  "batt-metal": () => fsvg(fcarte(30, 20, 260, 60) + fbatt(60, 95, 200, 80) + `<rect x="150" y="68" width="34" height="14" rx="2" fill="${FO}"/><path d="M250 20 L178 70 M262 30 L186 76" stroke="#8a9599" stroke-width="4" stroke-linecap="round"/>` +
+      feclair(170, 92) + fl(250, 22, 285, 14, "Pince métallique", "end") + fl(176, 94, 120, 130, "Court-circuit, étincelle", "start", FR) + fcroix(296, 182), "Ne jamais toucher la batterie avec du métal"),
+  "batt-percee": () => fsvg(`<path d="M60 120 Q160 60 260 120 L260 160 Q160 100 60 160 Z" fill="#F4D9A8" stroke="${FK}" stroke-width="2"/>` + fflamme(150, 90) + fflamme(185, 95) +
+      `<path d="M100 40 L130 110" stroke="#8a9599" stroke-width="5" stroke-linecap="round"/>` + fl(80, 140, 40, 182, "Batterie pliée ou gonflée") + fl(102, 46, 60, 22, "Objet pointu") + fl(160, 70, 205, 30, "Risque de feu", "start", FR) + fcroix(296, 182), "Ne jamais plier ni percer une batterie"),
+  "chauffe-ok": () => fsvg(ftel(170, 30, 90, 150) + `<rect x="20" y="70" width="70" height="30" rx="5" fill="${FK}"/><rect x="90" y="76" width="22" height="18" rx="2" fill="#555"/><rect x="38" y="100" width="20" height="45" rx="4" fill="${FK}"/>` +
+      [0, 1, 2].map(i => `<path d="M118 ${74 + i * 10} q6 -5 12 0 t12 0 t12 0" stroke="${FO}" stroke-width="2.5" fill="none"/>`).join("") + ft(130, 60, "80–90 °C", "start", 13, FO) +
+      fl(40, 85, 20, 40, "Station à air chaud") + fl(172, 100, 215, 196, "Bord de l’écran", "middle") + fcoche(300, 20), "Chauffer doucement à 80–90 °C"),
+  "chauffe-ko": () => fsvg(ftel(170, 30, 90, 150) + `<rect x="60" y="110" width="26" height="50" rx="5" fill="#C92A2A"/>` + fflamme(73, 108) +
+      `<path d="M178 60 q15 20 0 40 q20 10 10 40" stroke="#5c3d2e" stroke-width="6" fill="none" opacity=".7"/>` + fl(73, 140, 30, 186, "Briquet ou flamme") + fl(186, 90, 290, 196, "Écran brûlé", "end", FR) + fcroix(300, 20), "Jamais de flamme sur un écran"),
+  "mediator-ok": () => fsvg(`<rect x="30" y="80" width="260" height="14" fill="#9fb8c9" stroke="${FK}"/><rect x="30" y="94" width="260" height="50" fill="#E9EEEC" stroke="${FK}"/><path d="M120 120 h150" stroke="${FO}" stroke-width="4"/>` +
+      `<polygon points="20,70 60,84 60,92 20,88" fill="${FBL}"/><path d="M58 84 v10" stroke="${FV}" stroke-width="2"/>` + ft(64, 112, "3 mm max", "start", 11, FV) +
+      fl(30, 78, 20, 40, "Médiator") + fl(200, 87, 220, 40, "Vitre / écran") + fl(220, 120, 290, 180, "Nappe (à protéger)", "end") + fcoche(300, 20), "Glisser le médiator de 3 mm maximum"),
+  "mediator-ko": () => fsvg(`<rect x="30" y="80" width="260" height="14" fill="#9fb8c9" stroke="${FK}"/><rect x="30" y="94" width="260" height="50" fill="#E9EEEC" stroke="${FK}"/><path d="M120 120 h50 M182 120 h88" stroke="${FO}" stroke-width="4"/>` +
+      `<polygon points="20,80 190,112 190,126 20,92" fill="${FBL}" opacity=".9"/>` + feclair(176, 106) + fl(40, 86, 30, 40, "Médiator trop profond") + fl(180, 124, 200, 185, "Nappe coupée", "start", FR) + fcroix(300, 20), "Ne pas enfoncer le médiator trop loin"),
+  "vis-ok": () => fsvg(`<rect x="40" y="30" width="240" height="140" rx="8" fill="#DCEBE7" stroke="${FK}" stroke-width="2"/>` +
+      [0, 1, 2].map(c => [0, 1].map(r => `<rect x="${55 + c * 75}" y="${45 + r * 60}" width="60" height="50" rx="4" fill="#fff" stroke="${FG}"/>`).join("")).join("") +
+      [[85, 70], [160, 70], [235, 70], [85, 130], [160, 130]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="6" fill="#adb5bd" stroke="${FK}"/><path d="M${x - 3} ${y}h6M${x} ${y - 3}v6" stroke="${FK}"/>`).join("") +
+      ft(85, 102, "Haut", "middle", 9.5) + ft(160, 102, "Milieu", "middle", 9.5) + ft(235, 102, "Bas", "middle", 9.5) + ft(85, 162, "Longues", "middle", 9.5) + ft(160, 162, "Courtes", "middle", 9.5) +
+      fl(270, 40, 300, 14, "Tapis magnétique", "end") + fcoche(20, 186), "Ranger les vis dans l’ordre"),
+  "vis-ko": () => fsvg([[60, 60], [72, 66], [66, 52], [80, 58], [70, 74], [88, 70]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="6" fill="#adb5bd" stroke="${FK}"/>`).join("") +
+      fcarte(150, 90, 150, 70) + `<rect x="210" y="40" width="8" height="70" fill="#adb5bd" stroke="${FK}"/><circle cx="214" cy="38" r="9" fill="#adb5bd" stroke="${FK}"/>` + feclair(222, 118) +
+      fl(60, 60, 30, 120, "Vis mélangées") + fl(214, 70, 250, 30, "Vis trop longue") + fl(225, 130, 170, 190, "Carte mère percée", "start", FR) + fcroix(300, 186), "Une vis longue au mauvais endroit perce la carte"),
+  "multi-batt": () => fsvg(`<rect x="20" y="20" width="90" height="150" rx="8" fill="#E3B23C" stroke="${FK}" stroke-width="2"/><rect x="30" y="30" width="70" height="34" rx="3" fill="#DCEBE7" stroke="${FK}"/>` + ft(65, 54, "3,95 V", "middle", 15) +
+      `<circle cx="65" cy="110" r="20" fill="#fff" stroke="${FK}" stroke-width="2"/>` + ft(65, 114, "V⎓", "middle", 12) + fbatt(180, 60, 110, 110) + ft(235, 120, "Batterie", "middle", 12) +
+      `<rect x="200" y="50" width="20" height="10" fill="${FR}"/><rect x="250" y="50" width="20" height="10" fill="${FK}"/><path d="M80 170 C120 200 160 120 210 52" stroke="${FR}" stroke-width="2.5" fill="none"/><path d="M95 170 C150 200 220 140 260 52" stroke="${FK}" stroke-width="2.5" fill="none"/>` +
+      fl(30, 40, 20, 10, "Écran du multimètre") + fl(85, 110, 120, 95, "Mode V continu") + fl(210, 55, 195, 25, "+ (fil rouge)", "end") + fl(260, 55, 300, 25, "− (fil noir)", "end") + fcoche(300, 186), "Mesurer la tension de la batterie"),
+  "ecran-couches": () => fsvg([["Vitre", "#c5dbe8", 30], ["Couche tactile", "#e2ecf1", 62], ["Dalle LCD ou OLED", "#3d4a52", 94], ["Châssis", "#adb5bd", 126]]
+      .map(([t, c, y]) => `<rect x="30" y="${y}" width="140" height="22" rx="3" fill="${c}" stroke="${FK}"/>` + fl(170, y + 11, 190, y + 11, t)).join("") +
+      `<path d="M100 148 v20 h60" stroke="${FO}" stroke-width="5" fill="none"/>` + fl(160, 168, 190, 182, "Nappe de l’écran"), "Les couches d’un écran"),
+  "ecran-test": () => fsvg(ftel(40, 20, 90, 160) + `<rect x="45" y="30" width="80" height="138" fill="#FFF4DF"/><path d="M68 98l12 12 22-26" stroke="${FV}" stroke-width="6" fill="none" stroke-linecap="round"/>` +
+      fcarte(180, 60, 110, 80) + `<path d="M130 100 C150 100 160 110 185 105" stroke="${FO}" stroke-width="5" fill="none"/>` +
+      fl(85, 30, 160, 14, "Écran neuf allumé") + fl(160, 102, 150, 172, "Nappe branchée") + fl(240, 70, 300, 40, "Carte mère", "end") + fcoche(300, 186) + ft(85, 196, "Pas encore collé", "middle", 10, FV), "Tester l’écran avant de le coller"),
+  "ecran-colle": () => fsvg(ftel(40, 20, 90, 160) + `<rect x="45" y="30" width="80" height="138" fill="#222"/><path d="M210 40 h30 v80 l-15 20 l-15 -20 z" fill="#ffd8a8" stroke="${FK}" stroke-width="2"/>` +
+      ft(225, 85, "B-7000", "middle", 9) + fl(85, 120, 140, 190, "Écran noir, déjà collé", "start", FR) + fl(225, 40, 270, 22, "Colle") + fcroix(300, 186), "Ne pas coller avant d’avoir testé"),
+  "vitre-sep": () => fsvg(`<rect x="30" y="60" width="260" height="16" fill="#c5dbe8" stroke="${FK}"/><rect x="30" y="76" width="260" height="8" fill="#ffe066" stroke="${FK}"/><rect x="30" y="84" width="260" height="30" fill="#3d4a52" stroke="${FK}"/><rect x="20" y="114" width="280" height="20" fill="#adb5bd" stroke="${FK}"/>` +
+      `<path d="M10 80 L310 80" stroke="${FR}" stroke-width="1.5"/><circle cx="10" cy="80" r="5" fill="none" stroke="${FR}" stroke-width="2"/><circle cx="310" cy="80" r="5" fill="none" stroke="${FR}" stroke-width="2"/>` +
+      fl(80, 68, 60, 30, "Vitre") + fl(150, 80, 150, 40, "Fil molybdène", "middle", FR) + fl(220, 80, 250, 30, "Colle OCA") + fl(200, 100, 220, 170, "Dalle (fragile)") + fl(60, 124, 40, 175, "Plaque chauffante 80 °C"), "Séparer la vitre de la dalle"),
+  "port-ok": () => fsvg(`<rect x="30" y="80" width="260" height="90" rx="20" fill="#fff" stroke="${FK}" stroke-width="2.5"/><rect x="110" y="130" width="100" height="24" rx="12" fill="#333" stroke="${FO}" stroke-width="2.5"/>` +
+      [[130, 160], [150, 166], [175, 162], [195, 170]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.5" fill="#8a6d4b"/>`).join("") + `<path d="M160 20 L160 128" stroke="${FBL}" stroke-width="5" stroke-linecap="round"/>` +
+      fl(160, 50, 140, 30, "Aiguille en plastique", "end") + fl(210, 142, 300, 110, "Port de charge", "end") + fl(150, 166, 110, 192, "Poussière retirée", "end") + fcoche(300, 20), "Nettoyer le connecteur avec du plastique"),
+  "port-ko": () => fsvg(`<rect x="30" y="80" width="260" height="90" rx="20" fill="#fff" stroke="${FK}" stroke-width="2.5"/><rect x="110" y="130" width="100" height="24" rx="12" fill="#333"/>` +
+      `<path d="M160 20 L160 132" stroke="#8a9599" stroke-width="3" stroke-linecap="round"/>` + feclair(175, 140) + fl(160, 50, 140, 30, "Aiguille ou trombone en métal", "end") + fl(178, 148, 296, 192, "Contacts abîmés, court-circuit", "end", FR) + fcroix(300, 20), "Jamais de métal dans le connecteur"),
+  "soudure-ok": () => fsvg(fcarte(20, 110, 280, 70) + `<rect x="110" y="120" width="100" height="30" rx="3" fill="#ced4da" stroke="${FK}"/>` + [...Array(8)].map((_, i) => `<rect x="${118 + i * 11}" y="150" width="5" height="10" fill="#e9c46a"/>`).join("") +
+      `<rect x="100" y="125" width="10" height="20" fill="#e9c46a"/><rect x="210" y="125" width="10" height="20" fill="#e9c46a"/><path d="M300 10 L222 118" stroke="${FK}" stroke-width="7" stroke-linecap="round"/><path d="M222 118 l-6 9" stroke="#999" stroke-width="3"/>` +
+      fl(160, 130, 125, 64, "Connecteur de charge", "end") + fl(105, 135, 10, 100, "Pattes de maintien") + fl(140, 158, 120, 194, "Contacts (séparés)", "end") + fl(255, 60, 200, 38, "Fer à souder", "end") + fcoche(20, 20), "Souder d’abord les pattes de maintien"),
+  "soudure-ko": () => fsvg(fcarte(20, 110, 280, 70) + `<rect x="110" y="120" width="100" height="30" rx="3" fill="#ced4da" stroke="${FK}"/>` + [...Array(8)].map((_, i) => `<rect x="${118 + i * 11}" y="150" width="5" height="10" fill="#e9c46a"/>`).join("") +
+      `<rect x="139" y="150" width="20" height="10" rx="3" fill="#adb5bd"/>` + feclair(150, 140) + fl(149, 158, 120, 196, "Pont d’étain = court-circuit", "start", FR) + fcroix(20, 20), "Deux contacts soudés ensemble"),
+  "retrait-ok": () => fsvg(fbatt(40, 50, 180, 110) + ft(130, 110, "Batterie", "middle", 12) + `<path d="M150 150 L300 160" stroke="#fff3bf" stroke-width="14" stroke-linecap="round"/><path d="M150 150 L300 160" stroke="#e9c46a" stroke-width="1.5"/>` +
+      `<path d="M240 140 L290 142" stroke="${FV}" stroke-width="3"/><polygon points="290,136 300,142 290,148" fill="${FV}"/>` + fl(260, 158, 300, 190, "Bande adhésive", "end") + ft(255, 118, "Tirer à plat,", "middle", 10.5, FV) + ft(255, 131, "lentement", "middle", 10.5, FV) + fcoche(300, 20), "Retirer la batterie en tirant l’adhésif à plat"),
+  "retrait-ko": () => fsvg(`<path d="M40 70 h180 v80 Q130 120 40 150 Z" fill="#DCEBE7" stroke="${FK}" stroke-width="2"/>` + `<path d="M300 40 L120 130" stroke="#8a9599" stroke-width="6" stroke-linecap="round"/><rect x="270" y="28" width="40" height="18" rx="4" transform="rotate(-27 290 37)" fill="${FK}"/>` +
+      fflamme(110, 128) + fl(200, 85, 250, 112, "Tournevis en métal", "end") + fl(60, 140, 30, 186, "Batterie pliée, risque de feu", "start", FR) + fcroix(20, 20), "Ne jamais forcer avec un outil en métal"),
+  "eau-ok": () => fsvg([["spatule", ["1. Ouvrir", "le téléphone"]], ["batterie", ["2. Déconnecter", "la batterie"]], ["alcool", ["3. Alcool IPA", "+ brosse douce"]], ["test", ["4. Sécher", "24 heures"]]]
+      .map(([n, ls], i) => { const x = 10 + i * 78; return `<rect x="${x + 6}" y="40" width="66" height="66" rx="10" fill="#E6F4EA" stroke="${FV}"/>` + fico(n, x + 19, 53, 40, FV) + ls.map((l, j) => ft(x + 39, 128 + j * 14, l, "middle", 10)).join(""); }).join("") + fcoche(300, 20), "Les bons gestes après l’eau"),
+  "eau-ko": () => fsvg(`<path d="M30 110 Q100 190 170 110 Z" fill="#f1f3f5" stroke="${FK}" stroke-width="2"/>` + [...Array(18)].map((_, i) => `<ellipse cx="${55 + (i % 9) * 12}" cy="${112 + Math.floor(i / 9) * 6}" rx="4" ry="2" fill="#fff" stroke="#ced4da"/>`).join("") +
+      `<rect x="75" y="60" width="40" height="70" rx="6" fill="#fff" stroke="${FK}" stroke-width="2"/>` + fico("cable", 220, 60, 50, FK) + feclair(250, 130) +
+      fl(60, 150, 30, 190, "Riz : inutile") + fl(245, 85, 280, 40, "Charger / allumer", "end") + fl(255, 135, 290, 180, "Court-circuit", "end", FR) + fcroix(20, 20), "Ni riz, ni charge, ni allumage"),
+  "carte-mere": () => fsvg(fcarte(20, 20, 280, 160) + `<rect x="120" y="60" width="60" height="50" rx="3" fill="#212529"/><rect x="200" y="60" width="50" height="40" rx="3" fill="#343a40"/><rect x="60" y="110" width="36" height="36" rx="3" fill="#495057"/>` +
+      [...Array(6)].map((_, i) => `<rect x="${120 + i * 12}" y="130" width="7" height="4" fill="#ced4da"/>`).join("") + `<rect x="40" y="40" width="40" height="14" rx="2" fill="${FO}"/><rect x="230" y="140" width="50" height="12" rx="2" fill="${FO}"/><path d="M80 47 H120" stroke="#ffd43b" stroke-width="2.5"/>` +
+      fl(150, 85, 145, 8, "Processeur (CPU)") + fl(225, 80, 310, 8, "Mémoire", "end") + fl(78, 128, 8, 194, "PMIC (alimentation)") + fl(140, 132, 118, 194, "Condensateurs") + fl(60, 47, 8, 8, "Connecteur batterie") + fl(255, 146, 312, 194, "Connecteur écran", "end") + fl(100, 47, 105, 35, "Ligne VBAT", "start", "#fff"), "Les parties d’une carte mère"),
+  "court-circuit": () => fsvg(`<rect x="20" y="40" width="100" height="70" rx="6" fill="#343a40"/><rect x="30" y="50" width="80" height="26" fill="#94d82d"/>` + ft(70, 69, "1,0 V  1 A", "middle", 12) +
+      fcarte(170, 70, 130, 100) + `<rect x="230" y="110" width="12" height="7" fill="#ff8787"/><circle cx="236" cy="113" r="16" fill="#ff6b6b" opacity=".3"/><path d="M60 110 C80 170 180 150 236 117" stroke="${FR}" stroke-width="2.5" fill="none"/><path d="M90 110 C110 190 200 190 200 165" stroke="${FK}" stroke-width="2.5" fill="none"/>` +
+      fl(40, 45, 20, 22, "Alimentation stabilisée") + fl(236, 105, 300, 50, "Composant qui chauffe", "end", FR) + fl(70, 132, 10, 150, "Fil + sur la ligne") + fl(200, 165, 170, 192, "Fil − sur la masse", "end"), "Trouver le composant en court-circuit"),
+  "rebillage": () => fsvg(`<rect x="40" y="40" width="110" height="110" rx="4" fill="#212529"/>` + [...Array(25)].map((_, i) => `<circle cx="${57 + (i % 5) * 19}" cy="${57 + Math.floor(i / 5) * 19}" r="5" fill="#ced4da"/>`).join("") +
+      `<rect x="180" y="40" width="120" height="110" rx="4" fill="#dee2e6" stroke="${FK}"/>` + [...Array(25)].map((_, i) => `<circle cx="${197 + (i % 5) * 21}" cy="${57 + Math.floor(i / 5) * 19}" r="4.5" fill="#fff" stroke="${FK}"/>`).join("") +
+      fl(95, 150, 95, 175, "Puce et billes d’étain", "middle") + fl(240, 150, 240, 175, "Pochoir (stencil)", "middle") + ft(160, 25, "La pâte à souder passe par les trous du pochoir", "middle", 10.5), "Refaire les billes sous une puce"),
+  "son-pieces": () => fsvg(ftel(110, 10, 100, 180) + `<rect x="145" y="16" width="30" height="5" rx="2.5" fill="${FO}"/><circle cx="194" cy="18" r="3" fill="${FO}"/><rect x="146" y="178" width="28" height="7" rx="3" fill="${FO}"/><circle cx="128" cy="181" r="3" fill="${FO}"/>` +
+      `<g fill="${FO}"><circle cx="186" cy="181" r="2"/><circle cx="193" cy="181" r="2"/><circle cx="200" cy="181" r="2"/></g>` +
+      fl(160, 18, 104, 18, "Écouteur d’appel", "end") + fl(194, 18, 216, 40, "Micro secondaire") + fl(128, 181, 104, 160, "Micro principal", "end") + fl(160, 183, 104, 194, "Port de charge", "end") + fl(193, 181, 216, 160, "Haut-parleur"), "Où se trouvent écouteur, micros et haut-parleur"),
+  "micro-ko": () => fsvg(`<rect x="30" y="80" width="260" height="90" rx="20" fill="#fff" stroke="${FK}" stroke-width="2.5"/><circle cx="110" cy="140" r="5" fill="#333"/><path d="M110 30 L110 136" stroke="#8a9599" stroke-width="3"/>` +
+      fl(110, 60, 150, 40, "Aiguille dans le trou du micro") + fl(112, 142, 160, 190, "Membrane percée", "start", FR) + fcroix(300, 186), "Ne jamais enfoncer d’aiguille dans le micro"),
+  "flash-ok": () => fsvg(`<rect x="15" y="40" width="130" height="85" rx="5" fill="#fff" stroke="${FK}" stroke-width="2.5"/><rect x="22" y="47" width="116" height="70" fill="#DCEBE7"/><path d="M5 130 h150 l-10 12 H15 z" fill="${FK}"/>` + ft(80, 80, "Micrologiciel", "middle", 10) + ft(80, 94, "OFFICIEL", "middle", 11, FV) +
+      ftel(220, 40, 60, 110) + `<rect x="226" y="52" width="48" height="10" fill="#94d82d"/>` + ft(250, 78, "> 50 %", "middle", 10, FV) + `<path d="M150 120 C180 120 190 160 250 152" stroke="${FK}" stroke-width="2.5" fill="none"/>` +
+      fl(70, 45, 40, 18, "Ordinateur") + fl(200, 140, 180, 190, "Câble USB de qualité") + fl(250, 56, 290, 18, "Batterie chargée", "end") + fcoche(302, 110), "Réinstaller le système officiel"),
+  "flash-ko": () => fsvg(`<rect x="40" y="40" width="240" height="120" rx="6" fill="#fff" stroke="${FK}" stroke-width="2"/><rect x="60" y="80" width="90" height="34" rx="4" fill="#DCEBE7" stroke="${FK}"/><rect x="170" y="80" width="90" height="34" rx="4" fill="#FFE3E3" stroke="${FR}" stroke-width="2"/>` +
+      ft(105, 101, "Download Only", "middle", 10, FV) + ft(215, 101, "Format All", "middle", 10, FR) + `<path d="M175 84 l80 26 M255 84 l-80 26" stroke="${FR}" stroke-width="2.5"/>` +
+      fl(105, 114, 90, 186, "Bon choix", "end", FV) + fl(215, 114, 230, 186, "Efface l’IMEI !", "start", FR) + fl(60, 50, 30, 20, "SP Flash Tool"), "Ne jamais choisir « Format All » sans sauvegarde"),
+  "iphone-dfu": () => fsvg(`<rect x="15" y="40" width="120" height="80" rx="5" fill="#fff" stroke="${FK}" stroke-width="2.5"/><rect x="22" y="47" width="106" height="66" fill="#DCEBE7"/><path d="M5 125 h140 l-10 12 H15 z" fill="${FK}"/>` +
+      ftel(210, 30, 64, 130) + `<rect x="206" y="60" width="4" height="16" fill="${FO}"/><rect x="206" y="82" width="4" height="16" fill="${FO}"/><rect x="274" y="70" width="4" height="22" fill="${FO}"/><path d="M140 115 C170 115 180 170 240 158" stroke="${FK}" stroke-width="2.5" fill="none"/>` +
+      fl(75, 50, 20, 20, "iTunes ou Finder") + fl(208, 66, 190, 40, "1. Volume +", "end") + fl(208, 90, 190, 72, "2. Volume −", "end") + fl(278, 80, 300, 186, "3. Bouton latéral (maintenir)", "end") + fl(170, 140, 120, 190, "Câble", "end"), "Mettre un iPhone en mode récupération"),
+  "icloud-ko": () => fsvg(ftel(120, 20, 80, 150) + `<rect x="145" y="80" width="30" height="26" rx="4" fill="${FK}"/><path d="M151 80 v-8 a9 9 0 0118 0 v8" stroke="${FK}" stroke-width="4" fill="none"/>` +
+      fl(150, 95, 110, 60, "Compte verrouillé", "end") + ft(160, 194, "Ne jamais contourner sur un téléphone qui n’est pas au client", "middle", 10, FR) + fcroix(30, 30), "Ne jamais contourner un verrouillage"),
+  "prix": () => fsvg([["Pièce", 12, "#E1ECF7"], ["Temps de travail", 118, "#DCEBE7"], ["Marge de risque", 224, "#FBEFD9"]].map(([t, x, c]) => `<rect x="${x}" y="55" width="84" height="60" rx="8" fill="${c}" stroke="${FK}"/>` + t.split(" de ").map((l, j, a) => ft(x + 42, 89 + (j - (a.length - 1) / 2) * 13, j ? "de " + l : l, "middle", 11)).join("")).join("") +
+      ft(108, 92, "+", "middle", 18) + ft(214, 92, "+", "middle", 18) + `<rect x="100" y="140" width="120" height="40" rx="8" fill="${FK}"/>` + ft(160, 165, "= Prix au client", "middle", 12, "#fff"), "Calculer son prix"),
+  "qualites": () => fsvg([["Origine", "★★★", FV, 20], ["Copie haute qualité", "★★☆", FO, 120], ["Copie bas de gamme", "★☆☆", FR, 220]].map(([t, e, c, x]) => fbatt(x + 15, 40, 50, 80) + ft(x + 40, 140, e, "middle", 14, c) + t.split(" ").reduce((a, w) => { const l = a[a.length - 1]; if ((l + " " + w).trim().length <= 12) a[a.length - 1] = (l + " " + w).trim(); else a.push(w); return a; }, [""]).map((l, j) => ft(x + 40, 160 + j * 13, l, "middle", 10.5)).join("")).join(""), "Les trois qualités de pièces"),
+  "ordre": () => fsvg(["Charge", "Allumage", "Écran", "Tactile", "Son", "Micro", "Caméras", "Réseau", "Wi-Fi"].map((t, i) => { const x = 18 + (i % 3) * 100, y = 25 + Math.floor(i / 3) * 58; return `<rect x="${x}" y="${y}" width="86" height="42" rx="8" fill="#E6F4EA" stroke="${FV}"/><circle cx="${x + 14}" cy="${y + 21}" r="10" fill="${FV}"/>` + ft(x + 14, y + 25, String(i + 1), "middle", 11, "#fff") + ft(x + 30, y + 25, t, "start", 11); }).join(""), "L’ordre des tests"),
+  "questions": () => fsvg([["Il est tombé ?", 15, 20], ["Tombé dans l’eau ?", 165, 20], ["Depuis quand ?", 15, 110], ["Après une mise à jour ?", 165, 110]].map(([t, x, y]) => `<path d="M${x} ${y} h124 a8 8 0 018 8 v40 a8 8 0 01-8 8 h-84 l-14 12 v-12 h-26 a8 8 0 01-8-8 v-40 a8 8 0 018-8z" fill="#E1ECF7" stroke="${FBL}"/>` + ft(x + 66, y + 34, t, "middle", 11)).join(""), "Les questions à poser au client"),
+  "log-vs-mat": () => fsvg(`<rect x="10" y="20" width="145" height="165" rx="10" fill="#E1ECF7" stroke="${FBL}"/><rect x="165" y="20" width="145" height="165" rx="10" fill="#FBEFD9" stroke="${FO}"/>` + fico("logiciel", 62, 30, 40, FBL) + fico("puce", 217, 30, 40, FO) +
+      ft(82, 90, "LOGICIEL", "middle", 12, FBL) + ["Redémarre en boucle", "Bloqué sur le logo", "Après une mise à jour"].map((t, i) => ft(82, 115 + i * 18, "• " + t, "middle", 10)).join("") +
+      ft(237, 90, "MATÉRIEL", "middle", 12, FO) + ["Après une chute / l’eau", "Écran noir qui vibre", "Ne charge avec rien"].map((t, i) => ft(237, 115 + i * 18, "• " + t, "middle", 10)).join(""), "Logiciel ou matériel ?")
+};
+const LECON_FIGS = {
+  "bases-1": [["do", "outils", "Les outils de base, à garder à portée de main"], ["do", "antistatique", "Bracelet relié au tapis et à la prise de terre"]],
+  "bases-2": [["do", "batt-ok", "Déconnectez la batterie avec une spatule en plastique"], ["dont", "batt-metal", "Ne touchez jamais la batterie avec un outil en métal"], ["dont", "batt-percee", "Ne pliez jamais et ne percez jamais une batterie"]],
+  "bases-3": [["do", "chauffe-ok", "Chauffez les bords à 80–90 °C"], ["do", "mediator-ok", "Glissez le médiator de 3 mm maximum"], ["dont", "mediator-ko", "Trop profond, le médiator coupe les nappes"], ["do", "vis-ok", "Rangez les vis dans l’ordre du démontage"], ["dont", "vis-ko", "Une vis longue au mauvais endroit perce la carte"]],
+  "bases-4": [["do", "multi-batt", "Mesurez la batterie en mode V continu"], ["do", "court-circuit", "Repérez un court-circuit avec l’alimentation stabilisée"]],
+  "diagnostic-1": [["do", "questions", "Posez ces questions avant de toucher au téléphone"], ["do", "ordre", "Testez toujours dans cet ordre"]],
+  "diagnostic-2": [["do", "log-vs-mat", "Repérez si la panne est logicielle ou matérielle"]],
+  "ecrans-1": [["do", "ecran-couches", "Un écran est fait de plusieurs couches"]],
+  "ecrans-2": [["do", "chauffe-ok", "Chauffez doucement pour ramollir la colle"], ["dont", "chauffe-ko", "Jamais de flamme : l’écran brûle"], ["do", "ecran-test", "Testez l’écran neuf avant de le coller"], ["dont", "ecran-colle", "Ne collez jamais un écran sans l’avoir testé"]],
+  "ecrans-3": [["do", "vitre-sep", "Le fil passe dans la colle, entre la vitre et la dalle"]],
+  "batterie-1": [["do", "port-ok", "Nettoyez le connecteur avec du plastique"], ["dont", "port-ko", "Jamais d’aiguille ni de trombone en métal"]],
+  "batterie-2": [["do", "retrait-ok", "Tirez l’adhésif à plat, lentement"], ["dont", "retrait-ko", "Ne forcez jamais avec un tournevis en métal"], ["dont", "batt-percee", "Une batterie pliée peut prendre feu"]],
+  "batterie-3": [["do", "soudure-ok", "Soudez d’abord les pattes de maintien, puis les contacts"], ["dont", "soudure-ko", "Un pont d’étain entre deux contacts crée un court-circuit"]],
+  "son-1": [["do", "son-pieces", "Repérez écouteur, micros et haut-parleur"]],
+  "son-2": [["do", "son-pieces", "Le micro principal est souvent près du connecteur"], ["dont", "micro-ko", "Une aiguille perce la membrane du micro"]],
+  "logiciel-1": [["do", "act:power-volume-haut", "Mode récupération : Marche + Volume + sur beaucoup d’Android"]],
+  "logiciel-2": [["do", "flash-ok", "Système officiel, câble de qualité, batterie chargée"], ["dont", "flash-ko", "« Format All » sans sauvegarde efface l’IMEI"]],
+  "logiciel-3": [["do", "iphone-dfu", "Volume +, Volume −, puis bouton latéral maintenu"], ["dont", "icloud-ko", "Ne contournez jamais un compte iCloud ou Google"]],
+  "carte-1": [["do", "carte-mere", "Les principales parties d’une carte mère"]],
+  "carte-2": [["do", "court-circuit", "Injectez 1 V et repérez le composant qui chauffe"]],
+  "carte-3": [["do", "rebillage", "La puce, ses billes et le pochoir"]],
+  "eau-1": [["do", "eau-ok", "Les 4 bons gestes, dans l’ordre"], ["dont", "eau-ko", "Ni riz, ni charge, ni allumage"]],
+  "eau-2": [["do", "act:alcool", "Brossez la carte à l’alcool isopropylique"], ["do", "carte-mere", "Inspectez les connecteurs et les composants"]],
+  "atelier-1": [["do", "prix", "Pièce + temps + marge = prix au client"]],
+  "atelier-2": [["do", "qualites", "Proposez les trois qualités, avec un prix différent"]]
+};
+const figSVG = k => k.startsWith("act:") ? (ACTIONS[k.slice(4)] ? ACTIONS[k.slice(4)]() : "") : (FIGS[k] ? FIGS[k]() : "");
+
+/* ==========================================================
    COURS
    ========================================================== */
 const cacheLecons = {};
@@ -1530,36 +1723,83 @@ function renderCourses(){
       </button>
       <div class="lessons">
         ${c.lecons.map((l, j) => `<div class="lesson" data-id="${l.id}">
-            <button type="button" aria-expanded="false"><span>${j+1}. ${esc(l.t)}</span><span class="lock">${l.gratuit ? "Gratuit" : (actif ? "" : "Abonnés")}</span></button>
-            <div class="body"></div>
+            <button type="button" aria-haspopup="dialog"><span>${j+1}. ${esc(l.t)}</span><span class="lock">${l.gratuit ? "Gratuit" : (actif ? "Ouvrir" : "Abonnés")} ›</span></button>
           </div>`).join("")}
       </div>
     </div>`).join("");
   document.querySelectorAll(".course > button").forEach(b => b.addEventListener("click", () => {
     const o = b.parentElement.classList.toggle("open"); b.setAttribute("aria-expanded", o);
   }));
-  document.querySelectorAll(".lesson > button").forEach(b => b.addEventListener("click", () => {
-    const el = b.parentElement, o = el.classList.toggle("open"); b.setAttribute("aria-expanded", o);
-    if (o) ouvrirLecon(el);
-  }));
+  document.querySelectorAll(".lesson > button").forEach(b => b.addEventListener("click", () => ouvrirLecon(b.parentElement.dataset.id)));
 }
 function trouverLecon(id){ for (const c of CATALOGUE) for (const l of c.lecons) if (l.id === id) return l; return null; }
-async function ouvrirLecon(el){
-  const id = el.dataset.id, l = trouverLecon(id), body = el.querySelector(".body");
-  if (l.gratuit) { body.innerHTML = l.gratuit; return; }
-  if (!user) { body.innerHTML = `<p>Cette leçon est réservée aux abonnés. <button type="button" class="linkbtn" style="color:var(--copper-ink);padding:0" data-login>Se connecter</button> ou <a href="#abonnements">voir les abonnements</a>.</p>`; body.querySelector("[data-login]").onclick = () => openDlg("#loginDlg"); return; }
-  if (!isActive()) { body.innerHTML = `<p>Cette leçon est réservée aux abonnés Pro et Atelier. <a href="#abonnements">Voir les abonnements</a></p>`; return; }
-  if (cacheLecons[id]) { body.innerHTML = cacheLecons[id]; return; }
-  body.innerHTML = '<div class="thinking"><div class="spin"></div><span>Chargement…</span></div>';
-  try{
-    const s = await F.getDoc(F.doc(db, "lecons", id));
+/* ==========================================================
+   FENÊTRE DE LEÇON (fond clair, zoom, schémas)
+   ========================================================== */
+let leconCourante = null;
+let lfs = 1.12; try { lfs = parseFloat(localStorage.getItem("ra_lfs")) || 1.12; } catch(_){}
+const majLfs = () => { $("#leconDlg").style.setProperty("--lfs", lfs + "rem"); try { localStorage.setItem("ra_lfs", lfs); } catch(_){} };
+majLfs();
+$("#lcPlus").addEventListener("click", () => { lfs = Math.min(2, +(lfs + .12).toFixed(2)); majLfs(); });
+$("#lcMoins").addEventListener("click", () => { lfs = Math.max(.88, +(lfs - .12).toFixed(2)); majLfs(); });
+
+function placeLecon(id){
+  for (const c of CATALOGUE) { const j = c.lecons.findIndex(l => l.id === id); if (j >= 0) return { c, j, l: c.lecons[j] }; }
+  return null;
+}
+async function contenuLecon(l){
+  if (l.gratuit) return { html: l.gratuit, ouvert: true };
+  if (!user) return { html: `<div class="lc-lock"><p><strong>Cette leçon est réservée aux abonnés.</strong></p><p>Connectez-vous, puis choisissez l’abonnement Pro ou Atelier.</p><div class="actions"><button class="btn btn-copper" type="button" data-lc="login">Se connecter</button><button class="btn btn-ghost" type="button" data-lc="abos">Voir les abonnements</button></div></div>`, ouvert: false };
+  if (!isActive()) return { html: `<div class="lc-lock"><p><strong>Cette leçon est réservée aux abonnés Pro et Atelier.</strong></p><div class="actions"><button class="btn btn-copper" type="button" data-lc="abos">Voir les abonnements</button></div></div>`, ouvert: false };
+  if (cacheLecons[l.id]) return { html: cacheLecons[l.id], ouvert: true };
+  try {
+    const s = await F.getDoc(F.doc(db, "lecons", l.id));
     const html = s.exists() ? (s.data().contenu || "") : "";
-    cacheLecons[id] = html || "<p>Cette leçon arrive très bientôt.</p>";
-    body.innerHTML = cacheLecons[id];
-  }catch(e){
-    body.innerHTML = /permission/i.test(e.message) ? `<p>Votre abonnement est terminé. <a href="#abonnements">Le renouveler</a></p>` : "<p>Impossible de charger la leçon. Vérifiez votre connexion.</p>";
+    cacheLecons[l.id] = html || "<p>Cette leçon arrive très bientôt.</p>";
+    return { html: cacheLecons[l.id], ouvert: true };
+  } catch(e) {
+    return { html: /permission/i.test(e.message) ? `<div class="lc-lock"><p><strong>Votre abonnement est terminé.</strong></p><div class="actions"><button class="btn btn-copper" type="button" data-lc="abos">Le renouveler</button></div></div>` : "<p>Impossible de charger la leçon. Vérifiez votre connexion.</p>", ouvert: false };
   }
 }
+async function ouvrirLecon(id){
+  const P = placeLecon(id); if (!P) return;
+  leconCourante = id;
+  const { c, j, l } = P, n = c.lecons.length;
+  const tag = l.gratuit ? '<span class="lc-tag free">Gratuit</span>' : '<span class="lc-tag pro">Abonnés</span>';
+  const nav = `<div class="lc-nav">
+      ${j > 0 ? `<button class="btn btn-ghost" type="button" data-lc-go="${c.lecons[j - 1].id}">← Leçon précédente</button>` : "<span></span>"}
+      ${j < n - 1 ? `<button class="btn btn-copper" type="button" data-lc-go="${c.lecons[j + 1].id}">Leçon suivante →</button>` : `<button class="btn btn-ghost" type="button" data-close>Terminer</button>`}
+    </div>`;
+  const head = `<p class="lc-kicker">${esc(c.titre)} · Leçon ${j + 1} sur ${n} ${tag}</p><h1 id="lcTitre">${esc(l.t)}</h1>`;
+  $("#lcBody").innerHTML = head + '<div class="thinking"><div class="spin"></div><span>Chargement…</span></div>';
+  if (!$("#leconDlg").open) $("#leconDlg").showModal();
+  $("#lcBody").scrollTop = 0; $("#leconDlg").scrollTop = 0;
+  const { html, ouvert } = await contenuLecon(l);
+  if (leconCourante !== id) return;
+  const figs = ouvert ? (LECON_FIGS[id] || []) : [];
+  const figHtml = figs.length ? `<h2 class="lc-h2">En images</h2><div class="lc-figs">${figs.map(([k, f, cap], i) => `
+      <figure class="lc-fig ${k}" tabindex="0" data-lcfig="${i}">
+        <div class="lc-badge">${k === "do" ? "✓ À faire" : "✗ À ne pas faire"}</div>
+        ${figSVG(f)}
+        <figcaption>${esc(cap)} <span>Toucher pour agrandir</span></figcaption>
+      </figure>`).join("")}</div>` : "";
+  $("#lcBody").innerHTML = head + `<div class="lc-texte">${html}</div>` + figHtml + nav;
+  $("#lcBody").querySelectorAll("[data-lcfig]").forEach(el => {
+    const f = figs[+el.dataset.lcfig][1];
+    const open = () => ouvrirZoom(figSVG(f));
+    el.addEventListener("click", open);
+    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+  });
+}
+$("#lcBody").addEventListener("click", e => {
+  if (e.target.closest("[data-close]")) { $("#leconDlg").close(); return; }
+  const go = e.target.closest("[data-lc-go]"); if (go) { ouvrirLecon(go.dataset.lcGo); return; }
+  const a = e.target.closest("[data-lc]"); if (!a) return;
+  $("#leconDlg").close();
+  if (a.dataset.lc === "login") openDlg("#loginDlg");
+  else $("#abonnements").scrollIntoView({ behavior: "smooth" });
+});
+$("#leconDlg").addEventListener("close", () => { leconCourante = null; });
 
 /* ==========================================================
    ABONNEMENTS ET PAIEMENTS
