@@ -62,7 +62,7 @@ nav.bottom a.act{color:var(--acc)}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{border:1px solid var(--line);background:var(--card2);color:var(--txt);border-radius:20px;padding:8px 12px;font-size:14px;cursor:pointer;font-family:inherit}
 .chip.on{border-color:var(--acc);background:var(--acc);color:var(--onacc)}
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--card2);padding:12px 18px;border-radius:12px;display:none;z-index:20;max-width:90%;text-align:center}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--card2);padding:12px 18px;border-radius:12px;display:none;z-index:40;max-width:90%;text-align:center}
 .hdr-r{display:flex;align-items:center;gap:2px}
 .themebtn{font-size:20px}
 .login-g{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--card);color:var(--txt);border:1px solid var(--line)}
@@ -78,6 +78,16 @@ nav.bottom a.act{color:var(--acc)}
 .avatar{width:64px;height:64px;border-radius:50%;object-fit:cover;background:var(--card2);display:inline-flex;align-items:center;justify-content:center;font-size:30px}
 .spin{display:inline-block;width:18px;height:18px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--acc);animation:sp .8s linear infinite;vertical-align:middle}
 @keyframes sp{to{transform:rotate(360deg)}}
+
+/* ===== Fenêtres superposées (paramètres, options, abonnement…) ===== */
+:root{--navh:64px}
+#scrim{position:fixed;top:0;left:0;right:0;bottom:var(--navh);background:rgba(2,6,23,.55);z-index:20;opacity:0;pointer-events:none;transition:opacity .25s}
+#panel{position:fixed;top:0;left:0;width:84%;max-width:440px;bottom:calc(var(--navh) + 52px);background:var(--bg);color:var(--txt);z-index:21;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;border-radius:0 0 22px 0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);box-shadow:8px 8px 30px rgba(0,0,0,.45);transform:translateX(-104%);transition:transform .28s ease;visibility:hidden}
+body.pan{overflow:hidden}
+body.pan #scrim{opacity:1;pointer-events:auto}
+body.pan #panel{transform:none;visibility:visible}
+#panelBody{padding:14px 16px 28px}
+.pclose{position:sticky;top:0;float:right;margin:10px 10px 0 0;z-index:2;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:18px;cursor:pointer}
 </style>
 <script>
 /* Thème jour / nuit appliqué avant l'affichage */
@@ -105,6 +115,8 @@ document.documentElement.setAttribute("data-theme",t);})();
   <a href="#/abonnement" data-p="abonnement"><b>⭐</b><span data-t="navSub"></span></a>
 </nav>
 
+<div id="scrim" onclick="closePanel()"></div>
+<aside id="panel" role="dialog" aria-modal="true"><button class="pclose" onclick="closePanel()" aria-label="Fermer">✕</button><div id="panelBody"></div></aside>
 <div class="toast" id="toast"></div>
 <div id="recaptcha-container"></div>
 
@@ -113,11 +125,12 @@ document.documentElement.setAttribute("data-theme",t);})();
 const PHONE = "22377370254";              // ton numéro Orange Money / Wave / WhatsApp
 const PLANS = {
   pro:     { price: 5000,  days: 30, levels: ["pro"] },
-  atelier: { price: 10000, days: 30, levels: ["pro", "atelier"] }   // prix Atelier à confirmer
+  atelier: { price: 12500, days: 30, levels: ["pro", "atelier"] }
 };
 /* Codes d'activation TEMPORAIRES (avant la connexion Firebase).
    Tu donnes le code au client par WhatsApp après avoir reçu son paiement. */
-const ACTIVATION_CODES = { "PRO-2026": "pro", "ATELIER-2026": "atelier" };
+/* Les codes d'activation ont été supprimés : l'activation se fait maintenant depuis l'espace administrateur. */
+const ACTIVATION_CODES = {};
 const FREE_DIAGNOSTICS = 3;
 /* Comptes ADMINISTRATEUR : accès complet sans abonnement */
 const ADMIN_EMAILS = ["pofficielvideo@gmail.com"];
@@ -230,7 +243,7 @@ function toggleTheme(){ setTheme(themeNow()==="light"?"dark":"light"); if((locat
 function paintTheme(){ const b=document.getElementById("themeBtn"); if(b){ b.textContent=themeNow()==="light"?"🌙":"☀️"; b.title=themeNow()==="light"?tr("nightMode"):tr("dayMode"); } }
 
 /* ============ COMPTE (Firebase, voir le script en bas de page) ============ */
-const NEEDS_LOGIN = ["abonnement","payer","pro","atelier","compte"];
+const NEEDS_LOGIN = ["abonnement","payer","pro","atelier","compte","admin"];
 function authReady(){ return !!(window.RA && window.RA.ready); }
 function user(){ return (window.RA && window.RA.user) || null; }
 function uidKey(k){ const u=user(); return u ? k+"_"+u.uid : null; }
@@ -340,12 +353,14 @@ const S = {
  set(k,v){try{localStorage.setItem("ra_"+k,JSON.stringify(v))}catch(e){}}
 };
 let lang = S.get("lang","fr"); window.lang = lang;
+Object.assign(T.fr,{payStep3:"Après le paiement, écris ici la référence de la transaction (dans le SMS Orange Money ou Wave) et le numéro qui a payé. Tu es activé dès que ta demande est vérifiée.",refPh:"Référence de la transaction",payerPh:"Numéro qui a payé (ex : +223 70 00 00 00)",sendReq:"Envoyer ma demande",reqSent:"Demande envoyée ✅ Elle sera vérifiée très vite.",needRef:"Écris la référence de la transaction.",reqPending:"Demande en attente de validation",reqRejected:"Demande refusée : contacte-nous sur WhatsApp",reqErr:"Impossible d'envoyer la demande. Vérifie ta connexion et réessaie.",admArea:"Espace administrateur",admAreaSub:"Demandes de paiement et abonnés"});
+Object.assign(T.en,{payStep3:"After paying, enter the transaction reference (from the Orange Money or Wave SMS) and the number that paid. You are activated as soon as your request is checked.",refPh:"Transaction reference",payerPh:"Number that paid (e.g. +223 70 00 00 00)",sendReq:"Send my request",reqSent:"Request sent ✅ It will be checked very soon.",needRef:"Enter the transaction reference.",reqPending:"Request waiting for validation",reqRejected:"Request refused: contact us on WhatsApp",reqErr:"Could not send the request. Check your connection and try again.",admArea:"Administrator area",admAreaSub:"Payment requests and subscribers"});
 const tr = k => (T[lang] && T[lang][k]) || T.fr[k] || k;
 const pick = o => o ? (o[lang] || o.fr) : "";
 
 function isAdmin(){ const u=user(); return !!(u && ((u.email && ADMIN_EMAILS.includes(u.email.toLowerCase())) || (u.phoneNumber && ADMIN_PHONES.includes(u.phoneNumber)))); }
-function sub(){ if(isAdmin()) return {plan:"atelier",admin:true,until:Date.now()+3650*864e5}; const k=uidKey("sub"); if(!k) return null; const s=S.get(k,null); return s && s.until > Date.now() ? s : null; }
-function hadSub(){ const k=uidKey("sub"); return !!(k && S.get(k,null)); }
+function sub(){ if(isAdmin()) return {plan:"atelier",admin:true,until:Date.now()+3650*864e5}; const P=window.RA&&RA.profile; if(P) return (P.plan && PLANS[P.plan] && P.until>Date.now()) ? {plan:P.plan,until:P.until} : null; const k=uidKey("sub"); if(!k) return null; const s=S.get(k,null); return s && s.until > Date.now() ? s : null; }
+function hadSub(){ const P=window.RA&&RA.profile; if(P) return !!P.plan; const k=uidKey("sub"); return !!(k && S.get(k,null)); }
 function canOpen(level){ if(level==="free") return true; const s=sub(); return !!(s && PLANS[s.plan].levels.includes(level)); }
 function lessonLevelLabel(l){ return `<span class="tag ${l==='free'?'free':l==='pro'?'pro':'at'}">${tr(l==='free'?'free':l)}</span>`; }
 function fmtDate(t){ return new Date(t).toLocaleDateString(lang==="en"?"en-GB":"fr-FR"); }
@@ -354,6 +369,11 @@ function pushHist(key,item){ const h=S.get(key,[]); const f=h.filter(x=>!(item.i
 
 /* ============ NAVIGATION ============ */
 function go(p){ location.hash="#/"+p; }
+/* Pages qui s'ouvrent en fenêtre superposée sur l'écran en cours */
+const PANELS=["parametres","options","historique","langue","politique","abonnement","payer","compte","connexion","admin"];
+let lastBase="#/analyser";
+function closePanel(){ if(!document.body.classList.contains("pan")) return; location.hash=lastBase; }
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closePanel(); });
 window.addEventListener("hashchange",render);
 
 function render(){
@@ -362,17 +382,32 @@ function render(){
  document.querySelectorAll("[data-t]").forEach(e=>e.textContent=tr(e.dataset.t));
  const parts=(location.hash.replace("#/","")||"analyser").split("/");
  const page=parts[0], arg=parts[1];
- document.querySelectorAll("nav.bottom a").forEach(a=>a.classList.toggle("act",a.dataset.p===page));
+ const views={connexion:vLoginPage,compte:vAccount,analyser:vAnalyze,lecons:vLessons,lecon:()=>vLesson(arg),abonnement:vSub,payer:()=>vPay(arg),pro:vPro,atelier:vAtelier,parametres:vSettings,historique:vHistory,langue:vLang,politique:()=>vPolicy(arg),options:vOptions,admin:vAdmin};
+ const isPanel=PANELS.includes(page);
+ const basePage=(isPanel?lastBase:location.hash).replace("#/","").split("/")[0]||"analyser";
+ if(!isPanel) lastBase=location.hash||"#/analyser";
+ document.body.classList.toggle("pan",isPanel);
+ document.querySelectorAll("nav.bottom a").forEach(a=>a.classList.toggle("act",a.dataset.p===(isPanel?basePage:page)));
+ const target=document.getElementById(isPanel?"panelBody":"app");
+ const toTop=()=>{ if(isPanel) document.getElementById("panel").scrollTop=0; else window.scrollTo(0,0); };
  if(NEEDS_LOGIN.includes(page) && !user()){
-  document.getElementById("app").innerHTML = BACKLINK() + (authReady() ? vLogin() : `<p class="mut" style="text-align:center;margin-top:40px"><span class="spin"></span> ${tr("loading")}</p>`);
-  window.scrollTo(0,0); if(authReady()) bindLogin(); return;
+  if(isPanel) ensureBase(basePage);
+  target.innerHTML = BACKLINK() + (authReady() ? vLogin() : `<p class="mut" style="text-align:center;margin-top:40px"><span class="spin"></span> ${tr("loading")}</p>`);
+  toTop(); if(authReady()) bindLogin(); return;
  }
- const views={connexion:vLoginPage,compte:vAccount,analyser:vAnalyze,lecons:vLessons,lecon:()=>vLesson(arg),abonnement:vSub,payer:()=>vPay(arg),pro:vPro,atelier:vAtelier,parametres:vSettings,historique:vHistory,langue:vLang,politique:()=>vPolicy(arg),options:vOptions};
  let html=(views[page]||vAnalyze)();
  if(page!=="analyser" && views[page] && html && html.indexOf('class="back"')===-1) html=BACKLINK()+html;
- document.getElementById("app").innerHTML=html;
- window.scrollTo(0,0);
- if(page==="analyser"||!views[page]) bindAnalyze();
+ if(isPanel) ensureBase(basePage);
+ target.innerHTML=html;
+ toTop();
+ if(!isPanel && (page==="analyser"||!views[page])) bindAnalyze();
+ function ensureBase(bp){
+  const app=document.getElementById("app");
+  if(app.innerHTML.trim()) return;
+  const ok=views[bp] && !(NEEDS_LOGIN.includes(bp) && !user());
+  app.innerHTML=(ok?views[bp]:vAnalyze)();
+  if(!ok||bp==="analyser") bindAnalyze();
+ }
 }
 
 /* ---------- Page d'accueil : ANALYSER LA PANNE ---------- */
@@ -563,11 +598,20 @@ function vSub(){
    ${on?`<a class="btn b-grn" href="#/${openPage}">${openLabel}</a>`:`<a class="btn b-org" href="#/payer/${id}">${tr("pay")}</a>`}
   </div>`;
  };
+ setTimeout(()=>{ if(window.RA&&RA.refresh) RA.refresh().then(ch=>{ if(ch) render(); }); loadMyReq(); },0);
  return `<h2>⭐ ${tr("subTitle")}</h2><p class="mut">${tr("subSub")}</p>
+ <div id="reqBox"></div>
  ${card("pro","Pro",tr("proF"),"pro",tr("openPro"))}
  ${card("atelier","Atelier",tr("atF"),"atelier",tr("openAt"))}`;
 }
 
+async function loadMyReq(){
+ const box=document.getElementById("reqBox"); if(!box||!window.RA||!RA.myRequests||!user()) return;
+ try{
+  const l=(await RA.myRequests()).slice(0,3);
+  box.innerHTML=l.filter(r=>r.status!=="approved").map(r=>`<div class="warn">${r.status==="pending"?"⏳ "+tr("reqPending"):"❌ "+tr("reqRejected")}<br><small>${r.plan==="pro"?"Pro":"Atelier"} · ${Number(r.amount).toLocaleString("fr-FR")} FCFA · ${esc(r.reference||"")}</small></div>`).join("");
+ }catch(e){}
+}
 /* ---------- Paiement ---------- */
 const CONSENT = {
  fr:"Je demande que l'accès à mon abonnement commence immédiatement, et je reconnais perdre mon droit de rétractation de 14 jours pour ce contenu numérique, dans les conditions prévues par la loi. J'ai lu la politique :",
@@ -579,13 +623,16 @@ function vPay(plan){
  if(!PLANS[plan]) return vSub();
  const name=plan==="pro"?"Pro":"Atelier", price=PLANS[plan].price;
  const msg=encodeURIComponent(`Bonjour, j'ai payé l'abonnement ${name} (${price} FCFA) sur Répar'Académie. Voici ma preuve de paiement :`);
- setTimeout(()=>{document.getElementById("act").onclick=()=>{
+ setTimeout(()=>{ const b=document.getElementById("act"); if(!b) return; b.onclick=async()=>{
   if(!document.getElementById("consent").checked){toast(pick(CONSENT_ERR));return;}
-  const c=document.getElementById("code").value.trim().toUpperCase(), p=ACTIVATION_CODES[c];
-  if(!p){toast(tr("badCode"));return;}
+  const ref=document.getElementById("code").value.trim();
+  if(ref.length<4){toast(tr("needRef"));return;}
   if(!user()){ go("abonnement"); return; }
-  S.set(uidKey("sub"),{plan:p,price:PLANS[p].price,until:Date.now()+PLANS[p].days*864e5,consent:Date.now(),uid:user().uid});
-  toast(tr("activated")); go("abonnement");
+  b.disabled=true;
+  try{
+   await RA.sendPayment({plan,amount:price,reference:ref,payerPhone:document.getElementById("payer").value.trim()});
+   toast(tr("reqSent")); go("abonnement");
+  }catch(e){ b.disabled=false; toast(tr("reqErr")); }
  }},0);
  return `<a class="back" href="#/abonnement">${tr("back")}</a>
  <h2>${tr("payTitle")} ${name}</h2>
@@ -594,12 +641,13 @@ function vPay(plan){
   <div class="step"><div class="n">2</div><p>${tr("payStep2")}</p></div>
   <a class="btn b-grn" href="https://wa.me/${PHONE}?text=${msg}" target="_blank">${tr("whatsapp")}</a>
   <div class="step" style="margin-top:16px"><div class="n">3</div><p>${tr("payStep3")}</p></div>
-  <input id="code" placeholder="${tr("code")}">
+  <input id="code" placeholder="${tr("refPh")}">
+  <input id="payer" type="tel" placeholder="${tr("payerPh")}">
   <label style="display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:14px;line-height:1.45">
    <input type="checkbox" id="consent" style="width:22px;height:22px;margin:2px 0 0;flex:0 0 22px">
    <span>${pick(CONSENT)} <a href="#/politique/remboursement" style="color:var(--acc)">${tr("refund")}</a></span>
   </label>
-  <button class="btn b-acc" id="act">${tr("activate")}</button>
+  <button class="btn b-acc" id="act">${tr("sendReq")}</button>
  </div>`;
 }
 
@@ -609,6 +657,47 @@ function listLevel(level){ return LESSONS.filter(l=>l.level===level).map(l=>`<a 
 function vPro(){ return `<a class="back" href="#/abonnement">${tr("back")}</a><h2>⭐ ${tr("proTitle")}</h2>${canOpen("pro")?listLevel("pro")+(canOpen("atelier")?`<a class="row" href="#/atelier" style="border-color:#a78bfa"><span class="ic">🔧</span><span class="tx">${tr("atTitle")}</span>›</a>`:""):lockedPage()}`; }
 function vAtelier(){ return `<a class="back" href="#/abonnement">${tr("back")}</a><h2>🔧 ${tr("atTitle")}</h2>${canOpen("atelier")?listLevel("atelier"):lockedPage()}`; }
 
+/* ---------- ESPACE ADMINISTRATEUR ---------- */
+const planName = p => p==="atelier" ? "Atelier" : "Pro";
+function vAdmin(){
+ if(!isAdmin()) return `<div class="card"><p>Accès réservé à l'administrateur.</p></div>`;
+ setTimeout(admLoad,0);
+ return `<h2>👑 ${tr("admArea")}</h2>
+ <h3>Demandes de paiement en attente</h3><div id="admReq"><p class="mut">Chargement…</p></div>
+ <h3>Chercher un client</h3>
+ <input id="admQ" placeholder="Email ou numéro (+223…)">
+ <button class="btn b-acc" onclick="admFind()">Chercher</button>
+ <div id="admUser"></div>`;
+}
+function admErr(e){ return `<p class="mut">Erreur : ${esc((e&&(e.code||e.message))||"inconnue")}. Vérifie que les règles Firestore sont publiées et que tu es connecté avec ton compte administrateur.</p>`; }
+async function admLoad(){
+ const box=document.getElementById("admReq"); if(!box) return;
+ if(!window.RA||!RA.pending){ box.innerHTML=admErr({message:"connexion indisponible"}); return; }
+ try{
+  const list=await RA.pending(); window._adm={}; list.forEach(r=>window._adm[r.id]=r);
+  box.innerHTML=list.length ? list.map(r=>`<div class="card"><b>${planName(r.plan)}</b> · ${Number(r.amount).toLocaleString("fr-FR")} FCFA<br>
+   <span class="mut">${esc(r.email||r.phone||r.uid)}<br>Réf : ${esc(r.reference||"")} · Payé par : ${esc(r.payerPhone||"—")}<br>${r.createdAt?fmtDate(r.createdAt):""}</span>
+   <button class="btn b-grn" onclick="admApprove('${r.id}')">Valider et activer</button>
+   <button class="btn b-ghost" onclick="admReject('${r.id}')">Refuser</button></div>`).join("") : `<p class="mut">Aucune demande en attente.</p>`;
+ }catch(e){ box.innerHTML=admErr(e); }
+}
+async function admApprove(id){ const r=(window._adm||{})[id]; if(!r||!PLANS[r.plan]) return;
+ try{ await RA.approve(r,PLANS[r.plan].days); toast("Abonnement "+planName(r.plan)+" activé ✅"); }catch(e){ toast("Échec : "+((e&&e.message)||e)); }
+ admLoad(); }
+async function admReject(id){ try{ await RA.reject(id); toast("Demande refusée"); }catch(e){ toast("Échec : "+((e&&e.message)||e)); } admLoad(); }
+async function admFind(){
+ const q=(document.getElementById("admQ").value||"").trim(), box=document.getElementById("admUser"); if(!q) return;
+ try{
+  const list=await RA.findUsers(q); window._admU={}; list.forEach(u=>window._admU[u.uid]=u);
+  box.innerHTML=list.length ? list.map(u=>`<div class="card"><b>${esc(u.name||u.email||u.phone)}</b><br><span class="mut">${esc(u.email||"")} ${esc(u.phone||"")}<br>${u.until>Date.now()?"Abonnement "+planName(u.plan)+" jusqu'au "+fmtDate(u.until):"Aucun abonnement actif"}</span>
+   <button class="btn b-grn" onclick="admSet('${u.uid}','pro')">+30 jours Pro</button>
+   <button class="btn b-grn" onclick="admSet('${u.uid}','atelier')">+30 jours Atelier</button>
+   <button class="btn b-ghost" onclick="admStop('${u.uid}')">Arrêter l'abonnement</button></div>`).join("") : `<p class="mut">Aucun client trouvé.</p>`;
+ }catch(e){ box.innerHTML=admErr(e); }
+}
+async function admSet(uid,plan){ try{ await RA.setPlan(uid,plan,PLANS[plan].days); toast("Abonnement mis à jour ✅"); }catch(e){ toast("Échec : "+((e&&e.message)||e)); } admFind(); }
+async function admStop(uid){ try{ await RA.stopPlan(uid); toast("Abonnement arrêté"); }catch(e){ toast("Échec : "+((e&&e.message)||e)); } admFind(); }
+
 /* ---------- Menu gauche : PARAMÈTRES ---------- */
 function vSettings(){
  const r=(href,ic,label,sm)=>`<a class="row" href="#/${href}"><span class="ic">${ic}</span><span class="tx">${label}${sm?`<small>${sm}</small>`:""}</span>›</a>`;
@@ -616,6 +705,7 @@ function vSettings(){
  return `<h2>⚙️ ${tr("settings")}</h2>
  ${u?r("compte","👤",tr("myAccount"),esc(u.displayName||u.phoneNumber||u.email||"")):r("connexion","👤",tr("login"),tr("loginSmall"))}
  <a class="row" href="javascript:void(0)" onclick="toggleTheme()"><span class="ic">${themeNow()==="light"?"☀️":"🌙"}</span><span class="tx">${tr("theme")}<small>${themeNow()==="light"?tr("dayMode"):tr("nightMode")} · ${tr("themeSub")}</small></span><span class="tag">${themeNow()==="light"?tr("nightMode"):tr("dayMode")}</span></a>
+ ${isAdmin()?r("admin","👑",tr("admArea"),tr("admAreaSub")):""}
  ${r("historique","🕘",tr("history"),tr("historySub"))}
  ${r("langue","🌍",tr("language"),{fr:"Français",bm:"Bamanankan",en:"English"}[lang])}
  ${r("abonnement","⭐",tr("account"),sub()?(sub().admin?"👑 "+tr("admin"):tr("subscribed")+" – "+tr("until")+fmtDate(sub().until)):"")}
@@ -842,6 +932,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult,
   RecaptchaVerifier, signInWithPhoneNumber, signOut, setPersistence, browserLocalPersistence }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, collection, query, where, getDocs, serverTimestamp, Timestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* >>> CONFIGURATION FIREBASE DU PROJET <<< */
 const firebaseConfig = {
@@ -859,6 +951,46 @@ if(!RA.configured){ RA.ready=true; window.render && render(); }
 else {
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const db = getFirestore(app);
+  const ms = t => (t && t.toMillis) ? t.toMillis() : 0;
+  RA.profile = null; RA.dbError = false;
+  async function loadProfile(u){
+    try{
+      const ref = doc(db,"users",u.uid); let s = await getDoc(ref);
+      if(!s.exists()){
+        await setDoc(ref,{ uid:u.uid, email:(u.email||"").toLowerCase(), phone:u.phoneNumber||"", name:u.displayName||"", createdAt:serverTimestamp() });
+        s = await getDoc(ref);
+      }
+      const d = s.data()||{}, old = RA.profile;
+      RA.profile = { plan:d.plan||"", until:ms(d.planUntil) }; RA.dbError = false;
+      return !old || old.plan!==RA.profile.plan || old.until!==RA.profile.until;
+    }catch(e){ console.warn("Firestore indisponible :", e && e.code); RA.profile = null; RA.dbError = true; return false; }
+  }
+  RA.refresh = () => RA.user ? loadProfile(RA.user) : Promise.resolve(false);
+  RA.sendPayment = async ({plan,amount,reference,payerPhone}) => {
+    const u = auth.currentUser; if(!u) throw new Error("non connecté");
+    await addDoc(collection(db,"paymentRequests"),{ uid:u.uid, email:(u.email||"").toLowerCase(), phone:u.phoneNumber||"", plan, amount:Number(amount), reference, payerPhone:payerPhone||"", status:"pending", createdAt:serverTimestamp() });
+  };
+  const toReq = d => { const x=d.data(); return { id:d.id, uid:x.uid, email:x.email, phone:x.phone, plan:x.plan, amount:x.amount, reference:x.reference, payerPhone:x.payerPhone, status:x.status, createdAt:ms(x.createdAt) }; };
+  RA.myRequests = async () => { const u=auth.currentUser; if(!u) return []; const r=await getDocs(query(collection(db,"paymentRequests"),where("uid","==",u.uid))); return r.docs.map(toReq).sort((a,b)=>b.createdAt-a.createdAt); };
+  RA.pending = async () => { const r=await getDocs(query(collection(db,"paymentRequests"),where("status","==","pending"))); return r.docs.map(toReq).sort((a,b)=>a.createdAt-b.createdAt); };
+  const extend = async (uid, plan, days) => {
+    const ref = doc(db,"users",uid), s = await getDoc(ref);
+    if(!s.exists()) throw new Error("Le client doit d'abord se connecter une fois au site.");
+    const base = Math.max(Date.now(), ms((s.data()||{}).planUntil));
+    await setDoc(ref,{ plan, planUntil:Timestamp.fromMillis(base + days*864e5) },{ merge:true });
+  };
+  RA.approve = async (r, days) => { await extend(r.uid, r.plan, days); await updateDoc(doc(db,"paymentRequests",r.id),{ status:"approved", approvedAt:serverTimestamp() }); };
+  RA.reject = id => updateDoc(doc(db,"paymentRequests",id),{ status:"rejected" });
+  RA.setPlan = (uid, plan, days) => extend(uid, plan, days);
+  RA.stopPlan = uid => setDoc(doc(db,"users",uid),{ planUntil:Timestamp.now() },{ merge:true });
+  RA.findUsers = async (q) => {
+    q = (q||"").trim(); let f, v;
+    if(q.includes("@")){ f="email"; v=q.toLowerCase(); }
+    else { f="phone"; v=q.replace(/[\s.-]/g,""); if(v.startsWith("00")) v="+"+v.slice(2); else if(/^\d{8}$/.test(v)) v="+223"+v; else if(!v.startsWith("+")) v="+"+v; }
+    const r = await getDocs(query(collection(db,"users"),where(f,"==",v)));
+    return r.docs.map(d=>{ const x=d.data(); return { uid:d.id, email:x.email, phone:x.phone, name:x.name, plan:x.plan||"", until:ms(x.planUntil) }; });
+  };
   auth.languageCode = (window.lang==="en") ? "en" : "fr";
   setPersistence(auth, browserLocalPersistence).catch(()=>{});
   let verifier=null, confirmation=null;
@@ -880,6 +1012,7 @@ else {
   getRedirectResult(auth).catch(()=>{});
   onAuthStateChanged(auth, (u) => {
     RA.user = u; RA.ready = true;
+    if(u){ loadProfile(u).then(()=>{ window.render && render(); }); } else { RA.profile = null; }
     if(u){
       /* Ancien abonnement enregistré sur cet appareil : on le rattache au compte */
       try{ const old=localStorage.getItem("ra_sub"); if(old && !localStorage.getItem("ra_sub_"+u.uid)){ localStorage.setItem("ra_sub_"+u.uid, old); localStorage.removeItem("ra_sub"); } }catch(e){}
