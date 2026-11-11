@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Répar'Académie</title>
+<meta name="theme-color" content="#0b1222">
+<title>Atelier Mobile – Répar Academy</title>
 <style>
 :root{--bg:#0f172a;--card:#1e293b;--card2:#273449;--txt:#f1f5f9;--mut:#94a3b8;--acc:#38bdf8;--org:#f97316;--grn:#22c55e;--red:#ef4444;--line:#334155;--hdr:#0b1222;--inp:#0b1222;--soft:#cbd5e1;--planon:#0f2a1b;--warnbg:#3b1d0a;--warnbd:#9a3412;--onacc:#04263a}
 [data-theme="light"]{--bg:#f4f6fb;--card:#ffffff;--card2:#eef2f7;--txt:#0f172a;--mut:#5b6478;--acc:#0284c7;--org:#ea580c;--grn:#16a34a;--red:#dc2626;--line:#dbe2ec;--hdr:#ffffff;--inp:#f8fafc;--soft:#334155;--planon:#ecfdf3;--warnbg:#fff4e6;--warnbd:#fdba74;--onacc:#ffffff}
@@ -88,38 +89,121 @@ body.pan #scrim{opacity:1;pointer-events:auto}
 body.pan #panel{transform:none;visibility:visible}
 #panelBody{padding:14px 16px 28px}
 .pclose{position:sticky;top:0;float:right;margin:10px 10px 0 0;z-index:2;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--txt);font-size:18px;cursor:pointer}
+
+/* ================= NOUVEAU DESIGN (concept « Atelier Mobile ») ================= */
+:root{--navh:64px;--g1:#0b1630;--g2:#10224a}
+body{padding-bottom:calc(var(--navh) + 12px);background:var(--bg)}
+body.nonav{--navh:0px;padding-bottom:0}
+body.nonav nav.bottom{display:none}
+header{display:none}
+main{max-width:640px;padding:0 0 12px}
+.pg{padding:0 16px 16px}
+.tb{position:sticky;top:0;z-index:9;display:flex;align-items:center;gap:8px;padding:12px 12px;background:var(--hdr);border-bottom:1px solid var(--line)}
+.tb h1{flex:1;font-size:17px;text-align:center;font-weight:800;line-height:1.2}
+.tb .tbr{min-width:40px;display:flex;justify-content:flex-end;gap:2px}
+.ib{width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:20px;color:var(--txt);text-decoration:none;background:none;border:none;cursor:pointer}
+.ib:active{background:var(--card)}
+nav.bottom a b{font-size:21px}
+.hello{padding:18px 16px 4px}.hello h2{font-size:24px;margin:0}.hello p{color:var(--mut)}
+.search{display:flex;align-items:center;gap:10px;margin:12px 16px;padding:12px 14px;border-radius:14px;background:var(--card);border:1px solid var(--line);color:var(--mut);text-decoration:none}
+.tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:6px 16px 4px}
+.tile{display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;color:var(--txt);font-size:11.5px;text-align:center}
+.tile i{font-style:normal;width:52px;height:52px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.banner{position:relative;display:block;margin:14px 16px;border-radius:18px;overflow:hidden;min-height:120px;text-decoration:none;color:#fff;border:1px solid var(--line)}
+.banner .art{position:absolute;inset:0}.banner .art svg{width:100%;height:100%}
+.banner .tx{position:relative;padding:18px;background:linear-gradient(90deg,rgba(8,16,40,.92) 35%,rgba(8,16,40,.15))}
+.banner b{display:block;font-size:20px;line-height:1.15}.banner small{display:block;margin-top:8px;color:#7dd3fc;font-weight:700}
+.sec{display:flex;justify-content:space-between;align-items:center;margin:18px 16px 8px}.sec h3{margin:0;font-size:17px}.sec a{color:var(--acc);font-size:13px;text-decoration:none}
+.th{flex:0 0 74px;height:62px;border-radius:11px;overflow:hidden;background:var(--g1);border:1px solid var(--line)}
+.th svg,.th img{width:100%;height:100%;object-fit:cover;display:block}
+.li{display:flex;align-items:center;gap:12px;padding:10px;margin:8px 16px;background:var(--card);border:1px solid var(--line);border-radius:14px;color:var(--txt);text-decoration:none}
+.li .tx{flex:1;min-width:0}.li .tx b{display:block;font-size:14.5px;line-height:1.25}.li .tx small{display:block;color:var(--mut);font-size:12px;margin-top:3px}
+.play{flex:0 0 38px;height:38px;border-radius:50%;background:var(--acc);color:var(--onacc);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800}
+.play.lock{background:var(--card2);color:var(--mut)}.play.done{background:var(--grn);color:#04210f}
+.pbar{height:6px;border-radius:6px;background:var(--card2);overflow:hidden;margin-top:6px}.pbar i{display:block;height:100%;background:var(--acc);border-radius:6px}
+.seg{display:flex;gap:6px;margin:12px 16px;padding:4px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.seg a,.seg button{flex:1;text-align:center;padding:9px 4px;border-radius:9px;font-size:13.5px;font-weight:700;color:var(--mut);text-decoration:none;background:none;border:none;cursor:pointer}
+.seg .on{background:var(--acc);color:var(--onacc)}
+.hero{position:relative;height:210px;overflow:hidden;background:var(--g1)}.hero svg,.hero img{width:100%;height:100%;object-fit:cover;display:block}
+.hero .sh{position:absolute;left:0;right:0;bottom:0;padding:34px 16px 12px;background:linear-gradient(transparent,rgba(5,10,25,.85));color:#fff;font-weight:800;font-size:17px}
+.hero .dl{position:absolute;right:10px;top:10px;background:rgba(5,10,25,.6);color:#fff}
+.box{margin:12px 16px;padding:14px;background:var(--card);border:1px solid var(--line);border-radius:14px}
+.box h4{margin:0 0 8px;font-size:15px;color:var(--acc)}.box p{font-size:14.5px}
+.box ul{margin:6px 0 0 18px;line-height:1.6;font-size:14.5px}
+.mat{display:flex;gap:8px;flex-wrap:wrap}.mat span{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:84px;padding:10px 6px;border-radius:12px;background:var(--card2);font-size:11.5px;text-align:center}.mat span i{font-style:normal;font-size:26px}
+.stk{position:sticky;bottom:0;padding:12px 16px;background:linear-gradient(transparent,var(--bg) 35%)}
+.good,.bad{margin:12px 16px;border-radius:14px;overflow:hidden;border:2px solid}
+.good{border-color:#16a34a}.bad{border-color:#dc2626}
+.good h4,.bad h4{margin:0;padding:10px 14px;color:#fff;font-size:15px}.good h4{background:#16a34a}.bad h4{background:#dc2626}
+.good ul,.bad ul{list-style:none;margin:0;padding:10px 14px;display:grid;gap:8px;font-size:14px}.good li::before{content:"✔ ";color:#16a34a;font-weight:800}.bad li::before{content:"✖ ";color:#dc2626;font-weight:800}
+.sch{margin:12px 16px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#0b1222}.sch svg{width:100%;display:block}
+.st{display:flex;gap:10px;align-items:flex-start;margin:8px 0;font-size:14px}.st b{flex:0 0 26px;height:26px;border-radius:50%;background:var(--acc);color:var(--onacc);display:flex;align-items:center;justify-content:center;font-size:13px}
+.qopt{display:flex;align-items:center;gap:12px;width:100%;padding:14px;margin:9px 0;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--txt);font-size:15px;text-align:left;cursor:pointer}
+.qopt i{flex:0 0 22px;height:22px;border-radius:50%;border:2px solid var(--mut)}
+.qopt.ok{border-color:#16a34a;background:#14532d;color:#fff}.qopt.ok i{background:#fff;border-color:#fff}
+.qopt.ko{border-color:#dc2626;background:#7f1d1d;color:#fff}
+.ring{width:132px;height:132px;border-radius:50%;margin:16px auto;display:flex;align-items:center;justify-content:center;flex-direction:column;position:relative}
+.ring b{font-size:30px}.ring small{color:var(--mut);font-size:11px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 16px}
+.kpi{padding:12px 6px;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:12px}.kpi b{display:block;font-size:22px}.kpi small{color:var(--mut);font-size:11.5px}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 16px}
+.pl{border-radius:14px;padding:12px;color:#fff;font-size:12.5px;display:flex;flex-direction:column;gap:4px}
+.pl b{font-size:15px}.pl .pr{font-size:19px;font-weight:800}.pl ul{margin:6px 0 0 14px;line-height:1.5}
+.pl.g0{background:#14532d}.pl.g1{background:#1e3a8a}.pl.g2{background:#581c87}.pl.g3{background:#92400e}
+.pl.cur{outline:3px solid #fff}
+.pm{display:flex;align-items:center;gap:12px;padding:12px;margin:8px 0;border:2px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;font-weight:700}
+.pm.on{border-color:var(--acc)}.pm i{width:34px;height:34px;border-radius:9px;font-style:normal;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800}
+.av{width:78px;height:78px;border-radius:50%;margin:16px auto 6px;background:var(--card2);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;border:3px solid var(--acc)}
+.av img{width:100%;height:100%;object-fit:cover}
+.cert{margin:12px 16px;padding:14px;border-radius:14px;background:linear-gradient(135deg,#fff7dd,#f5e6b3);color:#3b2f0b;border:2px solid #c9a227;text-align:center}
+.cert.lk{filter:grayscale(1);opacity:.55}
+.mrow{display:flex;align-items:center;gap:14px;padding:13px 14px;border-radius:10px;color:var(--txt);text-decoration:none;font-size:15px}
+.mrow.on{background:var(--acc);color:var(--onacc);font-weight:700}.mrow:active{background:var(--card2)}
+.mrow i{font-style:normal;width:24px;text-align:center}
+.rad{display:flex;align-items:center;gap:10px;padding:12px 4px;font-size:15px;cursor:pointer}.rad i{width:20px;height:20px;border-radius:50%;border:2px solid var(--mut)}.rad.on i{border-color:var(--acc);background:radial-gradient(var(--acc) 45%,transparent 50%)}
+.faq summary{padding:12px 4px;font-weight:700;cursor:pointer}.faq p{padding:0 4px 12px;color:var(--soft);font-size:14px}
+/* écran de démarrage et bienvenue */
+#splash{position:fixed;inset:0;z-index:100;background:radial-gradient(circle at 50% 30%,#16306b,#070d1f);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;transition:opacity .4s}
+#splash.out{opacity:0;pointer-events:none}
+#splash h1{font-size:34px;margin:10px 0 0}#splash h1 span{display:block;font-size:20px;font-weight:600;color:#cbd5e1;margin-top:2px}
+.sp-bar{width:220px;height:8px;border-radius:8px;background:#1e293b;margin-top:34px;overflow:hidden}.sp-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#818cf8)}
+.wel{min-height:100vh;display:flex;flex-direction:column;background:#070d1f;color:#fff}
+.wel .art{height:46vh;position:relative}.wel .art svg{width:100%;height:100%}
+.wel .art::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,#070d1f)}
+.wel .bd{padding:0 22px 26px;margin-top:-24px;position:relative;text-align:center}
+.wel h2{font-size:26px;line-height:1.15;margin:10px 0 6px}.wel p{color:#94a3b8;margin-bottom:12px}
+.wel .btn{margin-top:10px}.wel .out{background:none;border:2px solid #334155;color:#fff}
+/* administrateur */
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 16px}
+.adm .li .tx small{white-space:normal}
+.fld{display:block;margin:10px 16px 0;font-size:13px;color:var(--mut)}.fld input,.fld select,.fld textarea{margin-top:4px}
+.pillb{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:800;background:var(--card2);color:var(--mut);margin-left:6px}
+.pillb.g{background:#14532d;color:#86efac}.pillb.o{background:#7c2d12;color:#fdba74}.pillb.r{background:#7f1d1d;color:#fca5a5}
+.mini{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.mini button{flex:1;min-width:110px;padding:9px;border:none;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;background:var(--card2);color:var(--txt)}
+.mini .g{background:var(--grn);color:#04210f}.mini .r{background:#7f1d1d;color:#fff}
+#panel .tb{position:sticky;top:0}
+.pclose{display:none}
+.plans .pl:last-child{grid-column:1/-1}
+a.pm,a.rad{color:var(--txt);text-decoration:none}
+select{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--inp);color:var(--txt);font-size:16px;margin-top:4px;font-family:inherit}
+
+.chk{display:flex;gap:10px;align-items:flex-start;margin:0 0 14px;font-size:13.5px;line-height:1.45}.chk input{width:22px;height:22px;margin:2px 0 0;flex:0 0 22px}
 </style>
 <script>
-/* Thème jour / nuit appliqué avant l'affichage */
+/* Thème appliqué avant l'affichage *//* Thème jour / nuit appliqué avant l'affichage */
 (function(){var t=null;try{t=localStorage.getItem("ra_theme_mode")}catch(e){}
 if(t!=="light"&&t!=="dark")t=(window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches)?"light":"dark";
 document.documentElement.setAttribute("data-theme",t);})();
 </script>
 </head>
 <body>
-
-<header>
-  <button class="dots" onclick="go('parametres')" aria-label="Paramètres">⋮</button>
-  <h1>Répar'<span>Académie</span></h1>
-  <div class="hdr-r">
-    <button class="dots themebtn" id="themeBtn" onclick="toggleTheme()" aria-label="Mode jour / nuit"></button>
-    <button class="dots" onclick="go('options')" aria-label="Options">⋮</button>
-  </div>
-</header>
-
+<div id="splash"><svg width="92" height="92" viewBox="0 0 64 64" fill="none" stroke="#7dd3fc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="19" y="6" width="26" height="46" rx="5"/><path d="M28 10h8"/><circle cx="32" cy="36" r="6"/><path d="M32 26v4M32 42v4M22 36h4M38 36h4" stroke-width="2"/><path d="M46 46l8 8M10 54l10-10" stroke="#818cf8"/></svg><h1>Atelier Mobile<span>Répar Academy</span></h1><p style="margin-top:22px;color:#cbd5e1">Formation complète en réparation mobile</p><div class="sp-bar"><i></i></div><small id="sp-pct" style="margin-top:8px;color:#94a3b8">0%</small></div>
 <main id="app"></main>
-
-<nav class="bottom">
-  <a href="#/analyser" data-p="analyser"><b>🔍</b><span data-t="navAnalyze"></span></a>
-  <a href="#/lecons" data-p="lecons"><b>📘</b><span data-t="navLessons"></span></a>
-  <a href="#/abonnement" data-p="abonnement"><b>⭐</b><span data-t="navSub"></span></a>
-</nav>
-
+<nav class="bottom" id="nav"></nav>
 <div id="scrim" onclick="closePanel()"></div>
-<aside id="panel" role="dialog" aria-modal="true"><button class="pclose" onclick="closePanel()" aria-label="Fermer">✕</button><div id="panelBody"></div></aside>
+<aside id="panel" role="dialog" aria-modal="true"><div id="panelBody"></div></aside>
 <div class="toast" id="toast"></div>
 <div id="recaptcha-container"></div>
-
 <script>
 /* ============ RÉGLAGES À MODIFIER ============ */
 const PHONE = "22377370254";              // ton numéro Orange Money / Wave / WhatsApp
@@ -233,7 +317,7 @@ const FAULTS = {
 /* ---------- Retour en arrière ---------- */
 let navCount = 0;
 window.addEventListener("hashchange", () => { navCount++; });
-function goBack(){ if(navCount > 0){ navCount -= 2; history.back(); } else go("analyser"); }
+function goBack(){ if(navCount > 0){ navCount -= 2; history.back(); } else go("accueil"); }
 const BACKLINK = () => `<a class="back" href="javascript:goBack()">← ${tr("back").replace(/^[←\s]+/,"")}</a>`;
 
 /* ============ THÈME JOUR / NUIT ============ */
@@ -367,380 +451,7 @@ function fmtDate(t){ return new Date(t).toLocaleDateString(lang==="en"?"en-GB":"
 function toast(m){ const e=document.getElementById("toast"); e.textContent=m; e.style.display="block"; setTimeout(()=>e.style.display="none",2500); }
 function pushHist(key,item){ const h=S.get(key,[]); const f=h.filter(x=>!(item.id&&x.id===item.id)); f.unshift(item); S.set(key,f.slice(0,30)); }
 
-/* ============ NAVIGATION ============ */
-function go(p){ location.hash="#/"+p; }
-/* Pages qui s'ouvrent en fenêtre superposée sur l'écran en cours */
-const PANELS=["parametres","options","historique","langue","politique","abonnement","payer","compte","connexion","admin"];
-let lastBase="#/analyser";
-function closePanel(){ if(!document.body.classList.contains("pan")) return; location.hash=lastBase; }
-document.addEventListener("keydown",e=>{ if(e.key==="Escape") closePanel(); });
-window.addEventListener("hashchange",render);
 
-function render(){
- paintTheme();
- document.documentElement.lang = lang==="bm"?"bm":lang;
- document.querySelectorAll("[data-t]").forEach(e=>e.textContent=tr(e.dataset.t));
- const parts=(location.hash.replace("#/","")||"analyser").split("/");
- const page=parts[0], arg=parts[1];
- const views={connexion:vLoginPage,compte:vAccount,analyser:vAnalyze,lecons:vLessons,lecon:()=>vLesson(arg),abonnement:vSub,payer:()=>vPay(arg),pro:vPro,atelier:vAtelier,parametres:vSettings,historique:vHistory,langue:vLang,politique:()=>vPolicy(arg),options:vOptions,admin:vAdmin};
- const isPanel=PANELS.includes(page);
- const basePage=(isPanel?lastBase:location.hash).replace("#/","").split("/")[0]||"analyser";
- if(!isPanel) lastBase=location.hash||"#/analyser";
- document.body.classList.toggle("pan",isPanel);
- document.querySelectorAll("nav.bottom a").forEach(a=>a.classList.toggle("act",a.dataset.p===(isPanel?basePage:page)));
- const target=document.getElementById(isPanel?"panelBody":"app");
- const toTop=()=>{ if(isPanel) document.getElementById("panel").scrollTop=0; else window.scrollTo(0,0); };
- if(NEEDS_LOGIN.includes(page) && !user()){
-  if(isPanel) ensureBase(basePage);
-  target.innerHTML = BACKLINK() + (authReady() ? vLogin() : `<p class="mut" style="text-align:center;margin-top:40px"><span class="spin"></span> ${tr("loading")}</p>`);
-  toTop(); if(authReady()) bindLogin(); return;
- }
- let html=(views[page]||vAnalyze)();
- if(page!=="analyser" && views[page] && html && html.indexOf('class="back"')===-1) html=BACKLINK()+html;
- if(isPanel) ensureBase(basePage);
- target.innerHTML=html;
- toTop();
- if(!isPanel && (page==="analyser"||!views[page])) bindAnalyze();
- function ensureBase(bp){
-  const app=document.getElementById("app");
-  if(app.innerHTML.trim()) return;
-  const ok=views[bp] && !(NEEDS_LOGIN.includes(bp) && !user());
-  app.innerHTML=(ok?views[bp]:vAnalyze)();
-  if(!ok||bp==="analyser") bindAnalyze();
- }
-}
-
-/* ---------- Page d'accueil : ANALYSER LA PANNE ---------- */
-function usedKey(){ return uidKey("used") || "used"; }
-function vAnalyze(){
- const s=sub(), u=user(), left=Math.max(0,FREE_DIAGNOSTICS-S.get(usedKey(),0));
- const faults=FAULTS[lang]||FAULTS.fr;
- const status = s ? (s.admin ? "👑 "+tr("admin")+" – "+tr("subActive") : tr("subActive"))
-              : u ? tr("freeLeft")+left+" / "+FREE_DIAGNOSTICS
-              : `🎁 ${tr("freeAfterLogin")} – <a href="#/connexion" style="color:var(--acc)">${tr("login")}</a>`;
- return `<h2>🔍 ${tr("analyzeTitle")}</h2><p class="mut">${tr("analyzeSub")}</p>
- <div class="card">
-  <h3 style="margin-top:0">💡 ${tr("howTitle")}</h3>
-  <p class="mut" style="margin-bottom:6px">${tr("howIntro")}</p>
-  <div class="step"><div class="n">1</div><p>${tr("how1")}</p></div>
-  <div class="step"><div class="n">2</div><p>${tr("how2")}</p></div>
-  <div class="step"><div class="n">3</div><p>${tr("how3")}</p></div>
- </div>
- <div class="card">
-  <input id="model" placeholder="${tr("model")}">
-  <textarea id="desc" placeholder="${tr("describe")}"></textarea>
-  <p class="mut" style="margin:10px 0 6px;font-size:13px">${tr("suggest")}</p>
-  <div class="chips">${faults.map(f=>`<button type="button" class="chip">${f}</button>`).join("")}</div>
-  <label class="btn b-ghost" for="photo">${tr("photo")}</label>
-  <input type="file" id="photo" accept="image/*" capture="environment" hidden>
-  <img id="prev" class="prev" alt="">
-  <button class="btn b-acc" id="goAn">${tr("analyzeBtn")}</button>
-  <p class="mut" id="diagLeft" style="margin-top:10px">${status}</p>
- </div><div id="res"></div>`;
-}
-function bindAnalyze(){
- const ph=document.getElementById("photo"); if(!ph) return;
- let hasPhoto=false;
- document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{
-  const d=document.getElementById("desc"), t=c.textContent;
-  const parts=d.value.split(/\s*,\s*/).filter(Boolean);
-  const i=parts.indexOf(t);
-  if(i>-1){ parts.splice(i,1); c.classList.remove("on"); } else { parts.push(t); c.classList.add("on"); }
-  d.value=parts.join(", ");
- });
- ph.onchange=e=>{const f=e.target.files[0]; if(!f) return; hasPhoto=true; const r=new FileReader(); r.onload=x=>{const i=document.getElementById("prev"); i.src=x.target.result; i.style.display="block"}; r.readAsDataURL(f);};
- document.getElementById("goAn").onclick=()=>{
-  const d=document.getElementById("desc").value.trim(), model=document.getElementById("model").value.trim();
-  if(!d){toast(tr("needDesc"));return;}
-  if(!user()){ toast(tr("needLoginDiag")); try{sessionStorage.setItem("ra_after_login","analyser")}catch(e){} go("connexion"); return; }
-  const s=sub(), used=S.get(usedKey(),0);
-  if(!s && used>=FREE_DIAGNOSTICS){
-   document.getElementById("res").innerHTML=`<div class="warn">${tr("noFree")}</div><a class="btn b-org" href="#/abonnement">${tr("goPro")}</a>`; return;
-  }
-  const low=(d+" "+model).toLowerCase();
-  const rule=RULES.map(r=>({r,score:r.k.filter(k=>low.includes(k)).length})).sort((a,b)=>b.score-a.score)[0];
-  let html;
-  if(!rule||rule.score===0){ html=`<div class="card">${tr("unknown")}</div>`; }
-  else{
-   const r=rule.r, L=LESSONS.find(x=>x.id===r.lesson);
-   if(!s){ S.set(usedKey(),used+1); const dl=document.getElementById("diagLeft"); if(dl) dl.textContent=tr("freeLeft")+Math.max(0,FREE_DIAGNOSTICS-used-1)+" / "+FREE_DIAGNOSTICS; }
-   pushHist("hd",{t:Date.now(),q:(model?model+" – ":"")+d.slice(0,80),lesson:r.lesson,level:L.level});
-   html=`<div class="card result">
-    ${hasPhoto?`<p class="mut">${tr("photoNote")}</p>`:""}
-    <h3>${tr("probable")}</h3><p>${pick(r.c)}</p>
-    <h3>${tr("method")}</h3><ol>${pick(r.m).map(x=>`<li>${x}</li>`).join("")}</ol>
-    <h3>${tr("tools")}</h3><p>${r.o}</p>
-    <h3>${tr("related")}</h3>
-    <a class="row ${canOpen(L.level)?"":"locked"}" href="#/lecon/${L.id}"><span class="ic">${L.icon}</span><span class="tx">${pick(L.t)}</span>${canOpen(L.level)?lessonLevelLabel(L.level):"🔒"}</a>
-   </div>`;
-  }
-  document.getElementById("res").innerHTML=html;
-  const p=document.querySelector("main p.mut:last-of-type");
- };
-}
-
-/* ---------- Leçons publiques (débutants / gratuites seulement) ---------- */
-function vLessons(){
- const free=LESSONS.filter(l=>l.level==="free");
- return `<h2>📘 ${tr("lessonsTitle")}</h2><p class="mut">${tr("lessonsSub")}</p>
- ${free.map(l=>`<a class="row" href="#/lecon/${l.id}"><span class="ic">${l.icon}</span><span class="tx">${pick(l.t)}</span>${lessonLevelLabel("free")}</a>`).join("")}
- <a class="row" href="#/${sub()?"pro":"abonnement"}" style="border-color:var(--org)"><span class="ic">⭐</span><span class="tx">${tr("moreLessons")}<small>${tr("moreLessonsSub")}</small></span>›</a>`;
-}
-
-/* ---------- Une leçon ---------- */
-function vLesson(id){
- const L=LESSONS.find(x=>x.id===id); if(!L) return vLessons();
- const backTo=L.level==="free"?"lecons":L.level;
- if(!canOpen(L.level)){
-  return `<a class="back" href="#/${L.level==="free"?"lecons":"abonnement"}">${tr("back")}</a><div class="card" style="text-align:center"><div style="font-size:48px">🔒</div><h3>${pick(L.t)}</h3><p class="mut">${hadSub()?tr("expired"):tr("locked")}</p><a class="btn b-org" href="#/abonnement">${tr("goPro")}</a></div>`;
- }
- pushHist("hl",{id:L.id,t:Date.now()});
- const steps=pick(L.s);
- return `<a class="back" href="#/${backTo}">${tr("back")}</a>
- <h2>${L.icon} ${pick(L.t)}</h2>${lessonLevelLabel(L.level)}
- <figure class="schema">${SVG[L.svg]||""}<figcaption>${pick(L.t)}</figcaption></figure>
- ${L.w?`<div class="warn">⚠️ <b>${tr("safety")} :</b> ${pick(L.w)}</div>`:""}
- <h3>${tr("steps")}</h3>
- ${steps.map((x,i)=>`<div class="step"><div class="n">${i+1}</div><p>${x}</p></div>`).join("")}`;
-}
-
-
-/* ---------- Connexion (Google + numéro) ---------- */
-function vLoginPage(){
- if(user()) { setTimeout(()=>go("compte"),0); return ""; }
- if(!authReady()) return `<p class="mut" style="text-align:center;margin-top:40px"><span class="spin"></span> ${tr("loading")}</p>`;
- setTimeout(bindLogin,0); return vLogin();
-}
-function vLogin(){
- const inApp=/TikTok|musical_ly|Bytedance|FBAN|FBAV|Instagram|Snapchat/i.test(navigator.userAgent);
- if(!window.RA.configured) return `<h2>👤 ${tr("loginTitle")}</h2><div class="warn">${tr("notConfigured")}</div>`;
- const cc=[["+223","🇲🇱"],["+226","🇧🇫"],["+225","🇨🇮"],["+221","🇸🇳"],["+224","🇬🇳"],["+227","🇳🇪"],["+228","🇹🇬"],["+229","🇧🇯"],["+222","🇲🇷"],["+33","🇫🇷"]];
- let fromDiag=false; try{ fromDiag=sessionStorage.getItem("ra_after_login")==="analyser"; }catch(e){}
- return `<h2>👤 ${tr("loginTitle")}</h2><p class="mut">${fromDiag?"🎁 "+tr("loginForDiag"):tr("loginSub")}</p>
- <div class="card">
-  ${inApp?`<div class="warn" style="margin-top:0">⚠️ ${tr("inApp")}</div>`:""}
-  <button class="btn login-g" id="lgGoogle" style="margin-top:0">
-   <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
-   <span>${tr("google")}</span></button>
-  <div class="sep">${tr("orPhone")}</div>
-  <div id="lgStep1">
-   <label class="mut">${tr("phoneLbl")}</label>
-   <div class="prow"><select id="lgCc">${cc.map(c=>`<option value="${c[0]}">${c[1]} ${c[0]}</option>`).join("")}</select>
-   <input id="lgPhone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="70 00 00 00"></div>
-   <button class="btn b-acc" id="lgSend">${tr("sendCode")}</button>
-  </div>
-  <div id="lgStep2" style="display:none">
-   <label class="mut">${tr("codeLbl")}</label>
-   <p class="mut" id="lgTo" style="margin:4px 0 0"></p>
-   <input id="lgCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••">
-   <button class="btn b-acc" id="lgVerify">${tr("verify")}</button>
-   <div style="display:flex;justify-content:space-between;margin-top:6px">
-    <button class="lnk" id="lgChange">${tr("changeNum")}</button><button class="lnk" id="lgResend" disabled>${tr("resend")}</button></div>
-  </div>
-  <div class="lmsg" id="lgMsg" role="status"></div>
- </div>
- <p class="mut" style="text-align:center;font-size:12px"><a href="#/politique/conditions" style="color:var(--acc)">${tr("terms")}</a> · <a href="#/politique/confidentialite" style="color:var(--acc)">${tr("privacy")}</a></p>`;
-}
-let lgTimer=null;
-function bindLogin(){
- const $=id=>document.getElementById(id); if(!$("lgGoogle")) return;
- const msg=(t,c)=>{ const m=$("lgMsg"); if(!m) return; m.textContent=t||""; m.className="lmsg "+(c||""); };
- const busy=(b,on,label)=>{ if(!b||!b.isConnected) return; b.disabled=on; b.innerHTML=on?'<span class="spin"></span>':label; };
- const gl=$("lgGoogle").innerHTML;
- $("lgGoogle").onclick=async()=>{ msg(""); busy($("lgGoogle"),true); try{ await window.RA.google(); }catch(e){ msg(authErr(e),"err"); busy($("lgGoogle"),false,gl); } };
- const number=()=>{ let n=$("lgPhone").value.replace(/\D/g,""), c=$("lgCc").value;
-  if(n.startsWith("00")) return "+"+n.slice(2); if(n.startsWith(c.slice(1))&&n.length>9) return "+"+n; if(c==="+33"&&n.startsWith("0")) n=n.slice(1); return c+n; };
- const countdown=()=>{ let k=60; clearInterval(lgTimer); $("lgResend").disabled=true; $("lgResend").textContent=tr("resend")+" ("+k+"s)";
-  lgTimer=setInterval(()=>{ const b=$("lgResend"); if(!b){clearInterval(lgTimer);return;} k--; if(k<=0){clearInterval(lgTimer); b.disabled=false; b.textContent=tr("resend");} else b.textContent=tr("resend")+" ("+k+"s)"; },1000); };
- const sl=$("lgSend").innerHTML;
- const send=async()=>{ msg(""); const n=number(); if(n.replace(/\D/g,"").length<8){ msg(tr("badPhone"),"err"); return; }
-  busy($("lgSend"),true);
-  try{ await window.RA.sendCode(n); if(!$("lgStep1")) return; $("lgStep1").style.display="none"; $("lgStep2").style.display="block"; $("lgTo").textContent=tr("sentTo")+n; $("lgCode").value=""; $("lgCode").focus(); msg(tr("codeSent"),"ok"); countdown(); }
-  catch(e){ window.RA.resetCaptcha(); msg(authErr(e),"err"); }
-  busy($("lgSend"),false,sl); };
- $("lgSend").onclick=send; $("lgPhone").onkeydown=e=>{ if(e.key==="Enter") send(); };
- const vl=$("lgVerify").innerHTML;
- const verify=async()=>{ const c=$("lgCode").value.replace(/\D/g,""); if(c.length!==6){ msg(tr("badCodeLen"),"err"); return; }
-  busy($("lgVerify"),true); try{ await window.RA.verify(c); msg(tr("loggedIn"),"ok"); }catch(e){ msg(authErr(e),"err"); busy($("lgVerify"),false,vl); } };
- $("lgVerify").onclick=verify; $("lgCode").oninput=()=>{ if($("lgCode").value.replace(/\D/g,"").length===6) verify(); };
- $("lgResend").onclick=()=>{ window.RA.resetCaptcha(); $("lgStep2").style.display="none"; $("lgStep1").style.display="block"; send(); };
- $("lgChange").onclick=()=>{ clearInterval(lgTimer); window.RA.resetCaptcha(); $("lgStep2").style.display="none"; $("lgStep1").style.display="block"; msg(""); };
-}
-
-/* ---------- Mon compte ---------- */
-function vAccount(){
- const u=user(), s=sub();
- setTimeout(()=>{ const b=document.getElementById("lgOut"); if(b) b.onclick=async()=>{ await window.RA.logout(); toast(tr("loggedOut")); go("analyser"); }; },0);
- return `<a class="back" href="#/parametres">${tr("back")}</a><h2>👤 ${tr("myAccount")}</h2>
- <div class="card" style="text-align:center">
-  ${u.photoURL?`<img class="avatar" src="${esc(u.photoURL)}" alt="" referrerpolicy="no-referrer">`:`<span class="avatar">👤</span>`}
-  <h3 style="margin:10px 0 2px">${esc(u.displayName||u.phoneNumber||"")}</h3>
-  <p class="mut">${esc(u.email||u.phoneNumber||"")}</p>
- </div>
- <a class="row" href="#/abonnement"><span class="ic">⭐</span><span class="tx">${tr("account")}<small>${s?(s.admin?"👑 "+tr("admin"):tr("subscribed")+" "+(s.plan==="pro"?"Pro":"Atelier")+" – "+tr("until")+fmtDate(s.until)):tr("noPlan")}</small></span>›</a>
- <button class="btn b-ghost" id="lgOut">${tr("logout")}</button>`;
-}
-
-/* ---------- Abonnement ---------- */
-function vSub(){
- const s=sub();
- if(s && s.admin) return `<h2>⭐ ${tr("subTitle")}</h2>
-  <div class="plan on"><div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">👑 ${tr("admin")}</h3><span class="badge">✓ ${tr("subscribed")}</span></div>
-  <p style="margin-top:8px">${tr("adminSub")}</p>
-  <a class="btn b-grn" href="#/pro">${tr("openPro")}</a><a class="btn b-ghost" href="#/atelier">${tr("openAt")}</a></div>`;
- const card=(id,name,feat,openPage,openLabel)=>{
-  const on=s&&s.plan===id;
-  return `<div class="plan ${on?"on":""}">
-   <div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">${name}</h3>${on?`<span class="badge">✓ ${tr("subscribed")}</span>`:""}</div>
-   <div class="price">${PLANS[id].price.toLocaleString("fr-FR")} <small style="font-size:14px;color:var(--mut)">${tr("perMonth")}</small></div>
-   ${on?`<p class="mut">${tr("until")}${fmtDate(s.until)}</p>`:""}
-   <ul>${feat.map(f=>`<li>${f}</li>`).join("")}</ul>
-   ${on?`<a class="btn b-grn" href="#/${openPage}">${openLabel}</a>`:`<a class="btn b-org" href="#/payer/${id}">${tr("pay")}</a>`}
-  </div>`;
- };
- setTimeout(()=>{ if(window.RA&&RA.refresh) RA.refresh().then(ch=>{ if(ch) render(); }); loadMyReq(); },0);
- return `<h2>⭐ ${tr("subTitle")}</h2><p class="mut">${tr("subSub")}</p>
- <div id="reqBox"></div>
- ${card("pro","Pro",tr("proF"),"pro",tr("openPro"))}
- ${card("atelier","Atelier",tr("atF"),"atelier",tr("openAt"))}`;
-}
-
-async function loadMyReq(){
- const box=document.getElementById("reqBox"); if(!box||!window.RA||!RA.myRequests||!user()) return;
- try{
-  const l=(await RA.myRequests()).slice(0,3);
-  box.innerHTML=l.filter(r=>r.status!=="approved").map(r=>`<div class="warn">${r.status==="pending"?"⏳ "+tr("reqPending"):"❌ "+tr("reqRejected")}<br><small>${r.plan==="pro"?"Pro":"Atelier"} · ${Number(r.amount).toLocaleString("fr-FR")} FCFA · ${esc(r.reference||"")}</small></div>`).join("");
- }catch(e){}
-}
-/* ---------- Paiement ---------- */
-const CONSENT = {
- fr:"Je demande que l'accès à mon abonnement commence immédiatement, et je reconnais perdre mon droit de rétractation de 14 jours pour ce contenu numérique, dans les conditions prévues par la loi. J'ai lu la politique :",
- bm:"N b'a fɛ n ka abonnement ka daminɛ joona, ani n b'a dɔn ko n tɛ se ka segin n kɔ tile 14 kɔnɔ nin fɛn numérique in na, ka kɛɲɛ ni sariya ye. N ye nin sariya kalan :",
- en:"I request that access to my subscription start immediately, and I acknowledge that I lose my 14-day right of withdrawal for this digital content, as provided by law. I have read the policy:"
-};
-const CONSENT_ERR = {fr:"Coche la case d'accord avant d'activer.",bm:"Kare in sɛbɛn fɔlɔ sani i k'a daminɛ.",en:"Tick the consent box before activating."};
-function vPay(plan){
- if(!PLANS[plan]) return vSub();
- const name=plan==="pro"?"Pro":"Atelier", price=PLANS[plan].price;
- const msg=encodeURIComponent(`Bonjour, j'ai payé l'abonnement ${name} (${price} FCFA) sur Répar'Académie. Voici ma preuve de paiement :`);
- setTimeout(()=>{ const b=document.getElementById("act"); if(!b) return; b.onclick=async()=>{
-  if(!document.getElementById("consent").checked){toast(pick(CONSENT_ERR));return;}
-  const ref=document.getElementById("code").value.trim();
-  if(ref.length<4){toast(tr("needRef"));return;}
-  if(!user()){ go("abonnement"); return; }
-  b.disabled=true;
-  try{
-   await RA.sendPayment({plan,amount:price,reference:ref,payerPhone:document.getElementById("payer").value.trim()});
-   toast(tr("reqSent")); go("abonnement");
-  }catch(e){ b.disabled=false; toast(tr("reqErr")); }
- }},0);
- return `<a class="back" href="#/abonnement">${tr("back")}</a>
- <h2>${tr("payTitle")} ${name}</h2>
- <div class="card">
-  <div class="step"><div class="n">1</div><p>${tr("payStep1")}<br><b style="font-size:20px">+223 77 37 02 54</b><br><b>${price.toLocaleString("fr-FR")} FCFA</b> — Orange Money / Wave</p></div>
-  <div class="step"><div class="n">2</div><p>${tr("payStep2")}</p></div>
-  <a class="btn b-grn" href="https://wa.me/${PHONE}?text=${msg}" target="_blank">${tr("whatsapp")}</a>
-  <div class="step" style="margin-top:16px"><div class="n">3</div><p>${tr("payStep3")}</p></div>
-  <input id="code" placeholder="${tr("refPh")}">
-  <input id="payer" type="tel" placeholder="${tr("payerPh")}">
-  <label style="display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:14px;line-height:1.45">
-   <input type="checkbox" id="consent" style="width:22px;height:22px;margin:2px 0 0;flex:0 0 22px">
-   <span>${pick(CONSENT)} <a href="#/politique/remboursement" style="color:var(--acc)">${tr("refund")}</a></span>
-  </label>
-  <button class="btn b-acc" id="act">${tr("sendReq")}</button>
- </div>`;
-}
-
-/* ---------- Leçons pour Pro / Atelier ---------- */
-function lockedPage(){ return `<div class="card" style="text-align:center"><div style="font-size:48px">🔒</div><p>${hadSub()?tr("expired"):tr("locked")}</p><a class="btn b-org" href="#/abonnement">${tr("goPro")}</a></div>`; }
-function listLevel(level){ return LESSONS.filter(l=>l.level===level).map(l=>`<a class="row" href="#/lecon/${l.id}"><span class="ic">${l.icon}</span><span class="tx">${pick(l.t)}</span>${lessonLevelLabel(level)}</a>`).join(""); }
-function vPro(){ return `<a class="back" href="#/abonnement">${tr("back")}</a><h2>⭐ ${tr("proTitle")}</h2>${canOpen("pro")?listLevel("pro")+(canOpen("atelier")?`<a class="row" href="#/atelier" style="border-color:#a78bfa"><span class="ic">🔧</span><span class="tx">${tr("atTitle")}</span>›</a>`:""):lockedPage()}`; }
-function vAtelier(){ return `<a class="back" href="#/abonnement">${tr("back")}</a><h2>🔧 ${tr("atTitle")}</h2>${canOpen("atelier")?listLevel("atelier"):lockedPage()}`; }
-
-/* ---------- ESPACE ADMINISTRATEUR ---------- */
-const planName = p => p==="atelier" ? "Atelier" : "Pro";
-function vAdmin(){
- if(!isAdmin()) return `<div class="card"><p>Accès réservé à l'administrateur.</p></div>`;
- setTimeout(admLoad,0);
- return `<h2>👑 ${tr("admArea")}</h2>
- <h3>Demandes de paiement en attente</h3><div id="admReq"><p class="mut">Chargement…</p></div>
- <h3>Chercher un client</h3>
- <input id="admQ" placeholder="Email ou numéro (+223…)">
- <button class="btn b-acc" onclick="admFind()">Chercher</button>
- <div id="admUser"></div>`;
-}
-function admErr(e){ return `<p class="mut">Erreur : ${esc((e&&(e.code||e.message))||"inconnue")}. Vérifie que les règles Firestore sont publiées et que tu es connecté avec ton compte administrateur.</p>`; }
-async function admLoad(){
- const box=document.getElementById("admReq"); if(!box) return;
- if(!window.RA||!RA.pending){ box.innerHTML=admErr({message:"connexion indisponible"}); return; }
- try{
-  const list=await RA.pending(); window._adm={}; list.forEach(r=>window._adm[r.id]=r);
-  box.innerHTML=list.length ? list.map(r=>`<div class="card"><b>${planName(r.plan)}</b> · ${Number(r.amount).toLocaleString("fr-FR")} FCFA<br>
-   <span class="mut">${esc(r.email||r.phone||r.uid)}<br>Réf : ${esc(r.reference||"")} · Payé par : ${esc(r.payerPhone||"—")}<br>${r.createdAt?fmtDate(r.createdAt):""}</span>
-   <button class="btn b-grn" onclick="admApprove('${r.id}')">Valider et activer</button>
-   <button class="btn b-ghost" onclick="admReject('${r.id}')">Refuser</button></div>`).join("") : `<p class="mut">Aucune demande en attente.</p>`;
- }catch(e){ box.innerHTML=admErr(e); }
-}
-async function admApprove(id){ const r=(window._adm||{})[id]; if(!r||!PLANS[r.plan]) return;
- try{ await RA.approve(r,PLANS[r.plan].days); toast("Abonnement "+planName(r.plan)+" activé ✅"); }catch(e){ toast("Échec : "+((e&&e.message)||e)); }
- admLoad(); }
-async function admReject(id){ try{ await RA.reject(id); toast("Demande refusée"); }catch(e){ toast("Échec : "+((e&&e.message)||e)); } admLoad(); }
-async function admFind(){
- const q=(document.getElementById("admQ").value||"").trim(), box=document.getElementById("admUser"); if(!q) return;
- try{
-  const list=await RA.findUsers(q); window._admU={}; list.forEach(u=>window._admU[u.uid]=u);
-  box.innerHTML=list.length ? list.map(u=>`<div class="card"><b>${esc(u.name||u.email||u.phone)}</b><br><span class="mut">${esc(u.email||"")} ${esc(u.phone||"")}<br>${u.until>Date.now()?"Abonnement "+planName(u.plan)+" jusqu'au "+fmtDate(u.until):"Aucun abonnement actif"}</span>
-   <button class="btn b-grn" onclick="admSet('${u.uid}','pro')">+30 jours Pro</button>
-   <button class="btn b-grn" onclick="admSet('${u.uid}','atelier')">+30 jours Atelier</button>
-   <button class="btn b-ghost" onclick="admStop('${u.uid}')">Arrêter l'abonnement</button></div>`).join("") : `<p class="mut">Aucun client trouvé.</p>`;
- }catch(e){ box.innerHTML=admErr(e); }
-}
-async function admSet(uid,plan){ try{ await RA.setPlan(uid,plan,PLANS[plan].days); toast("Abonnement mis à jour ✅"); }catch(e){ toast("Échec : "+((e&&e.message)||e)); } admFind(); }
-async function admStop(uid){ try{ await RA.stopPlan(uid); toast("Abonnement arrêté"); }catch(e){ toast("Échec : "+((e&&e.message)||e)); } admFind(); }
-
-/* ---------- Menu gauche : PARAMÈTRES ---------- */
-function vSettings(){
- const r=(href,ic,label,sm)=>`<a class="row" href="#/${href}"><span class="ic">${ic}</span><span class="tx">${label}${sm?`<small>${sm}</small>`:""}</span>›</a>`;
- const u=user();
- return `<h2>⚙️ ${tr("settings")}</h2>
- ${u?r("compte","👤",tr("myAccount"),esc(u.displayName||u.phoneNumber||u.email||"")):r("connexion","👤",tr("login"),tr("loginSmall"))}
- <a class="row" href="javascript:void(0)" onclick="toggleTheme()"><span class="ic">${themeNow()==="light"?"☀️":"🌙"}</span><span class="tx">${tr("theme")}<small>${themeNow()==="light"?tr("dayMode"):tr("nightMode")} · ${tr("themeSub")}</small></span><span class="tag">${themeNow()==="light"?tr("nightMode"):tr("dayMode")}</span></a>
- ${isAdmin()?r("admin","👑",tr("admArea"),tr("admAreaSub")):""}
- ${r("historique","🕘",tr("history"),tr("historySub"))}
- ${r("langue","🌍",tr("language"),{fr:"Français",bm:"Bamanankan",en:"English"}[lang])}
- ${r("abonnement","⭐",tr("account"),sub()?(sub().admin?"👑 "+tr("admin"):tr("subscribed")+" – "+tr("until")+fmtDate(sub().until)):"")}
- <h3>📄</h3>
- ${r("politique/confidentialite","🔒",tr("privacy"))}
- ${r("politique/cookies","🍪",tr("cookies"))}
- ${r("politique/conditions","📜",tr("terms"))}
- ${r("politique/remboursement","💳",tr("refund"))}
- ${r("politique/mentions","⚖️",tr("legal"))}`;
-}
-
-/* ---------- Historique ---------- */
-function vHistory(){
- const hl=S.get("hl",[]), hd=S.get("hd",[]);
- const lessonRow=h=>{const L=LESSONS.find(x=>x.id===h.id); if(!L) return ""; const ok=canOpen(L.level);
-  return `<a class="row ${ok?"":"locked"}" href="#/lecon/${L.id}"><span class="ic">${ok?L.icon:"🔒"}</span><span class="tx">${pick(L.t)}<small>${fmtDate(h.t)}${ok?"":" · "+tr("expired")}</small></span>${lessonLevelLabel(L.level)}</a>`;};
- const diagRow=h=>{const L=LESSONS.find(x=>x.id===h.lesson); const ok=L?canOpen(L.level):true;
-  return `<a class="row ${ok?"":"locked"}" href="#/lecon/${h.lesson}"><span class="ic">${ok?"🔍":"🔒"}</span><span class="tx">${h.q}<small>${fmtDate(h.t)}</small></span></a>`;};
- setTimeout(()=>{const b=document.getElementById("clr"); if(b) b.onclick=()=>{S.set("hl",[]);S.set("hd",[]);render();}},0);
- return `<a class="back" href="#/parametres">${tr("back")}</a><h2>🕘 ${tr("history")}</h2>
- <h3>${tr("lastLessons")}</h3>${hl.length?hl.map(lessonRow).join(""):`<p class="mut">${tr("empty")}</p>`}
- <h3>${tr("lastDiag")}</h3>${hd.length?hd.map(diagRow).join(""):`<p class="mut">${tr("empty")}</p>`}
- ${(hl.length||hd.length)?`<button class="btn b-ghost" id="clr">${tr("clear")}</button>`:""}`;
-}
-
-/* ---------- Langue ---------- */
-function vLang(){
- setTimeout(()=>document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{lang=b.dataset.l;S.set("lang",lang);render();}),0);
- const b=(c,n)=>`<button data-l="${c}" class="${lang===c?"on":""}">${n}${lang===c?" ✓":""}</button>`;
- return `<a class="back" href="#/parametres">${tr("back")}</a><h2>🌍 ${tr("chooseLang")}</h2>
- <div class="lang">${b("fr","🇫🇷 Français")}${b("bm","🇲🇱 Bamanankan")}${b("en","🇬🇧 English")}</div>
- ${lang==="bm"?`<p class="mut" style="margin-top:12px">${tr("langNote")}</p>`:""}`;
-}
-
-/* ---------- Politiques (textes à coller ici après validation du juriste) ---------- */
 const POLICIES = {
  confidentialite:{title:"privacy",text:`
 <p class="mut">Répar'Académie — Dernière mise à jour : 10 novembre 2026</p>
@@ -910,29 +621,663 @@ const POLICIES = {
 `},
  mentions:{title:"legal",text:""}
 };
-function vPolicy(id){
- const p=POLICIES[id]; if(!p) return vSettings();
- return `<a class="back" href="#/parametres">${tr("back")}</a><h2>${tr(p.title)}</h2>
- <div class="card">${p.text?p.text:`<p class="mut">${tr("policySoon")}</p>`}</div>`;
+
+function usedKey(){ return uidKey("used") || "used"; }
+function vAnalyze(){
+ const s=sub(), u=user(), left=Math.max(0,FREE_DIAGNOSTICS-S.get(usedKey(),0));
+ const faults=FAULTS[lang]||FAULTS.fr;
+ const status = s ? (s.admin ? "👑 "+tr("admin")+" – "+tr("subActive") : tr("subActive"))
+              : u ? tr("freeLeft")+left+" / "+FREE_DIAGNOSTICS
+              : `🎁 ${tr("freeAfterLogin")} – <a href="#/connexion" style="color:var(--acc)">${tr("login")}</a>`;
+ return `<h2>🔍 ${tr("analyzeTitle")}</h2><p class="mut">${tr("analyzeSub")}</p>
+ <div class="card">
+  <h3 style="margin-top:0">💡 ${tr("howTitle")}</h3>
+  <p class="mut" style="margin-bottom:6px">${tr("howIntro")}</p>
+  <div class="step"><div class="n">1</div><p>${tr("how1")}</p></div>
+  <div class="step"><div class="n">2</div><p>${tr("how2")}</p></div>
+  <div class="step"><div class="n">3</div><p>${tr("how3")}</p></div>
+ </div>
+ <div class="card">
+  <input id="model" placeholder="${tr("model")}">
+  <textarea id="desc" placeholder="${tr("describe")}"></textarea>
+  <p class="mut" style="margin:10px 0 6px;font-size:13px">${tr("suggest")}</p>
+  <div class="chips">${faults.map(f=>`<button type="button" class="chip">${f}</button>`).join("")}</div>
+  <label class="btn b-ghost" for="photo">${tr("photo")}</label>
+  <input type="file" id="photo" accept="image/*" capture="environment" hidden>
+  <img id="prev" class="prev" alt="">
+  <button class="btn b-acc" id="goAn">${tr("analyzeBtn")}</button>
+  <p class="mut" id="diagLeft" style="margin-top:10px">${status}</p>
+ </div><div id="res"></div>`;
+}
+function bindAnalyze(){
+ const ph=document.getElementById("photo"); if(!ph) return;
+ let hasPhoto=false;
+ document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{
+  const d=document.getElementById("desc"), t=c.textContent;
+  const parts=d.value.split(/\s*,\s*/).filter(Boolean);
+  const i=parts.indexOf(t);
+  if(i>-1){ parts.splice(i,1); c.classList.remove("on"); } else { parts.push(t); c.classList.add("on"); }
+  d.value=parts.join(", ");
+ });
+ ph.onchange=e=>{const f=e.target.files[0]; if(!f) return; hasPhoto=true; const r=new FileReader(); r.onload=x=>{const i=document.getElementById("prev"); i.src=x.target.result; i.style.display="block"}; r.readAsDataURL(f);};
+ document.getElementById("goAn").onclick=()=>{
+  const d=document.getElementById("desc").value.trim(), model=document.getElementById("model").value.trim();
+  if(!d){toast(tr("needDesc"));return;}
+  if(!user()){ toast(tr("needLoginDiag")); try{sessionStorage.setItem("ra_after_login","analyser")}catch(e){} go("connexion"); return; }
+  const s=sub(), used=S.get(usedKey(),0);
+  if(!s && used>=FREE_DIAGNOSTICS){
+   document.getElementById("res").innerHTML=`<div class="warn">${tr("noFree")}</div><a class="btn b-org" href="#/abonnement">${tr("goPro")}</a>`; return;
+  }
+  const low=(d+" "+model).toLowerCase();
+  const rule=RULES.map(r=>({r,score:r.k.filter(k=>low.includes(k)).length})).sort((a,b)=>b.score-a.score)[0];
+  let html;
+  if(!rule||rule.score===0){ html=`<div class="card">${tr("unknown")}</div>`; }
+  else{
+   const r=rule.r, L=LESSONS.find(x=>x.id===r.lesson);
+   if(!s){ S.set(usedKey(),used+1); const dl=document.getElementById("diagLeft"); if(dl) dl.textContent=tr("freeLeft")+Math.max(0,FREE_DIAGNOSTICS-used-1)+" / "+FREE_DIAGNOSTICS; }
+   pushHist("hd",{t:Date.now(),q:(model?model+" – ":"")+d.slice(0,80),lesson:r.lesson,level:L.level});
+   html=`<div class="card result">
+    ${hasPhoto?`<p class="mut">${tr("photoNote")}</p>`:""}
+    <h3>${tr("probable")}</h3><p>${pick(r.c)}</p>
+    <h3>${tr("method")}</h3><ol>${pick(r.m).map(x=>`<li>${x}</li>`).join("")}</ol>
+    <h3>${tr("tools")}</h3><p>${r.o}</p>
+    <h3>${tr("related")}</h3>
+    <a class="row ${canOpen(L.level)?"":"locked"}" href="#/lecon/${L.id}"><span class="ic">${L.icon}</span><span class="tx">${pick(L.t)}</span>${canOpen(L.level)?lessonLevelLabel(L.level):"🔒"}</a>
+   </div>`;
+  }
+  document.getElementById("res").innerHTML=html;
+  const p=document.querySelector("main p.mut:last-of-type");
+ };
 }
 
-/* ---------- Menu droit : OPTIONS (Abonnement) ---------- */
-function vOptions(){
- return `<h2>${tr("options")}</h2>
- <a class="row" href="#/abonnement" style="border-color:var(--org)"><span class="ic">⭐</span><span class="tx">${tr("subTitle")}<small>${tr("goProSub")}</small></span>›</a>
- <a class="row" href="https://wa.me/${PHONE}" target="_blank"><span class="ic">💬</span><span class="tx">${tr("contact")}<small>WhatsApp +223 77 37 02 54</small></span>›</a>`;
+
+/* ---------- Connexion (Google + numéro) ---------- */
+function vLoginPage(){
+ if(user()) { setTimeout(()=>go("compte"),0); return ""; }
+ if(!authReady()) return `<p class="mut" style="text-align:center;margin-top:40px"><span class="spin"></span> ${tr("loading")}</p>`;
+ setTimeout(bindLogin,0); return vLogin();
+}
+function vLogin(){
+ const inApp=/TikTok|musical_ly|Bytedance|FBAN|FBAV|Instagram|Snapchat/i.test(navigator.userAgent);
+ if(!window.RA.configured) return `<h2>👤 ${tr("loginTitle")}</h2><div class="warn">${tr("notConfigured")}</div>`;
+ const cc=[["+223","🇲🇱"],["+226","🇧🇫"],["+225","🇨🇮"],["+221","🇸🇳"],["+224","🇬🇳"],["+227","🇳🇪"],["+228","🇹🇬"],["+229","🇧🇯"],["+222","🇲🇷"],["+33","🇫🇷"]];
+ let fromDiag=false; try{ fromDiag=sessionStorage.getItem("ra_after_login")==="analyser"; }catch(e){}
+ return `<h2>👤 ${tr("loginTitle")}</h2><p class="mut">${fromDiag?"🎁 "+tr("loginForDiag"):tr("loginSub")}</p>
+ <div class="card">
+  ${inApp?`<div class="warn" style="margin-top:0">⚠️ ${tr("inApp")}</div>`:""}
+  <label class="chk"><input type="checkbox" id="lgConsent" onchange="window._lgc=this.checked" ${window._lgc?"checked":""}><span>${tr("acceptHtml")}</span></label>
+  <button class="btn login-g" id="lgGoogle" style="margin-top:0">
+   <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+   <span>${tr("google")}</span></button>
+  <div class="sep">${tr("orPhone")}</div>
+  <div id="lgStep1">
+   <label class="mut">${tr("phoneLbl")}</label>
+   <div class="prow"><select id="lgCc">${cc.map(c=>`<option value="${c[0]}">${c[1]} ${c[0]}</option>`).join("")}</select>
+   <input id="lgPhone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="70 00 00 00"></div>
+   <button class="btn b-acc" id="lgSend">${tr("sendCode")}</button>
+  </div>
+  <div id="lgStep2" style="display:none">
+   <label class="mut">${tr("codeLbl")}</label>
+   <p class="mut" id="lgTo" style="margin:4px 0 0"></p>
+   <input id="lgCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••">
+   <button class="btn b-acc" id="lgVerify">${tr("verify")}</button>
+   <div style="display:flex;justify-content:space-between;margin-top:6px">
+    <button class="lnk" id="lgChange">${tr("changeNum")}</button><button class="lnk" id="lgResend" disabled>${tr("resend")}</button></div>
+  </div>
+  <div class="lmsg" id="lgMsg" role="status"></div>
+ </div>
+ <p class="mut" style="text-align:center;font-size:12px"><a href="#/politique/conditions" style="color:var(--acc)">${tr("terms")}</a> · <a href="#/politique/confidentialite" style="color:var(--acc)">${tr("privacy")}</a></p>`;
+}
+let lgTimer=null;
+function bindLogin(){
+ const $=id=>document.getElementById(id); if(!$("lgGoogle")) return;
+ const msg=(t,c)=>{ const m=$("lgMsg"); if(!m) return; m.textContent=t||""; m.className="lmsg "+(c||""); };
+ const busy=(b,on,label)=>{ if(!b||!b.isConnected) return; b.disabled=on; b.innerHTML=on?'<span class="spin"></span>':label; };
+ const okc=()=>{ const c=$("lgConsent"); if(c&&!c.checked){ msg(tr("needAccept"),"err"); return false; } try{ localStorage.setItem("ra_consent",String(Date.now())); }catch(e){} return true; };
+ const gl=$("lgGoogle").innerHTML;
+ $("lgGoogle").onclick=async()=>{ msg(""); if(!okc()) return; busy($("lgGoogle"),true); try{ await window.RA.google(); }catch(e){ msg(authErr(e),"err"); busy($("lgGoogle"),false,gl); } };
+ const number=()=>{ let n=$("lgPhone").value.replace(/\D/g,""), c=$("lgCc").value;
+  if(n.startsWith("00")) return "+"+n.slice(2); if(n.startsWith(c.slice(1))&&n.length>9) return "+"+n; if(c==="+33"&&n.startsWith("0")) n=n.slice(1); return c+n; };
+ const countdown=()=>{ let k=60; clearInterval(lgTimer); $("lgResend").disabled=true; $("lgResend").textContent=tr("resend")+" ("+k+"s)";
+  lgTimer=setInterval(()=>{ const b=$("lgResend"); if(!b){clearInterval(lgTimer);return;} k--; if(k<=0){clearInterval(lgTimer); b.disabled=false; b.textContent=tr("resend");} else b.textContent=tr("resend")+" ("+k+"s)"; },1000); };
+ const sl=$("lgSend").innerHTML;
+ const send=async()=>{ msg(""); if(!okc()) return; const n=number(); if(n.replace(/\D/g,"").length<8){ msg(tr("badPhone"),"err"); return; }
+  busy($("lgSend"),true);
+  try{ await window.RA.sendCode(n); if(!$("lgStep1")) return; $("lgStep1").style.display="none"; $("lgStep2").style.display="block"; $("lgTo").textContent=tr("sentTo")+n; $("lgCode").value=""; $("lgCode").focus(); msg(tr("codeSent"),"ok"); countdown(); }
+  catch(e){ window.RA.resetCaptcha(); msg(authErr(e),"err"); }
+  busy($("lgSend"),false,sl); };
+ $("lgSend").onclick=send; $("lgPhone").onkeydown=e=>{ if(e.key==="Enter") send(); };
+ const vl=$("lgVerify").innerHTML;
+ const verify=async()=>{ const c=$("lgCode").value.replace(/\D/g,""); if(c.length!==6){ msg(tr("badCodeLen"),"err"); return; }
+  busy($("lgVerify"),true); try{ await window.RA.verify(c); msg(tr("loggedIn"),"ok"); }catch(e){ msg(authErr(e),"err"); busy($("lgVerify"),false,vl); } };
+ $("lgVerify").onclick=verify; $("lgCode").oninput=()=>{ if($("lgCode").value.replace(/\D/g,"").length===6) verify(); };
+ $("lgResend").onclick=()=>{ window.RA.resetCaptcha(); $("lgStep2").style.display="none"; $("lgStep1").style.display="block"; send(); };
+ $("lgChange").onclick=()=>{ clearInterval(lgTimer); window.RA.resetCaptcha(); $("lgStep2").style.display="none"; $("lgStep1").style.display="block"; msg(""); };
 }
 
-render();
+/* ---------- Mon compte ---------- */
+function vAccount(){
+ const u=user(), s=sub();
+ setTimeout(()=>{ const b=document.getElementById("lgOut"); if(b) b.onclick=async()=>{ await window.RA.logout(); toast(tr("loggedOut")); go("analyser"); }; },0);
+ return `<a class="back" href="#/parametres">${tr("back")}</a><h2>👤 ${tr("myAccount")}</h2>
+ <div class="card" style="text-align:center">
+  ${u.photoURL?`<img class="avatar" src="${esc(u.photoURL)}" alt="" referrerpolicy="no-referrer">`:`<span class="avatar">👤</span>`}
+  <h3 style="margin:10px 0 2px">${esc(u.displayName||u.phoneNumber||"")}</h3>
+  <p class="mut">${esc(u.email||u.phoneNumber||"")}</p>
+ </div>
+ <a class="row" href="#/abonnement"><span class="ic">⭐</span><span class="tx">${tr("account")}<small>${s?(s.admin?"👑 "+tr("admin"):tr("subscribed")+" "+(s.plan==="pro"?"Pro":"Atelier")+" – "+tr("until")+fmtDate(s.until)):tr("noPlan")}</small></span>›</a>
+ <button class="btn b-ghost" id="lgOut">${tr("logout")}</button>`;
+}
+
+
+const CONSENT = {
+ fr:"Je demande que l'accès à mon abonnement commence immédiatement, et je reconnais perdre mon droit de rétractation de 14 jours pour ce contenu numérique, dans les conditions prévues par la loi. J'ai lu la politique :",
+ bm:"N b'a fɛ n ka abonnement ka daminɛ joona, ani n b'a dɔn ko n tɛ se ka segin n kɔ tile 14 kɔnɔ nin fɛn numérique in na, ka kɛɲɛ ni sariya ye. N ye nin sariya kalan :",
+ en:"I request that access to my subscription start immediately, and I acknowledge that I lose my 14-day right of withdrawal for this digital content, as provided by law. I have read the policy:"
+};
+const CONSENT_ERR = {fr:"Coche la case d'accord avant d'activer.",bm:"Kare in sɛbɛn fɔlɔ sani i k'a daminɛ.",en:"Tick the consent box before activating."};
+
+/* ---------- Langue ---------- */
+function vLang(){
+ setTimeout(()=>document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{lang=b.dataset.l;S.set("lang",lang);render();}),0);
+ const b=(c,n)=>`<button data-l="${c}" class="${lang===c?"on":""}">${n}${lang===c?" ✓":""}</button>`;
+ return `<a class="back" href="#/parametres">${tr("back")}</a><h2>🌍 ${tr("chooseLang")}</h2>
+ <div class="lang">${b("fr","🇫🇷 Français")}${b("bm","🇲🇱 Bamanankan")}${b("en","🇬🇧 English")}</div>
+ ${lang==="bm"?`<p class="mut" style="margin-top:12px">${tr("langNote")}</p>`:""}`;
+}
+
+
+
+Object.assign(T.fr,{dataPolicy:"Politique relative aux données",needAccept:"Coche la case pour accepter les politiques avant de te connecter.",
+ acceptHtml:'J\'ai lu et j\'accepte les <a href="#/politique/conditions" style="color:var(--acc)">conditions d\'utilisation</a>, la <a href="#/politique/confidentialite" style="color:var(--acc)">politique de confidentialité</a>, la <a href="#/politique/donnees" style="color:var(--acc)">politique relative aux données</a> et la <a href="#/politique/remboursement" style="color:var(--acc)">politique de remboursement</a> du site.'});
+Object.assign(T.en,{dataPolicy:"Data policy",needAccept:"Tick the box to accept the policies before signing in.",
+ acceptHtml:'I have read and accept the <a href="#/politique/conditions" style="color:var(--acc)">terms of use</a>, the <a href="#/politique/confidentialite" style="color:var(--acc)">privacy policy</a>, the <a href="#/politique/donnees" style="color:var(--acc)">data policy</a> and the <a href="#/politique/remboursement" style="color:var(--acc)">refund policy</a> of the site.'});
+if(!POLICIES.donnees) POLICIES.donnees={title:"dataPolicy",text:""};
+
+
+/* ================= NOUVELLE APPLICATION : données, illustrations, écrans ================= */
+const MS = [{"id":"microsoudure-01","n":1,"t":"Comprendre la micro-soudure","c":"Découverte de la micro-soudure","o":1,"v":"Débutant","a":"gratuit","i":"La micro-soudure consiste à souder et dessouder des composants minuscules sur la carte mère d'un téléphone, le plus souvent sous microscope. C'est elle qui permet de réparer une panne de charge, d'allumage ou d'écran quand changer la pièce ne suffit pas.","r":["Un composant CMS mesure parfois moins d'un millimètre (format 0201 : 0,6 × 0,3 mm)","On travaille avec un fer fin, une station à air chaud, du flux et un microscope","Une réparation réussie = bon diagnostic + bon geste + contrôle final","Le réparateur qui maîtrise la micro-soudure répare ce que les autres déclarent « mort »"],"e":["Observer la carte au microscope pour repérer le défaut","Identifier le composant suspect","Préparer la zone (nettoyage, protection)","Retirer et remplacer le composant","Contrôler et tester le téléphone"],"x":["Commencer sans diagnostic","Chauffer longtemps « au hasard »","Travailler sans grossissement"],"q":[{"question":"Qu'est-ce qui vient en premier dans une réparation ?","choix":["Le remplacement du composant","Le diagnostic","Le test final"],"reponse":1}],"d":25,"s":"Carte mère vue au microscope avec des flèches vers une résistance, un condensateur, un circuit intégré et un connecteur, chacun légendé."},{"id":"microsoudure-02","n":2,"t":"Soudure, brasage et dessoudage","c":"Découverte de la micro-soudure","o":1,"v":"Débutant","a":"gratuit","i":"En électronique, on dit soudure, mais il s'agit en réalité de brasage : l'étain fond et lie les pièces sans faire fondre le cuivre. Dessouder, c'est faire l'inverse proprement, sans abîmer la carte.","r":["L'étain fond vers 183 °C (avec plomb) ou 217 à 227 °C (sans plomb)","Le cuivre de la carte ne fond pas : il est « mouillé » par l'étain","Le flux nettoie l'oxyde et permet à l'étain de bien couler","Dessouder = chauffer tous les points en même temps puis soulever sans forcer"],"e":["Appliquer du flux sur la zone","Chauffer jusqu'à la fusion de l'étain","Pour souder : apporter l'étain et le laisser couler","Pour dessouder : chauffer toutes les pattes et soulever à la pince","Nettoyer les résidus de flux"],"x":["Arracher un composant avant la fusion complète (pastilles arrachées)","Souder sans flux","Confondre fusion de l'étain et surchauffe"],"q":[{"question":"Pendant le brasage, qu'est-ce qui fond ?","choix":["Le cuivre de la carte","La patte du composant","L'étain"],"reponse":2}],"d":25,"s":"Coupe d'un joint : pastille de cuivre, étain en forme de ménisque, patte du composant ; à côté, un joint raté en boule."},{"id":"microsoudure-03","n":3,"t":"Anatomie d'une carte mère","c":"Découverte de la micro-soudure","o":1,"v":"Débutant","a":"gratuit","i":"La carte mère d'un téléphone est un circuit imprimé multicouche (souvent 8 à 12 couches) qui relie tous les composants. Savoir s'y repérer fait gagner un temps énorme au diagnostic.","r":["Zones principales : processeur et mémoire, gestion d'alimentation (PMIC), charge, radio (RF), audio","Les connecteurs FPC relient l'écran, la batterie et les nappes","Les blindages métalliques protègent les zones sensibles","Les lettres R, C, L, D, U, J, F identifient chaque composant"],"e":["Repérer les connecteurs (batterie, écran, charge)","Localiser les blindages et ce qu'ils cachent","Identifier le PMIC et le circuit de charge","Suivre le chemin de l'alimentation, de la batterie vers la carte","Noter les zones souvent abîmées (charge, oxydation)"],"x":["Retirer un blindage sans raison","Confondre zone RF et zone d'alimentation","Oublier que les couches internes sont invisibles"],"q":[{"question":"Que signifie la lettre U sur une carte ?","choix":["Un circuit intégré","Une résistance","Un condensateur"],"reponse":0}],"d":25,"s":"Carte mère divisée en zones colorées : alimentation (rouge), processeur et mémoire (bleu), RF (vert), audio (jaune), connecteurs (gris)."},{"id":"microsoudure-04","n":4,"t":"Composants CMS et SMD","c":"Découverte de la micro-soudure","o":1,"v":"Débutant","a":"gratuit","i":"CMS (composant monté en surface) et SMD (surface mounted device) désignent la même chose : des composants soudés directement sur la surface de la carte, sans trous. Presque tout le téléphone est fait de CMS.","r":["Les tailles sont codées : 0603, 0402, 0201, 01005","Les circuits intégrés ont des boîtiers QFN (contacts sous les bords) ou BGA (billes sous la puce)","Plus le composant est petit, plus il chauffe vite","Les CMS se dessoudent à l'air chaud ou avec un fer très fin"],"e":["Estimer la taille du composant","Identifier son type (passif ou circuit intégré)","Choisir l'outil adapté (fer fin ou air chaud)","Adapter la température et le débit d'air","Préparer un composant identique en remplacement"],"x":["Débit d'air trop fort qui souffle les petits CMS","Confondre deux composants de même taille mais de valeur différente","Perdre un 0201 sur la table"],"q":[{"question":"Que signifie CMS ?","choix":["Circuit à montage simple","Composant monté en surface","Composant multi-soudure"],"reponse":1}],"d":25,"s":"Règle graduée avec les formats 0805, 0603, 0402, 0201 et 01005 côte à côte ; à côté, coupe d'un boîtier QFN et d'un boîtier BGA."},{"id":"microsoudure-05","n":5,"t":"Reconnaître les composants","c":"Découverte de la micro-soudure","o":1,"v":"Débutant","a":"gratuit","i":"Avant de remplacer quoi que ce soit, il faut savoir ce qu'on regarde. La forme, la couleur et le repère imprimé sur la carte permettent de reconnaître chaque composant.","r":["Résistance (R) : souvent noire, parfois avec un code chiffré","Condensateur (C) : beige, marron ou gris, sans marquage","Bobine (L) : plus grosse, grise ou noire","Diode (D) : un trait indique la cathode","Fusible (F) : souvent près de l'entrée de charge"],"e":["Lire le repère sur la carte (R105, C22, L3…)","Comparer la forme et la couleur","Vérifier sur le schéma ou le plan de la carte","Mesurer au multimètre en cas de doute","Photographier l'emplacement avant de retirer"],"x":["Se fier uniquement à la couleur","Inverser une diode","Remplacer un condensateur par une résistance de même taille"],"q":[{"question":"Que repère le trait sur une diode ?","choix":["L'anode","La valeur","La cathode"],"reponse":2}],"d":25,"s":"Planche d'identification : photo agrandie de chaque composant (R, C, L, D, F, U) avec son symbole électronique à côté."},{"id":"microsoudure-06","n":6,"t":"Installer un poste de micro-soudure","c":"Outils, matériaux et sécurité","o":2,"v":"Débutant","a":"pro","i":"Un bon poste de travail évite les erreurs, la fatigue et les composants perdus. Il n'a pas besoin d'être cher, mais il doit être bien organisé.","r":["Table stable et bien éclairée, couverte d'un tapis en silicone résistant à la chaleur","Microscope au centre, fer d'un côté, air chaud de l'autre","Aspiration ou ventilation des fumées de flux","Boîtes à compartiments pour les vis et petites pièces"],"e":["Placer le tapis et le bracelet antistatique","Installer le microscope à hauteur des yeux","Disposer fer, air chaud et support de carte","Ranger flux, étain, tresse et pinces à portée de main","Vérifier la prise de terre et l'état des câbles"],"x":["Travailler sur une table encombrée","Placer la station à air chaud près des câbles","Oublier la ventilation"],"q":[{"question":"À quoi sert le tapis en silicone ?","choix":["Résister à la chaleur et protéger la carte","Augmenter la température","Remplacer le flux"],"reponse":0}],"d":25,"s":"Vue de dessus d'un poste : microscope, tapis, fer, air chaud, support de carte, extracteur de fumée et boîtes de rangement."},{"id":"microsoudure-07","n":7,"t":"Utiliser le fer et ses pannes","c":"Outils, matériaux et sécurité","o":2,"v":"Débutant","a":"pro","i":"Le fer à souder est l'outil de base. Sa panne (la pointe) doit être adaptée au travail et toujours bien étamée.","r":["Pointe conique fine pour les petits points, panne biseautée ou « couteau » pour tirer l'étain","Une station réglable (type T12 ou JBC) est préférable à un fer simple","Température habituelle : 300 à 350 °C","Une panne étamée (brillante) transmet bien la chaleur"],"e":["Allumer et régler la température","Nettoyer la panne dans la laine de laiton","Étamer la pointe avec un peu d'étain","Poser la panne pour chauffer pastille et patte en même temps","Reposer le fer sur son support et réétamer avant de l'éteindre"],"x":["Monter à 450 °C « pour aller vite »","Laisser la panne sèche et noire","Appuyer fort sur la carte"],"q":[{"question":"Pourquoi étamer la panne ?","choix":["Pour la refroidir","Pour bien transmettre la chaleur et la protéger","Pour la rendre magnétique"],"reponse":1}],"d":25,"s":"Les trois formes de pannes (conique, biseautée, couteau) avec un exemple d'usage sous chacune."},{"id":"microsoudure-08","n":8,"t":"Découvrir la station à air chaud","c":"Outils, matériaux et sécurité","o":2,"v":"Débutant","a":"pro","i":"La station à air chaud chauffe une zone avec un souffle d'air réglable. Elle sert à retirer les CMS, les circuits intégrés et les connecteurs.","r":["Deux réglages : température (souvent 300 à 380 °C) et débit d'air","Les buses changent la largeur du jet","La distance de la buse change fortement la chaleur reçue","Toujours chauffer en mouvement circulaire"],"e":["Choisir la buse adaptée","Régler la température et le débit","Préchauffer la zone de loin","Rapprocher la buse en mouvements circulaires","Soulever le composant dès que l'étain est liquide"],"x":["Débit trop fort qui fait voler les petits composants","Chauffer un point fixe","Oublier que la chaleur atteint aussi les composants voisins"],"q":[{"question":"Pourquoi chauffer en mouvement circulaire ?","choix":["Pour souffler la poussière","Pour refroidir la buse","Pour répartir la chaleur"],"reponse":2}],"d":25,"s":"Buse au-dessus d'une puce, cône d'air chaud dessiné, distance de 1 à 2 cm indiquée et mouvement circulaire fléché."},{"id":"microsoudure-09","n":9,"t":"Utiliser le microscope","c":"Outils, matériaux et sécurité","o":2,"v":"Débutant","a":"pro","i":"À l'œil nu, on ne voit ni un pont d'étain ni une piste fissurée. Le microscope stéréo est indispensable en micro-soudure.","r":["Microscope stéréo à deux oculaires, grossissement de 7x à 45x","Distance de travail d'au moins 10 cm pour passer les outils","Éclairage LED en anneau","Les microscopes numériques sur écran sont moins pratiques pour souder"],"e":["Régler l'écart entre les yeux","Faire la mise au point au plus faible grossissement","Centrer la zone de travail","Augmenter le grossissement pour inspecter","Revenir à un grossissement faible pour souder"],"x":["Souder au grossissement maximal (champ trop petit)","Mauvais éclairage qui cache les défauts","Carte posée sans support stable"],"q":[{"question":"Quel grossissement pour souder confortablement ?","choix":["Faible à moyen","Toujours le maximum","Aucun"],"reponse":0}],"d":25,"s":"Microscope stéréo légendé : oculaires, molette de zoom, mise au point, éclairage en anneau, distance de travail."},{"id":"microsoudure-10","n":10,"t":"Flux, étain et alliages","c":"Outils, matériaux et sécurité","o":2,"v":"Débutant","a":"pro","i":"Le flux et l'étain sont les consommables qui font la qualité d'une soudure. Un mauvais flux donne de mauvais résultats, même avec un excellent fer.","r":["Étain avec plomb (Sn63/Pb37) : fond à 183 °C, plus facile à travailler","Étain sans plomb (SAC305) : fond vers 217 à 220 °C","Fil fin de 0,3 à 0,5 mm pour la micro-soudure","Flux en gel « no-clean » pour la plupart des travaux","Pâte basse température (environ 138 °C) pour protéger une puce sensible"],"e":["Choisir l'étain selon la carte","Appliquer une petite quantité de flux","Souder","Nettoyer les résidus à l'alcool isopropylique (IPA) à 99 %","Refermer les flacons après usage"],"x":["Mettre trop de flux","Utiliser un décapant de plomberie","Laisser des résidus sur la carte"],"q":[{"question":"Avec quoi nettoie-t-on les résidus de flux ?","choix":["L'eau du robinet","L'alcool isopropylique","L'huile"],"reponse":1}],"d":25,"s":"Tableau visuel : alliage, température de fusion, usage conseillé, avec une bobine d'étain et une seringue de flux dessinées."},{"id":"microsoudure-11","n":11,"t":"Tresse, pompe et outils","c":"Outils, matériaux et sécurité","o":2,"v":"Débutant","a":"pro","i":"Retirer l'excès d'étain et manipuler les composants demande quelques outils simples mais précis.","r":["Tresse à dessouder : cuivre tressé qui absorbe l'étain","Pompe à dessouder : utile pour les trous traversants","Pinces brucelles fines et courbes, antistatiques","Spatule, pinceau, scalpel et ruban Kapton"],"e":["Ajouter du flux sur la tresse","Poser la tresse sur l'étain","Chauffer à travers la tresse","Retirer la tresse et le fer ensemble","Couper la partie usée de la tresse"],"x":["Frotter la tresse (cela arrache les pastilles)","Laisser la tresse refroidir collée à la carte","Pinces magnétiques qui attirent les composants"],"q":[{"question":"Comment retirer la tresse ?","choix":["Après refroidissement","En la frottant","En même temps que le fer, sans tirer à froid"],"reponse":2}],"d":25,"s":"Tresse posée sur des pastilles, panne au-dessus, flèche montrant l'étain qui remonte dans la tresse."},{"id":"microsoudure-12","n":12,"t":"Sécurité ESD et batteries lithium-ion","c":"Outils, matériaux et sécurité","o":2,"v":"Débutant","a":"pro","i":"L'électricité statique peut détruire un composant sans qu'on le voie, et les batteries lithium peuvent prendre feu. Ces deux risques se gèrent avec des règles simples.","r":["ESD : décharge électrostatique de plusieurs milliers de volts","Porter un bracelet antistatique relié à la terre","Débrancher la batterie avant toute soudure","Batterie gonflée, percée ou chauffée = risque d'incendie","Garder un bac de sable ou un extincteur à portée de main"],"e":["Mettre le bracelet antistatique","Ouvrir le téléphone et débrancher la batterie en premier","Éloigner la batterie de la zone de chauffe","Travailler dans un endroit aéré","Stocker les batteries abîmées dans un contenant ininflammable"],"x":["Chauffer près d'une batterie","Percer une batterie avec un outil métallique","Souder avec la batterie branchée"],"q":[{"question":"Que faire en premier après avoir ouvert un téléphone ?","choix":["Débrancher la batterie","Chauffer la carte","Nettoyer l'écran"],"reponse":0}],"d":25,"s":"Deux illustrations : bracelet antistatique relié à la terre ; batterie débranchée et isolée avec le symbole de danger feu."},{"id":"microsoudure-13","n":13,"t":"Tension, courant et résistance","c":"Bases d'électricité et d'électronique","o":3,"v":"Débutant","a":"pro","i":"Trois grandeurs expliquent presque toutes les pannes : la tension, le courant et la résistance. Les comprendre, c'est comprendre ce que mesure le multimètre.","r":["Tension (volts, V) : la « pression » électrique","Courant (ampères, A) : la quantité qui circule","Résistance (ohms, Ω) : ce qui freine le courant","Une batterie de téléphone donne environ 3,7 à 4,4 V"],"e":["Repérer la source de tension (batterie, chargeur)","Suivre le chemin du courant","Identifier ce qui consomme","Comparer avec une carte saine","Mesurer pour confirmer"],"x":["Confondre tension et courant","Penser qu'une tension présente veut dire que tout fonctionne","Mesurer sans connaître l'unité"],"q":[{"question":"En quelle unité se mesure le courant ?","choix":["Le volt","L'ampère","L'ohm"],"reponse":1}],"d":25,"s":"Analogie du château d'eau : hauteur de l'eau = tension, débit = courant, tuyau étroit = résistance."},{"id":"microsoudure-14","n":14,"t":"Loi d'Ohm et puissance","c":"Bases d'électricité et d'électronique","o":3,"v":"Débutant","a":"pro","i":"La loi d'Ohm relie la tension, le courant et la résistance. Elle permet de comprendre une consommation anormale ou un composant qui chauffe.","r":["U = R × I (tension = résistance × courant)","I = U / R et R = U / I","Puissance : P = U × I, en watts","Exemple : 5 V et 2 A donnent 10 W"],"e":["Noter les deux valeurs connues","Choisir la bonne formule","Calculer","Comparer au comportement réel","Conclure : consommation normale ou court-circuit"],"x":["Mélanger les unités (mA et A)","Oublier de convertir les kΩ","Croire qu'une résistance très faible est toujours bonne"],"q":[{"question":"Avec 5 V et 2 A, quelle est la puissance ?","choix":["7 W","2,5 W","10 W"],"reponse":2}],"d":25,"s":"Triangle U au-dessus de R × I, avec un exemple chiffré à côté."},{"id":"microsoudure-15","n":15,"t":"Courant continu et polarité","c":"Bases d'électricité et d'électronique","o":3,"v":"Débutant","a":"pro","i":"Un téléphone fonctionne en courant continu (DC). Le sens du courant compte : on parle de polarité, et une erreur peut détruire la carte.","r":["Le plus (+) et le moins (-, appelé masse ou GND)","Le chargeur transforme le courant alternatif du secteur en courant continu","Une inversion de polarité peut griller un composant","La masse est commune à toute la carte"],"e":["Repérer le + et le - de la batterie","Placer la pointe noire du multimètre à la masse","Mesurer sur la ligne voulue","Respecter la polarité en alimentant la carte","Vérifier deux fois avant de brancher"],"x":["Inverser les fils d'une alimentation","Confondre masse et ligne positive","Brancher une batterie à l'envers"],"q":[{"question":"Comment appelle-t-on le moins sur une carte ?","choix":["La masse (GND)","La phase","Le neutre"],"reponse":0}],"d":25,"s":"Connecteur de batterie avec les bornes +, - et NTC repérées, et pointes du multimètre bien placées."},{"id":"microsoudure-16","n":16,"t":"Résistances","c":"Bases d'électricité et d'électronique","o":3,"v":"Débutant","a":"pro","i":"La résistance limite le courant ou crée une tension précise. Une carte de téléphone en contient des centaines.","r":["Valeur en ohms, marquée par un code (103 = 10 kΩ) ou sans marquage","Une résistance de 0 Ω sert de pont","Une résistance coupée bloque une fonction","La mesure n'est exacte que hors circuit : sur carte, on compare"],"e":["Identifier la résistance (R)","La mesurer en mode ohms","Comparer à la valeur attendue sur le schéma","La remplacer si elle est ouverte ou brûlée","Revérifier après remplacement"],"x":["Croire que la mesure sur carte est toujours exacte","Remplacer par une valeur au hasard","Chauffer trop et décoller les pastilles"],"q":[{"question":"Que vaut le code 103 ?","choix":["103 Ω","10 kΩ","1 kΩ"],"reponse":1}],"d":25,"s":"Résistance CMS agrandie avec le code 103 et le calcul 10 × 10³ = 10 000 Ω."},{"id":"microsoudure-17","n":17,"t":"Condensateurs","c":"Bases d'électricité et d'électronique","o":3,"v":"Débutant","a":"pro","i":"Le condensateur stocke un peu d'énergie et filtre les tensions. C'est le composant le plus nombreux et une cause très fréquente de court-circuit.","r":["Valeur en farads (souvent µF ou nF)","Il est souvent placé entre une ligne et la masse","En court-circuit, il met la ligne à la masse","Les condensateurs CMS n'ont aucun marquage"],"e":["Repérer la ligne en court-circuit","Repérer les condensateurs sur cette ligne","Chercher celui qui chauffe","Le retirer et remesurer la ligne","Le remplacer par un identique"],"x":["Retirer tous les condensateurs au hasard","Prendre une tension de service trop faible","Oublier de remesurer après le retrait"],"q":[{"question":"Où est souvent relié un condensateur ?","choix":["Entre deux écrans","Au processeur uniquement","Entre une ligne et la masse"],"reponse":2}],"d":25,"s":"Ligne d'alimentation avec plusieurs condensateurs reliés à la masse, l'un d'eux en rouge « en court-circuit »."},{"id":"microsoudure-18","n":18,"t":"Diodes et LED","c":"Bases d'électricité et d'électronique","o":3,"v":"Débutant","a":"pro","i":"La diode laisse passer le courant dans un seul sens. Elle protège la carte contre les surtensions et les erreurs de branchement.","r":["Anode et cathode : le trait indique la cathode","Diode TVS : protège contre les surtensions, souvent près du connecteur de charge","LED : diode qui émet de la lumière (rétroéclairage, flash)","Le mode diode du multimètre permet de la tester"],"e":["Repérer la diode et son sens","Mesurer en mode diode dans les deux sens","Valeur dans un sens et rien dans l'autre = bonne diode","Valeur proche de 0 dans les deux sens = diode en court","Remplacer en respectant le sens"],"x":["Souder la diode à l'envers","Confondre diode et résistance","Retirer une diode de protection sans la remplacer"],"q":[{"question":"Une diode en bon état laisse passer le courant…","choix":["Dans un seul sens","Dans les deux sens","Jamais"],"reponse":0}],"d":25,"s":"Symbole de diode, composant CMS avec son trait, flèche du sens du courant et deux mesures (passante et bloquée)."},{"id":"microsoudure-19","n":19,"t":"Bobines et fusibles","c":"Bases d'électricité et d'électronique","o":3,"v":"Débutant","a":"pro","i":"La bobine stocke l'énergie dans un champ magnétique, surtout dans les circuits d'alimentation. Le fusible coupe le circuit quand le courant devient trop fort.","r":["Bobine (L) : résistance presque nulle","Une bobine ouverte coupe toute une alimentation","Fusible (F) : doit montrer une continuité","Un fusible coupé signale un problème plus loin dans le circuit"],"e":["Mesurer la continuité de la bobine","Mesurer la continuité du fusible","Si le fusible est coupé, chercher la cause avant de le remplacer","Remplacer par la même valeur","Tester la consommation après"],"x":["Remplacer un fusible par un fil","Ignorer la cause d'un fusible grillé","Fissurer une bobine en serrant trop la pince"],"q":[{"question":"Un fusible grillé indique…","choix":["Que tout va bien","Un problème à chercher plus loin dans le circuit","Une batterie neuve"],"reponse":1}],"d":25,"s":"Alimentation simplifiée : PMIC → bobine → condensateur → sortie ; fusible près du connecteur de charge."},{"id":"microsoudure-20","n":20,"t":"Préparer et entretenir la panne","c":"Premiers gestes de soudure","o":4,"v":"Débutant","a":"pro","i":"Une panne propre et étamée fait la moitié du travail. Une panne oxydée refuse l'étain et chauffe mal.","r":["Nettoyer dans la laine de laiton plutôt qu'avec une éponge trop mouillée","Étamer avant chaque usage et avant d'éteindre","Un réactivateur de panne restaure une pointe noircie","Ne jamais limer une panne"],"e":["Chauffer à la température de travail","Nettoyer dans la laine de laiton","Déposer un peu d'étain neuf","Essuyer l'excès","Réétamer avant de poser le fer sur son support"],"x":["Laisser le fer chauffer à vide pendant des heures","Gratter la panne au cutter","Éteindre le fer avec une panne sèche"],"q":[{"question":"Que faire avant d'éteindre le fer ?","choix":["La refroidir à l'eau","La limer","Réétamer la panne"],"reponse":2}],"d":25,"s":"Avant / après : panne noire et oxydée, puis panne brillante et étamée."},{"id":"microsoudure-21","n":21,"t":"Soudure traversante","c":"Premiers gestes de soudure","o":4,"v":"Débutant","a":"pro","i":"Les composants traversants passent à travers la carte. On les trouve sur les anciens téléphones, les accessoires et les cartes d'entraînement : c'est idéal pour apprendre le geste.","r":["Chauffer à la fois la pastille et la patte","Apporter l'étain sur le joint, pas sur la panne","Le bon joint ressemble à un petit volcan brillant","Temps de chauffe : 2 à 3 secondes"],"e":["Insérer le composant et plier légèrement les pattes","Poser la panne contre la patte et la pastille","Apporter l'étain","Retirer l'étain, puis le fer","Couper la patte au-dessus du joint"],"x":["Joint en boule (pas assez chauffé)","Trop d'étain","Bouger la patte pendant le refroidissement"],"q":[{"question":"Où apporte-t-on l'étain ?","choix":["Sur le joint chauffé","Sur la panne seulement","Sous la carte froide"],"reponse":0}],"d":25,"s":"Coupe d'un joint traversant réussi (forme conique) et de trois ratés : boule, joint froid, excès d'étain."},{"id":"microsoudure-22","n":22,"t":"Soudure CMS","c":"Premiers gestes de soudure","o":4,"v":"Débutant","a":"pro","i":"Souder un CMS demande de la précision : on fixe d'abord un côté, puis l'autre.","r":["Pré-étamer une seule pastille","Placer le composant à la pince","Souder le premier côté, puis le second","Le flux aide l'étain à bien se répartir"],"e":["Mettre un peu de flux","Déposer un point d'étain sur une pastille","Positionner le composant et chauffer ce point","Souder l'autre côté","Reprendre le premier côté si besoin et contrôler"],"x":["Composant qui se dresse (effet « pierre tombale »)","Trop d'étain qui crée un pont","Composant décalé"],"q":[{"question":"Comment appelle-t-on un composant qui se redresse ?","choix":["Effet pont","Effet pierre tombale","Effet boule"],"reponse":1}],"d":25,"s":"Trois étapes pour une résistance 0402 : pré-étamage, pose, soudure du second côté ; à côté, l'effet pierre tombale."},{"id":"microsoudure-23","n":23,"t":"Dessouder un composant traversant","c":"Premiers gestes de soudure","o":4,"v":"Débutant","a":"pro","i":"Retirer un composant traversant sans abîmer les trous demande de vider l'étain proprement.","r":["Pompe à dessouder ou tresse","Ajouter de l'étain frais aide l'ancien à fondre","Chauffer et aspirer au bon moment","Ne jamais forcer une patte encore soudée"],"e":["Ajouter du flux et un peu d'étain","Chauffer le joint","Aspirer à la pompe","Répéter pour chaque patte","Retirer le composant et nettoyer les trous"],"x":["Tirer sur le composant à froid","Surchauffer et décoller la pastille","Laisser de l'étain dans le trou"],"q":[{"question":"Pourquoi ajouter de l'étain frais ?","choix":["Pour solidifier","Pour isoler","Pour mieux faire fondre l'ancien"],"reponse":2}],"d":25,"s":"Pompe à dessouder posée sur un joint chauffé, avec la flèche d'aspiration."},{"id":"microsoudure-24","n":24,"t":"Dessouder un composant CMS","c":"Premiers gestes de soudure","o":4,"v":"Débutant","a":"pro","i":"Pour retirer un petit CMS, il faut chauffer ses deux côtés en même temps, à l'air chaud ou avec le fer.","r":["Air chaud : petite buse et débit faible","Astuce au fer : déposer une grosse goutte d'étain qui recouvre les deux côtés","Le flux protège et aide la fusion","Soulever dès que l'étain est liquide"],"e":["Appliquer du flux","Chauffer à l'air chaud en cercle, ou couvrir d'étain avec le fer","Soulever doucement à la pince","Nettoyer les pastilles à la tresse","Inspecter les pastilles"],"x":["Pousser le composant sur le côté","Souffler les composants voisins","Arracher une pastille"],"q":[{"question":"Quand soulève-t-on le composant ?","choix":["Quand l'étain est liquide des deux côtés","Dès le début","Après refroidissement"],"reponse":0}],"d":25,"s":"Résistance CMS recouverte d'une goutte d'étain chauffée par la panne ; à côté, air chaud avec une petite buse."},{"id":"microsoudure-25","n":25,"t":"Nettoyer et inspecter une soudure","c":"Premiers gestes de soudure","o":4,"v":"Débutant","a":"pro","i":"Une soudure n'est pas terminée tant qu'elle n'est pas nettoyée et contrôlée au microscope.","r":["Un bon joint est lisse, bien étalé et brillant (étain au plomb)","L'étain sans plomb est un peu plus mat : c'est normal","Rechercher ponts, billes d'étain et joints froids","Nettoyer à l'IPA avec une brosse douce"],"e":["Laisser refroidir","Nettoyer les résidus de flux à l'IPA","Inspecter chaque joint au microscope","Vérifier l'absence de pont et de bille","Mesurer la continuité si nécessaire"],"x":["Laisser des billes d'étain sous un blindage","Brosser trop fort et déplacer un composant","Valider sans contrôle au microscope"],"q":[{"question":"Qu'est-ce qu'une bille d'étain ?","choix":["Un bon joint","Une petite boule libre qui peut créer un court-circuit","Un composant"],"reponse":1}],"d":25,"s":"Grille d'inspection : joint bon, joint froid, pont, bille d'étain, excès, manque d'étain."},{"id":"microsoudure-26","n":26,"t":"Choisir une panne et une température","c":"Maîtrise des équipements","o":5,"v":"Intermédiaire","a":"atelier","i":"La bonne panne et la bonne température dépendent de la taille de la zone à chauffer, pas de l'envie d'aller vite.","r":["Petite pastille : pointe fine, 300 à 330 °C","Grande surface ou masse : panne large, 350 à 380 °C","Une pointe trop fine sur une masse ne chauffe pas assez","Augmenter la taille de la panne avant d'augmenter la température"],"e":["Évaluer la zone (petit CMS ou masse)","Choisir la panne","Régler la température","Faire un essai court","Ajuster si l'étain fond mal"],"x":["Tout faire à 400 °C","Garder la pointe fine pour tout","Chauffer longtemps faute de bonne panne"],"q":[{"question":"L'étain fond mal sur une masse : que faire d'abord ?","choix":["Monter à 450 °C","Appuyer plus fort","Prendre une panne plus large"],"reponse":2}],"d":25,"s":"Tableau visuel : type de travail → panne → température conseillée."},{"id":"microsoudure-27","n":27,"t":"Régler le débit d'air chaud","c":"Maîtrise des équipements","o":5,"v":"Intermédiaire","a":"atelier","i":"Le débit d'air compte autant que la température. Mal réglé, il souffle les composants ou chauffe mal.","r":["Débit faible pour les petits CMS","Débit moyen pour les circuits intégrés et les connecteurs","Plus la buse est proche, plus la chaleur est forte","Tester ses réglages sur une vieille carte avant une réparation client"],"e":["Choisir la buse","Commencer avec un débit faible","Chauffer à 2 ou 3 cm, puis rapprocher","Observer si les composants voisins bougent","Ajuster le débit"],"x":["Débit maximal sur un 0201","Buse trop large qui chauffe toute la carte","Ne jamais tester ses réglages"],"q":[{"question":"Pour un petit CMS, quel débit ?","choix":["Faible","Maximal","Aucun"],"reponse":0}],"d":25,"s":"Trois buses avec trois débits, flèches d'air plus ou moins fortes, et composants qui restent en place ou s'envolent."},{"id":"microsoudure-28","n":28,"t":"Préparer une carte avant intervention","c":"Maîtrise des équipements","o":5,"v":"Intermédiaire","a":"atelier","i":"Une carte bien préparée évite les accidents : pièces fondues, nappes brûlées, composants perdus.","r":["Retirer batterie, nappes, caméras et pièces en plastique","Fixer la carte sur un support","Nettoyer la zone de travail","Photographier avant toute modification"],"e":["Débrancher la batterie","Retirer les pièces amovibles proches","Fixer la carte sur le support","Photographier la zone","Nettoyer à l'IPA"],"x":["Laisser une caméra à côté de la zone chauffée","Carte qui bouge pendant la soudure","Ne rien photographier"],"q":[{"question":"Pourquoi photographier avant ?","choix":["Pour la publicité","Pour savoir remettre chaque composant","Pour chauffer moins"],"reponse":1}],"d":25,"s":"Carte sur son support de fixation, éléments retirés listés à côté, appareil photo pour la photo « avant »."},{"id":"microsoudure-29","n":29,"t":"Protéger les composants thermosensibles","c":"Maîtrise des équipements","o":5,"v":"Intermédiaire","a":"atelier","i":"Certains éléments supportent mal la chaleur : connecteurs en plastique, caméras, micros et puces voisines.","r":["Ruban Kapton pour masquer","Papier aluminium plié en bouclier","Pâte de protection thermique","Préchauffeur sous la carte pour réduire le temps de chauffe"],"e":["Repérer les composants sensibles proches","Les recouvrir de Kapton ou d'aluminium","Préchauffer si possible","Travailler vite et en cercle","Retirer les protections et contrôler"],"x":["Faire fondre le plastique d'un connecteur","Aluminium qui touche des contacts sous tension","Oublier de retirer la protection"],"q":[{"question":"À quoi sert le ruban Kapton ?","choix":["Coller l'écran","Conduire le courant","Protéger de la chaleur"],"reponse":2}],"d":25,"s":"Zone chauffée entourée d'un bouclier en aluminium, avec du Kapton sur un connecteur voisin."},{"id":"microsoudure-30","n":30,"t":"Contrôler la qualité d'un joint","c":"Maîtrise des équipements","o":5,"v":"Intermédiaire","a":"atelier","i":"Contrôler, c'est vérifier le joint à l'œil et à la mesure. Un joint qui « tient » n'est pas forcément bon.","r":["Forme : ménisque creusé, sans boule","Aspect : lisse et régulier","Mesure : continuité entre la patte et la piste","Test léger à la pince, sans forcer"],"e":["Inspecter au microscope sous plusieurs angles","Mesurer la continuité","Vérifier l'absence de court-circuit à la masse","Tester la fonction","Noter le résultat"],"x":["Valider à l'œil seulement","Forcer avec la pince et casser le joint","Oublier les joints voisins"],"q":[{"question":"Un bon joint a une forme…","choix":["Creusée en ménisque","En boule","Plate et terne"],"reponse":0}],"d":25,"s":"Joint vu de côté : bon (creusé), insuffisant, excès ; multimètre en mode continuité."},{"id":"microsoudure-31","n":31,"t":"Remplacer une résistance CMS","c":"Remplacement de composants","o":6,"v":"Intermédiaire","a":"atelier","i":"Une résistance coupée peut bloquer l'allumage, la charge ou l'éclairage. Son remplacement est un exercice de base.","r":["Trouver la valeur sur le schéma","Prendre la même taille et la même valeur","Une résistance récupérée sur un téléphone donneur fait l'affaire","Contrôler la valeur avant de souder"],"e":["Mesurer et confirmer la panne","Retirer l'ancienne résistance","Nettoyer les pastilles","Souder la nouvelle","Mesurer et tester"],"x":["Remplacer par une valeur au hasard","Confondre avec un condensateur","Arracher les pastilles"],"q":[{"question":"Où trouver la bonne valeur ?","choix":["Au hasard","Sur le schéma de la carte","Sur la batterie"],"reponse":1}],"d":25,"s":"Avant / après sur une résistance 0402, avec la valeur affichée sur le multimètre."},{"id":"microsoudure-32","n":32,"t":"Remplacer un condensateur CMS","c":"Remplacement de composants","o":6,"v":"Intermédiaire","a":"atelier","i":"Un condensateur en court-circuit met une ligne d'alimentation à la masse. Le remplacer règle souvent un téléphone qui ne s'allume plus.","r":["Même capacité et tension de service égale ou supérieure","Le retirer permet de vérifier s'il est la cause","Ne pas laisser sa place vide sans savoir à quoi il sert","Remesurer la ligne après le retrait"],"e":["Localiser le condensateur fautif","Le retirer","Mesurer : le court-circuit a-t-il disparu ?","Souder un condensateur identique","Tester l'allumage"],"x":["Tension de service trop faible","Laisser définitivement la place vide","Remplacer le mauvais condensateur"],"q":[{"question":"Après le retrait du condensateur, que vérifie-t-on ?","choix":["La couleur de l'écran","La batterie","Si le court-circuit a disparu"],"reponse":2}],"d":25,"s":"Ligne VBAT en court-circuit, condensateur chaud repéré en rouge, mesure avant et après."},{"id":"microsoudure-33","n":33,"t":"Remplacer une diode ou LED","c":"Remplacement de composants","o":6,"v":"Intermédiaire","a":"atelier","i":"Les diodes de protection et les LED de rétroéclairage ou de flash se remplacent avec la même méthode, en respectant le sens.","r":["Repérer la cathode avant de retirer","Photographier l'orientation","Une LED s'allume faiblement en mode diode","Une diode de protection en court met la ligne à la masse"],"e":["Noter le sens","Retirer la diode","Tester la nouvelle en mode diode","La souder dans le bon sens","Tester la fonction"],"x":["Inverser le sens","Trop chauffer une LED","Oublier de noter l'orientation"],"q":[{"question":"Que faut-il noter avant de retirer une diode ?","choix":["Son sens","Sa couleur seulement","Sa date"],"reponse":0}],"d":25,"s":"Diode avec le repère de cathode sur la carte et sur le composant, flèches d'alignement."},{"id":"microsoudure-34","n":34,"t":"Remplacer une bobine ou un fusible","c":"Remplacement de composants","o":6,"v":"Intermédiaire","a":"atelier","i":"Une bobine ouverte ou un fusible grillé coupe toute une alimentation. Ces composants sont plus gros et demandent plus de chaleur.","r":["Composants massifs : chauffer un peu plus longtemps","Fusible : trouver pourquoi il a grillé","Bobine : même valeur et même taille","Mesurer la continuité après remplacement"],"e":["Confirmer la coupure à la mesure","Rechercher la cause (court-circuit plus loin)","Retirer le composant","Souder le nouveau","Tester la consommation"],"x":["Remplacer le fusible sans chercher la cause","Fissurer la bobine avec la pince","Trop chauffer les composants voisins"],"q":[{"question":"Que faire avant de remplacer un fusible grillé ?","choix":["Rien","Chercher la cause","Changer l'écran"],"reponse":1}],"d":25,"s":"Chemin : connecteur de charge → fusible → bobine → circuit de charge, avec le point de coupure marqué."},{"id":"microsoudure-35","n":35,"t":"Remplacer un connecteur FPC","c":"Remplacement de composants","o":6,"v":"Intermédiaire","a":"atelier","i":"Le connecteur FPC reçoit les nappes (écran, batterie, caméra). Une broche abîmée donne un écran noir ou des lignes.","r":["Corps en plastique fragile : protéger et chauffer vite","Beaucoup de broches très fines","Bien aligner avant de souder","Air chaud avec flux, ou fer fin pour les retouches"],"e":["Protéger les composants autour","Chauffer et retirer l'ancien connecteur","Nettoyer et égaliser les pastilles","Aligner le nouveau connecteur et souder","Contrôler chaque broche au microscope"],"x":["Plastique fondu","Ponts entre broches","Connecteur décalé d'une broche"],"q":[{"question":"Quel est le risque principal en chauffant un FPC ?","choix":["Casser l'écran","Vider la batterie","Faire fondre le plastique"],"reponse":2}],"d":25,"s":"Connecteur FPC vu de dessus, alignement des broches sur les pastilles, zone de protection autour."},{"id":"microsoudure-36","n":36,"t":"Remplacer un connecteur de charge","c":"Remplacement de composants","o":6,"v":"Intermédiaire","a":"atelier","i":"Le connecteur de charge (USB-C, micro-USB, Lightning) est très sollicité. Quand il est soudé à la carte, son remplacement se fait en micro-soudure.","r":["Pattes de fixation massives : beaucoup de chaleur nécessaire","Ajouter de l'étain basse température facilite le retrait","Protéger les composants proches","Vérifier ensuite la charge et le transfert de données"],"e":["Ajouter du flux et de l'étain basse température","Chauffer à l'air chaud et retirer","Nettoyer les pastilles","Souder le nouveau connecteur bien aligné","Tester la charge et les données"],"x":["Arracher les pastilles des pattes de fixation","Ponts entre les broches de données","Connecteur mal aligné qui gêne le câble"],"q":[{"question":"Pourquoi ajouter de l'étain basse température ?","choix":["Pour faire fondre plus facilement l'ancien","Pour isoler","Pour décorer"],"reponse":0}],"d":25,"s":"Connecteur USB-C en coupe : broches de signal, pattes de fixation et pastilles."},{"id":"microsoudure-37","n":37,"t":"Contrôler un microphone","c":"Remplacement de composants","o":6,"v":"Intermédiaire","a":"atelier","i":"Sur les téléphones récents, le micro est soudé sur la carte. Avant de le remplacer, il faut vérifier qu'il est vraiment en panne.","r":["Tester en appel, en haut-parleur et en mémo vocal","Nettoyer l'orifice du micro","Vérifier l'alimentation du micro","Le micro craint la chaleur et l'eau"],"e":["Tester le micro dans plusieurs applications","Nettoyer l'orifice","Mesurer l'alimentation et la masse","Remplacer si nécessaire avec un préchauffage doux","Retester"],"x":["Boucher l'orifice avec du flux","Chauffer trop longtemps","Confondre panne de micro et panne logicielle"],"q":[{"question":"Que tester en premier ?","choix":["Le changer directement","Le micro dans plusieurs applications","La batterie"],"reponse":1}],"d":25,"s":"Micro en coupe avec son orifice, ses pastilles et la liste des tests à faire."},{"id":"microsoudure-38","n":38,"t":"Préparer les surfaces et les plages","c":"Réparation des pistes","o":7,"v":"Intermédiaire","a":"atelier","i":"Une piste ou une pastille ne se répare que sur une surface propre et sans oxyde.","r":["Retirer le vernis vert isolant avec un scalpel ou un stylo en fibre de verre","Nettoyer à l'IPA","Étamer le cuivre mis à nu","Travailler au microscope"],"e":["Repérer la zone","Gratter délicatement le vernis","Nettoyer","Appliquer du flux et étamer","Contrôler la surface"],"x":["Gratter trop profond jusqu'à la couche suivante","Laisser de l'oxyde","Étamer avec trop d'étain"],"q":[{"question":"Qu'enlève-t-on avant d'étamer une piste ?","choix":["Le cuivre","La masse","Le vernis isolant"],"reponse":2}],"d":25,"s":"Piste en coupe : vernis, cuivre, support ; flèche de grattage."},{"id":"microsoudure-39","n":39,"t":"Réaliser une reprise de soudure","c":"Réparation des pistes","o":7,"v":"Intermédiaire","a":"atelier","i":"Une reprise consiste à refaire fondre une soudure fissurée ou froide pour qu'elle reprenne correctement.","r":["Toujours ajouter du flux avant de chauffer","Ajouter un peu d'étain frais si nécessaire","Fréquent après une chute ou un choc","Une reprise ne remplace pas toujours un vrai remplacement"],"e":["Identifier le joint suspect","Ajouter du flux","Chauffer jusqu'à la fusion","Laisser refroidir sans bouger","Contrôler et tester"],"x":["Chauffer sans flux","Chauffer toute la carte au lieu du joint","Croire qu'une reprise règle tout"],"q":[{"question":"Qu'ajoute-t-on avant une reprise ?","choix":["Du flux","De l'eau","De la colle"],"reponse":0}],"d":25,"s":"Joint fissuré avant, joint refait après."},{"id":"microsoudure-40","n":40,"t":"Supprimer un pont d'étain","c":"Réparation des pistes","o":7,"v":"Intermédiaire","a":"atelier","i":"Un pont d'étain relie deux points qui ne devraient pas l'être et crée un court-circuit.","r":["Avec du flux, l'étain se sépare souvent tout seul","Tirer l'étain avec la panne vers l'extérieur","Tresse pour enlever l'excès","Contrôler au microscope"],"e":["Ajouter du flux","Passer la panne propre entre les points","Si besoin, absorber l'excès avec la tresse","Nettoyer","Vérifier qu'il n'y a plus de continuité entre les deux points"],"x":["Ajouter encore de l'étain","Gratter au scalpel et abîmer les pistes","Oublier les ponts cachés sous le composant"],"q":[{"question":"Qu'est-ce qu'un pont d'étain ?","choix":["Une piste réparée","Un court-circuit entre deux points","Un fusible"],"reponse":1}],"d":25,"s":"Deux broches reliées par un pont, flux ajouté, panne qui tire l'étain, résultat séparé."},{"id":"microsoudure-41","n":41,"t":"Réparer une pastille endommagée","c":"Réparation des pistes","o":7,"v":"Intermédiaire","a":"atelier","i":"Une pastille arrachée arrive souvent après un retrait forcé. On peut la reconstruire avec un fil fin et de la colle UV.","r":["Retrouver la piste qui partait de la pastille","Gratter le vernis pour mettre le cuivre à nu","Utiliser un fil très fin (0,02 à 0,1 mm)","Fixer et isoler avec une colle UV"],"e":["Localiser la piste d'origine","Gratter et étamer la piste","Souder un fil fin jusqu'à l'emplacement de la pastille","Fixer à la colle UV","Souder le composant"],"x":["Fil trop épais","Colle UV sur la zone à souder","Oublier de vérifier la continuité"],"q":[{"question":"Avec quoi fixe-t-on le fil de réparation ?","choix":["Du scotch","Du flux","Une colle UV"],"reponse":2}],"d":25,"s":"Pastille arrachée, piste grattée, fil reliant la piste au composant, colle UV autour."},{"id":"microsoudure-42","n":42,"t":"Réparer une piste coupée","c":"Réparation des pistes","o":7,"v":"Intermédiaire","a":"atelier","i":"Une piste peut être coupée par une chute, une rayure ou la corrosion. On la relie avec un fil fin.","r":["Trouver les deux extrémités saines","Confirmer la coupure au multimètre","Utiliser un fil émaillé fin","Isoler la réparation"],"e":["Repérer la coupure au microscope","Gratter le vernis de chaque côté","Étamer les deux extrémités","Souder un fil entre les deux","Isoler à la colle UV et mesurer"],"x":["Fil qui touche une autre piste","Fil trop long","Ne pas remesurer"],"q":[{"question":"Comment confirmer une coupure ?","choix":["Au multimètre, en continuité","À l'œil seulement","En chauffant"],"reponse":0}],"d":25,"s":"Piste coupée, deux extrémités grattées, fil soudé en pont, colle UV."},{"id":"microsoudure-43","n":43,"t":"Réaliser un jumper","c":"Réparation des pistes","o":7,"v":"Intermédiaire","a":"atelier","i":"Un jumper (pont de fil) relie deux points éloignés quand la piste d'origine est détruite ou cachée dans une couche interne.","r":["Trouver deux points sur la même ligne grâce au schéma","Choisir le chemin le plus court","Fil émaillé isolé","Fixer le fil le long de la carte"],"e":["Identifier la ligne coupée sur le schéma","Choisir les deux points de soudure","Préparer un fil à la bonne longueur","Souder les deux extrémités","Fixer et isoler à la colle UV"],"x":["Relier deux lignes différentes","Fil qui empêche le blindage ou la coque de fermer","Fil qui passe sur une zone chaude"],"q":[{"question":"Quand utilise-t-on un jumper ?","choix":["Pour décorer","Quand la piste d'origine est détruite ou inaccessible","Pour charger plus vite"],"reponse":1}],"d":25,"s":"Carte avec deux points de test reliés par un fil jaune suivant un chemin fléché sans obstacle."},{"id":"microsoudure-44","n":44,"t":"Inspecter une réparation","c":"Réparation des pistes","o":7,"v":"Intermédiaire","a":"atelier","i":"Une réparation de piste doit être solide, isolée et vérifiée avant de remonter le téléphone.","r":["Continuité entre les deux extrémités","Aucun court-circuit avec les pistes voisines ni la masse","Fil bien fixé","Test de la fonction réparée"],"e":["Inspecter au microscope","Mesurer la continuité","Vérifier l'isolement vers la masse","Tester la fonction (charge, écran…)","Remonter et retester"],"x":["Remonter sans mesurer","Colle UV mal durcie","Fil qui se décolle à la fermeture"],"q":[{"question":"Que vérifie-t-on vers la masse ?","choix":["La température","La luminosité","L'absence de court-circuit"],"reponse":2}],"d":25,"s":"Liste de contrôle illustrée : continuité, isolement, fixation, fonction, avec des coches."},{"id":"microsoudure-45","n":45,"t":"Prendre en main le multimètre","c":"Diagnostic électronique","o":8,"v":"Intermédiaire","a":"atelier","i":"Le multimètre est l'outil de diagnostic principal. Bien l'utiliser évite de remplacer des pièces au hasard.","r":["Modes utiles : tension continue (V⎓), résistance (Ω), continuité (bip), mode diode","Cordon noir sur COM, rouge sur V/Ω","Pointes fines ou aiguilles pour les CMS","Vérifier la pile du multimètre"],"e":["Brancher les cordons correctement","Choisir le mode","Toucher les deux pointes ensemble (0 Ω ou bip)","Poser la pointe noire à la masse","Lire et noter la mesure"],"x":["Mesurer une tension en mode ohms","Pointes trop grosses qui créent des courts-circuits","Ne pas noter les valeurs"],"q":[{"question":"Où se branche le cordon noir ?","choix":["Sur COM","Sur 10A","Sur V/Ω"],"reponse":0}],"d":25,"s":"Multimètre légendé : sélecteur, bornes COM et V/Ω, écran, symboles des modes."},{"id":"microsoudure-46","n":46,"t":"Mesurer la continuité","c":"Diagnostic électronique","o":8,"v":"Intermédiaire","a":"atelier","i":"La continuité vérifie que le courant peut passer entre deux points : piste, fusible, nappe.","r":["Le multimètre bipe quand la résistance est très faible","Toujours carte hors tension","Utile pour pistes, fusibles, bobines et nappes","Pas de bip = coupure"],"e":["Débrancher la batterie","Choisir le mode continuité","Toucher les deux extrémités","Écouter le bip","Conclure et noter"],"x":["Mesurer avec la batterie branchée","Confondre un bip vers la masse avec une bonne liaison","Pointes qui glissent"],"q":[{"question":"Pour mesurer la continuité, la carte doit être…","choix":["Sous tension","Hors tension","En charge"],"reponse":1}],"d":25,"s":"Piste avec les deux pointes du multimètre et un bip, puis une piste coupée sans bip."},{"id":"microsoudure-47","n":47,"t":"Mesurer une résistance sur carte","c":"Diagnostic électronique","o":8,"v":"Intermédiaire","a":"atelier","i":"Sur carte, une mesure est influencée par les composants autour, donc la valeur peut être faussée. On compare surtout avec une carte saine.","r":["Comparer avec une carte saine du même modèle","Mesurer une ligne vers la masse pour avoir une valeur de référence","Valeur proche de 0 Ω = court-circuit probable","Valeur infinie = ligne ouverte"],"e":["Débrancher la batterie","Choisir le mode ohms","Pointe noire à la masse, rouge sur la ligne","Comparer avec la valeur de référence","Conclure"],"x":["Prendre la valeur sur carte pour exacte","Mesurer juste après avoir débranché (condensateurs chargés)","Comparer avec un autre modèle"],"q":[{"question":"Une ligne à presque 0 Ω vers la masse indique…","choix":["Une ligne parfaite","Une ligne coupée","Un court-circuit probable"],"reponse":2}],"d":25,"s":"Ligne d'alimentation mesurée vers la masse sur une carte saine et sur une carte en panne, valeurs côte à côte."},{"id":"microsoudure-48","n":48,"t":"Utiliser le mode diode","c":"Diagnostic électronique","o":8,"v":"Intermédiaire","a":"atelier","i":"Le mode diode est la mesure préférée des réparateurs : il permet de comparer rapidement les lignes d'une carte.","r":["Méthode des réparateurs : pointe rouge à la masse, pointe noire sur la ligne","Le résultat s'affiche en volts, par exemple 0,350","Comparer avec une carte saine ou un tableau de valeurs","0,000 = court-circuit ; OL = ligne ouverte"],"e":["Débrancher la batterie","Choisir le mode diode","Rouge à la masse, noire sur le point de test","Lire la valeur","Comparer et conclure"],"x":["Inverser les pointes puis comparer avec des valeurs prises dans l'autre sens","Comparer avec un autre modèle","Oublier que OL signifie ouvert"],"q":[{"question":"Que signifie 0,000 en mode diode ?","choix":["Un court-circuit","Une ligne ouverte","Une valeur normale"],"reponse":0}],"d":25,"s":"Connecteur de charge avec la valeur en mode diode de chaque broche, une broche anormale en rouge."},{"id":"microsoudure-49","n":49,"t":"Mesurer une tension continue","c":"Diagnostic électronique","o":8,"v":"Intermédiaire","a":"atelier","i":"Mesurer une tension montre si une alimentation arrive bien là où elle doit. C'est une mesure sous tension : il faut être prudent.","r":["Mode V⎓","Pointe noire à la masse, rouge sur le point","Comparer avec la tension attendue sur le schéma","Une pointe qui glisse peut créer un court-circuit"],"e":["Brancher la batterie ou l'alimentation","Choisir le calibre 20 V","Poser la noire à la masse","Poser la rouge sur le point de test","Noter et comparer"],"x":["Glisser entre deux broches","Mesurer en mode courant (A)","Ne pas connaître la tension attendue"],"q":[{"question":"Quelle mesure se fait sous tension ?","choix":["La continuité","La tension","Le mode diode"],"reponse":1}],"d":25,"s":"Carte alimentée, points de test VBAT, 1,8 V et 3,3 V avec leurs valeurs attendues."},{"id":"microsoudure-50","n":50,"t":"Localiser un court-circuit","c":"Diagnostic électronique","o":8,"v":"Intermédiaire","a":"atelier","i":"Le court-circuit est la panne la plus fréquente sur carte. On le trouve en faisant chauffer le composant fautif.","r":["Confirmer d'abord le court-circuit en mode diode ou en ohms","Injecter une faible tension (1 à 4 V) avec le courant limité","Le composant fautif chauffe : on le repère avec de la colophane, un spray réfrigérant ou une caméra thermique","Toujours limiter le courant"],"e":["Mesurer la ligne en court","Régler l'alimentation (1 V, courant limité)","Injecter sur la ligne, le moins à la masse","Chercher le point chaud","Retirer le composant et remesurer"],"x":["Injecter trop de tension","Oublier de limiter le courant","Changer la puce avant de vérifier les condensateurs"],"q":[{"question":"Que doit-on limiter pendant l'injection ?","choix":["La couleur","Le temps de pause","Le courant"],"reponse":2}],"d":25,"s":"Alimentation de laboratoire reliée à la ligne en court, caméra thermique montrant un condensateur en rouge."},{"id":"microsoudure-51","n":51,"t":"Lire un schéma électronique","c":"Diagnostic électronique","o":8,"v":"Intermédiaire","a":"atelier","i":"Le schéma est la carte routière de l'électronique : il dit où va chaque ligne et quelle valeur attendre.","r":["Symboles : résistance, condensateur, bobine, diode, masse","Noms de lignes (VBAT, VBUS, PP1V8…)","Le plan de carte (boardview) montre où se trouve chaque composant","Un même nom de ligne = même connexion"],"e":["Choisir la fonction en panne (charge, écran…)","Trouver la ligne sur le schéma","Suivre ses composants","Les localiser sur le plan de carte","Mesurer aux bons points"],"x":["Lire le schéma d'un autre modèle","Ignorer les noms de lignes","Chercher sans plan de carte"],"q":[{"question":"Deux points avec le même nom de ligne sont…","choix":["Reliés électriquement","Indépendants","Toujours à la masse"],"reponse":0}],"d":25,"s":"Extrait simplifié du schéma d'un circuit de charge, relié par des flèches à sa position sur la carte."},{"id":"microsoudure-52","n":52,"t":"Utiliser une alimentation de laboratoire","c":"Diagnostic électronique","o":8,"v":"Intermédiaire","a":"atelier","i":"L'alimentation de laboratoire remplace la batterie et affiche la consommation : c'est un outil de diagnostic très puissant.","r":["Régler entre 3,8 et 4,2 V et limiter le courant","Lire la consommation au démarrage","Forte consommation immédiate = court-circuit","Aucune consommation = problème d'allumage"],"e":["Régler la tension et la limite de courant","Relier au connecteur batterie en respectant la polarité","Appuyer sur le bouton d'allumage","Observer la consommation","Comparer au comportement normal"],"x":["Inverser la polarité","Oublier la limite de courant","Oublier la broche de détection batterie de certains téléphones"],"q":[{"question":"Une forte consommation immédiate signale souvent…","choix":["Un écran neuf","Un court-circuit","Une batterie pleine"],"reponse":1}],"d":25,"s":"Alimentation reliée au connecteur batterie, écran affichant tension et courant, courbe d'un démarrage normal."},{"id":"microsoudure-53","n":53,"t":"Établir un diagnostic","c":"Diagnostic et réparations mobiles","o":9,"v":"Intermédiaire","a":"atelier","i":"Un bon diagnostic suit toujours le même ordre : questionner, observer, tester, mesurer, conclure.","r":["Questionner le client : chute, eau, réparation précédente","Observer : oxydation, composants brûlés, chocs","Tester d'abord les pièces simples (batterie, câble, écran)","Passer à la micro-soudure seulement après"],"e":["Écouter le client et noter","Inspecter l'extérieur et l'intérieur","Tester avec des pièces sûres","Mesurer sur la carte","Conclure et faire un devis"],"x":["Ouvrir la carte avant de tester la batterie","Croire le client sans vérifier","Ne rien noter"],"q":[{"question":"Que teste-t-on avant la carte ?","choix":["Le processeur","Rien","Les pièces simples (batterie, câble, écran)"],"reponse":2}],"d":25,"s":"Entonnoir de diagnostic : questions → observation → tests de pièces → mesures sur carte → conclusion."},{"id":"microsoudure-54","n":54,"t":"Diagnostiquer un défaut de charge","c":"Diagnostic et réparations mobiles","o":9,"v":"Intermédiaire","a":"atelier","i":"Le téléphone ne charge pas ? La panne peut venir du câble, du connecteur, du fusible ou du circuit de charge.","r":["Tester avec un autre chargeur et un testeur USB","Nettoyer le connecteur","Mesurer le connecteur en mode diode","Vérifier fusible, diode de protection et circuit de charge"],"e":["Tester câble, chargeur et batterie","Nettoyer et inspecter le connecteur","Lire la consommation sur le testeur USB","Mesurer VBUS et la masse en mode diode","Remonter vers le circuit de charge"],"x":["Changer le connecteur sans tester le câble","Ignorer l'oxydation","Oublier le fusible"],"q":[{"question":"Que tester en premier ?","choix":["Le câble et le chargeur","Le circuit de charge","Le processeur"],"reponse":0}],"d":25,"s":"Chemin de charge : chargeur → connecteur → fusible et diode de protection → circuit de charge → batterie, avec un point de contrôle à chaque étape."},{"id":"microsoudure-55","n":55,"t":"Diagnostiquer un défaut d'affichage","c":"Diagnostic et réparations mobiles","o":9,"v":"Intermédiaire","a":"atelier","i":"Écran noir, lignes, taches ou tactile mort : il faut savoir si la panne vient de l'écran, de la nappe ou de la carte.","r":["Tester avec un écran sûr","Le téléphone vibre ou sonne ? Alors il est allumé","Inspecter le connecteur d'écran","Mesurer l'alimentation de l'écran et du rétroéclairage"],"e":["Vérifier si le téléphone est allumé (son, vibration)","Tester un écran sûr","Inspecter le connecteur et ses broches","Mesurer le connecteur en mode diode","Vérifier le circuit de rétroéclairage"],"x":["Changer l'écran sans test","Ne pas voir une broche tordue","Brancher l'écran avec la batterie connectée"],"q":[{"question":"Que faire avant de brancher un écran ?","choix":["Chauffer le connecteur","Débrancher la batterie","Rien"],"reponse":1}],"d":25,"s":"Arbre de décision : écran noir → allumé ? → écran sûr ? → connecteur → rétroéclairage."},{"id":"microsoudure-56","n":56,"t":"Diagnostiquer un problème audio","c":"Diagnostic et réparations mobiles","o":9,"v":"Intermédiaire","a":"atelier","i":"Pas de son, son faible ou micro muet : la panne peut être mécanique, logicielle ou électronique.","r":["Nettoyer les grilles et les orifices","Tester avec écouteurs et haut-parleur","Mesurer le haut-parleur (souvent 6 à 8 Ω)","Vérifier le circuit audio et l'amplificateur"],"e":["Nettoyer les grilles","Tester toutes les entrées et sorties","Tester le haut-parleur seul au multimètre","Vérifier les contacts et la nappe","Mesurer le circuit audio"],"x":["Changer le circuit audio sans tester le haut-parleur","Oublier une mise à jour logicielle","Ne pas voir une grille bouchée"],"q":[{"question":"Quelle résistance typique pour un haut-parleur ?","choix":["0 Ω","10 kΩ","6 à 8 Ω"],"reponse":2}],"d":25,"s":"Chaîne audio : micro → circuit audio → amplificateur → haut-parleur, avec les points de test."},{"id":"microsoudure-57","n":57,"t":"Comprendre les circuits d'alimentation","c":"Diagnostic et réparations mobiles","o":9,"v":"Intermédiaire","a":"atelier","i":"La batterie fournit une seule tension ; le circuit de gestion d'alimentation (PMIC) la transforme en plusieurs tensions pour chaque partie du téléphone.","r":["VBAT : tension de la batterie","Le PMIC crée plusieurs lignes (1,8 V, 1,2 V, 3,3 V…)","Chaque convertisseur utilise bobines et condensateurs","Une seule ligne absente peut empêcher l'allumage"],"e":["Mesurer VBAT","Appuyer sur le bouton et observer la consommation","Mesurer les sorties principales du PMIC","Comparer au schéma","Isoler la ligne défaillante"],"x":["Changer le PMIC en premier","Ignorer un court-circuit sur une ligne secondaire","Mesurer sans schéma"],"q":[{"question":"Que fait le PMIC ?","choix":["Il crée les différentes tensions","Il affiche l'image","Il capte le réseau"],"reponse":0}],"d":25,"s":"Arbre d'alimentation : batterie → PMIC → lignes vers processeur, mémoire, écran et audio."},{"id":"microsoudure-58","n":58,"t":"Effectuer les tests après réparation","c":"Diagnostic et réparations mobiles","o":9,"v":"Intermédiaire","a":"atelier","i":"Un téléphone réparé doit être testé entièrement avant d'être rendu : c'est la preuve de ton sérieux.","r":["Tester toutes les fonctions, pas seulement celle réparée","Charge, écran, tactile, son, micro, caméras, réseau, Wi-Fi, capteurs","Surveiller la chauffe pendant 10 à 15 minutes","Noter les tests effectués"],"e":["Allumer et vérifier l'affichage","Tester la charge","Tester son, micro et caméras","Tester réseau, Wi-Fi et Bluetooth","Laisser tourner et vérifier la température"],"x":["Rendre le téléphone sans tout tester","Fermer la coque avant les tests","Oublier de surveiller la chauffe"],"q":[{"question":"Pourquoi tout tester ?","choix":["Pour perdre du temps","Pour éviter les retours et prouver son sérieux","Ce n'est pas utile"],"reponse":1}],"d":25,"s":"Liste de contrôle illustrée avec une icône par fonction et une case à cocher."},{"id":"microsoudure-59","n":59,"t":"Documenter une réparation","c":"Diagnostic et réparations mobiles","o":9,"v":"Intermédiaire","a":"atelier","i":"Noter chaque réparation crée ta propre base de connaissances et te protège en cas de litige.","r":["Modèle, panne, cause, mesures, composants remplacés","Photos avant et après","Prix et garantie","Ces notes accélèrent les réparations suivantes"],"e":["Créer une fiche par téléphone","Noter les symptômes et les mesures","Ajouter les photos","Noter la solution","Archiver et réutiliser"],"x":["Ne rien noter","Prendre des photos floues","Oublier la garantie"],"q":[{"question":"Que contient une fiche de réparation ?","choix":["Le mot de passe du client","Rien","Modèle, panne, mesures, solution et photos"],"reponse":2}],"d":25,"s":"Fiche de réparation type : modèle, panne, mesures, photos avant et après, solution, garantie."},{"id":"microsoudure-60","n":60,"t":"Analyser une oxydation","c":"Diagnostic et réparations mobiles","o":9,"v":"Intermédiaire","a":"atelier","i":"L'eau et l'humidité laissent de l'oxydation qui ronge les composants et crée des courts-circuits.","r":["Signes : dépôts verts, blancs ou bleus, composants noircis","Retirer les blindages pour voir dessous","Nettoyer à l'IPA à la brosse, ou au bac à ultrasons","Les composants rongés doivent être remplacés"],"e":["Débrancher la batterie immédiatement","Démonter et inspecter au microscope","Nettoyer à l'IPA ou aux ultrasons","Sécher complètement","Mesurer, remplacer les composants abîmés et tester"],"x":["Allumer un téléphone mouillé","Le mettre dans le riz et attendre","Nettoyer sans retirer les blindages"],"q":[{"question":"Que faire en premier avec un téléphone tombé dans l'eau ?","choix":["Débrancher la batterie","L'allumer pour voir","Le mettre dans le riz"],"reponse":0}],"d":25,"s":"Avant / après nettoyage d'une zone oxydée, flèches vers les dépôts verts et blancs."}];
+const U = (fr,en) => (lang==="en" && en) ? en : fr;
+const pad2 = n => String(n).padStart(2,"0");
+function hashStr(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+function rngOf(seed){ let a=seed|0; return ()=>{ a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+const PAL=[["#38bdf8","#0b2a4a"],["#fb923c","#431c07"],["#c084fc","#2e1065"],["#4ade80","#052e16"],["#f87171","#450a0a"],["#facc15","#422006"],["#2dd4bf","#042f2e"],["#f472b6","#500724"],["#818cf8","#1e1b4b"]];
+
+/* ---- Illustration de carte électronique (générée, unique pour chaque leçon) ---- */
+function pcbArt(seed, ci, w=320, h=180){
+ const R=rngOf(hashStr(String(seed))), P=PAL[Math.abs(ci||0)%PAL.length], a=P[0], bg=P[1];
+ let s=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g${hashStr(seed+"x")}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${bg}"/><stop offset="1" stop-color="#050a18"/></linearGradient><radialGradient id="r${hashStr(seed+"y")}"><stop offset="0" stop-color="${a}" stop-opacity=".55"/><stop offset="1" stop-color="${a}" stop-opacity="0"/></radialGradient></defs><rect width="${w}" height="${h}" fill="url(#g${hashStr(seed+"x")})"/>`;
+ for(let x=0;x<w;x+=16) s+=`<line x1="${x}" y1="0" x2="${x}" y2="${h}" stroke="${a}" stroke-opacity=".05"/>`;
+ for(let y=0;y<h;y+=16) s+=`<line x1="0" y1="${y}" x2="${w}" y2="${y}" stroke="${a}" stroke-opacity=".05"/>`;
+ const pts=[];
+ for(let i=0;i<16;i++){
+  let x=Math.round(R()*w/16)*16, y=Math.round(R()*h/16)*16, d=`M${x} ${y}`; pts.push([x,y]);
+  const n=2+Math.floor(R()*3);
+  for(let k=0;k<n;k++){ const horiz=R()<.5, len=(1+Math.floor(R()*4))*16*(R()<.5?-1:1);
+   if(horiz){ x+=len; d+=`H${x}`; } else { y+=len; d+=`V${y}`; }
+   if(R()<.45){ const dg=16*(R()<.5?-1:1); x+=dg; y+=dg; d+=`L${x} ${y}`; } }
+  s+=`<path d="${d}" fill="none" stroke="${a}" stroke-opacity="${(.35+R()*.4).toFixed(2)}" stroke-width="2" stroke-linejoin="round"/><circle cx="${x}" cy="${y}" r="3.2" fill="${a}" fill-opacity=".8"/>`;
+ }
+ const chips=2+Math.floor(R()*2);
+ for(let i=0;i<chips;i++){
+  const cw=48+Math.floor(R()*4)*10, ch=36+Math.floor(R()*3)*10, cx=Math.round((16+R()*(w-cw-32))/8)*8, cy=Math.round((12+R()*(h-ch-24))/8)*8;
+  s+=`<rect x="${cx}" y="${cy}" width="${cw}" height="${ch}" rx="3" fill="#0a1020" stroke="${a}" stroke-width="1.5"/>`;
+  for(let p=6;p<cw-4;p+=8) s+=`<rect x="${cx+p}" y="${cy-4}" width="3" height="4" fill="${a}" fill-opacity=".8"/><rect x="${cx+p}" y="${cy+ch}" width="3" height="4" fill="${a}" fill-opacity=".8"/>`;
+  for(let p=6;p<ch-4;p+=8) s+=`<rect x="${cx-4}" y="${cy+p}" width="4" height="3" fill="${a}" fill-opacity=".8"/><rect x="${cx+cw}" y="${cy+p}" width="4" height="3" fill="${a}" fill-opacity=".8"/>`;
+  s+=`<circle cx="${cx+8}" cy="${cy+8}" r="2.5" fill="${a}"/><text x="${cx+cw/2}" y="${cy+ch/2+4}" fill="${a}" fill-opacity=".7" font-size="10" text-anchor="middle" font-family="monospace">U${i+1}</text>`;
+ }
+ for(let i=0;i<14;i++){ const x=Math.round(R()*(w-20)/4)*4+4, y=Math.round(R()*(h-12)/4)*4+4, v=R()<.5;
+  s+=`<rect x="${x}" y="${y}" width="${v?5:10}" height="${v?10:5}" rx="1" fill="#e2e8f0" fill-opacity=".75"/>`; }
+ const hp=pts[Math.floor(R()*pts.length)]||[w/2,h/2];
+ s+=`<circle cx="${hp[0]}" cy="${hp[1]}" r="${Math.round(h*.38)}" fill="url(#r${hashStr(seed+"y")})"/></svg>`;
+ return s;
+}
+/* ---- Schéma légendé d'une leçon ---- */
+function schemaSVG(L, ci){
+ const w=360, h=230, R=rngOf(hashStr(L.id+"sch")), a=PAL[Math.abs(ci)%PAL.length][0];
+ let s=pcbArt(L.id+"S",ci,w,h).replace("</svg>","");
+ const steps=(L.etapes||[]).slice(0,4);
+ steps.forEach((e,i)=>{
+  const px=50+Math.round(R()*(w-100)), py=40+Math.round(R()*(h-90)), lx=i%2?w-24:24, ly=26+i*((h-52)/3);
+  s+=`<line x1="${px}" y1="${py}" x2="${lx}" y2="${ly}" stroke="#fff" stroke-width="1.6" stroke-dasharray="4 3"/><circle cx="${px}" cy="${py}" r="9" fill="none" stroke="#fff" stroke-width="2"/><circle cx="${lx}" cy="${ly}" r="12" fill="${a}"/><text x="${lx}" y="${ly+5}" font-size="14" font-weight="800" fill="#06101f" text-anchor="middle" font-family="sans-serif">${i+1}</text>`;
+ });
+ return s+"</svg>";
+}
+
+/* ---- Catégories et leçons (60 de micro-soudure + leçons de base + leçons ajoutées par l'administrateur) ---- */
+const LEG = {outils:["Outils de base","Débutant"],ouvrir:["Smartphones","Débutant"],charge:["Smartphones","Débutant"],batterie:["Smartphones","Débutant"],ecran:["Smartphones","Intermédiaire"],touches:["Téléphones à touches","Intermédiaire"],camera:["Appareils photo","Intermédiaire"],soudure:["Cartes mères","Avancé"],cartemere:["Cartes mères","Avancé"]};
+const MATS=[["air chaud","🌬️","Station à air chaud"],["fer ","🔥","Fer à souder"],["flux","🧴","Flux"],["étain","⚪","Étain"],["tresse","🧵","Tresse"],["multimètre","📟","Multimètre"],["microscope","🔬","Microscope"],["pince","🔧","Pince brucelle"],["kapton","🟫","Ruban Kapton"],["alimentation de lab","🔌","Alimentation de labo"],["alcool","🧪","Alcool isopropylique"],["tournevis","🪛","Tournevis"]];
+window.FSL = window.FSL || [];
+function normFS(d){ return {id:"fs-"+d.id,fs:true,docId:d.id,t:d.titre||"",c:d.categorie||"Autres",v:d.niveau||"Débutant",a:d.acces||"pro",i:d.introduction||"",r:d.a_retenir||[],e:d.etapes||[],x:d.erreurs_frequentes||[],q:d.quiz||[],d:d.duree_minutes||10,s:"",img:d.image||"",st:d.statut,ts:d.createdAt||0}; }
+function allLessons(){
+ const out=[]; let k=0;
+ MS.forEach(m=>{ out.push({id:m.id,n:m.n,t:m.t,c:m.c,o:m.o,v:m.v,a:m.a,i:m.i,r:m.r,e:m.e,x:m.q?m.x:m.x,q:m.q,d:m.d,s:m.s}); k=Math.max(k,m.n); });
+ LESSONS.forEach(L=>{ const g=LEG[L.id]||["Autres","Débutant"]; const st=pick(L.s)||[];
+  out.push({id:L.id,n:++k,t:pick(L.t),c:g[0],o:50,v:g[1],a:L.level==="free"?"gratuit":L.level,i:"",r:[],e:st,x:L.w?[pick(L.w)]:[],q:[],d:5+st.length*2,s:"",legacy:true,icon:L.icon,svg:L.svg}); });
+ (window.FSL||[]).forEach(f=>{ f.n=++k; out.push(f); });
+ return out;
+}
+function cats(){
+ const m=new Map(); allLessons().forEach(l=>{ if(!m.has(l.c)) m.set(l.c,{name:l.c,o:l.o||99,items:[]}); m.get(l.c).items.push(l); });
+ return [...m.values()].sort((a,b)=>a.o-b.o).map((c,i)=>(c.i=i,c));
+}
+const catIdx = name => { const c=cats().find(x=>x.name===name); return c?c.i:0; };
+function lessonById(id){ return allLessons().find(l=>l.id===id); }
+function canOpenL(l){ if(l.a==="gratuit"||isAdmin()) return true; const s=sub(); return !!(s && PLANS[s.plan] && PLANS[s.plan].levels.includes(l.a)); }
+const doneMap = () => S.get("done",{});
+const isDone = id => !!doneMap()[id];
+function markDone(id){ const d=doneMap(); if(!d[id]){ d[id]=Date.now(); S.set("done",d); } }
+function catProgress(c){ const d=doneMap(); const n=c.items.filter(l=>d[l.id]).length; return {n,t:c.items.length,p:c.items.length?Math.round(100*n/c.items.length):0}; }
+function art(l){ return l.img ? `<img src="${l.img}" alt="">` : pcbArt(l.id,catIdx(l.c)); }
+const fmtDur = m => m+" min";
+function mats(l){ const txt=(l.i+" "+l.e.join(" ")+" "+l.r.join(" ")+" "+l.t).toLowerCase(); return MATS.filter(m=>txt.includes(m[0])).slice(0,4); }
+function when(t){ const d=new Date(t), n=new Date(); const hm=d.toLocaleTimeString(lang==="en"?"en-GB":"fr-FR",{hour:"2-digit",minute:"2-digit"}); return d.toDateString()===n.toDateString()?U("Aujourd'hui","Today")+" · "+hm : fmtDate(t)+" · "+hm; }
+const logoSVG = (s=64)=>`<svg width="${s}" height="${s}" viewBox="0 0 64 64" fill="none" stroke="#7dd3fc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="19" y="6" width="26" height="46" rx="5"/><path d="M28 10h8"/><circle cx="32" cy="36" r="6"/><path d="M32 26v4M32 42v4M22 36h4M38 36h4M25 29l3 3M36 40l3 3M39 29l-3 3M28 40l-3 3" stroke-width="2"/><path d="M46 46l8 8M10 54l10-10" stroke="#818cf8"/></svg>`;
+const topbar=(title,o={})=>`<div class="tb">${o.back===false?`<span class="ib"></span>`:o.menu?`<a class="ib" href="#/menu" aria-label="Menu">☰</a>`:`<a class="ib" href="${o.panel?"javascript:panelBack()":"javascript:goBack()"}" aria-label="Retour">←</a>`}<h1>${title}</h1><span class="tbr">${o.right||(o.panel?`<a class="ib" href="javascript:closePanel()" aria-label="Fermer">✕</a>`:"")}</span></div>`;
+
+
+/* ================= ÉCRANS ================= */
+const NIV = ["Débutant","Intermédiaire","Avancé"];
+function lessonItem(l){
+ const ok=canOpenL(l), d=isDone(l.id);
+ return `<a class="li" href="#/${ok?"lecon/"+l.id:"abonnement"}"><div class="th">${art(l)}</div><div class="tx"><b>L${pad2(l.n)} – ${esc(l.t)}</b><small>⏱ ${fmtDur(l.d)} · ${esc(l.v)}${l.a!=="gratuit"?` · <span class="pillb ${l.a==="atelier"?"o":"g"}">${l.a==="atelier"?"ATELIER":"PRO"}</span>`:""}</small></div><div class="play ${ok?(d?"done":""):"lock"}">${ok?(d?"✓":"▶"):"🔒"}</div></a>`;
+}
+function firstName(){ const u=user(); const n=(u&&(u.displayName||""))||""; return n.split(" ")[0]; }
+
+/* ---- Démarrage et bienvenue ---- */
+function vWelcome(){
+ return `<div class="wel"><div class="art">${pcbArt("bienvenue",0,360,300)}</div><div class="bd">
+ ${logoSVG(54)}<h2>${U("Deviens un expert<br>en réparation mobile","Become a mobile<br>repair expert")}</h2>
+ <p>${U("Formation complète en réparation et micro-soudure","Complete training in mobile repair and micro-soldering")}</p>
+ <a class="btn b-acc" href="javascript:startApp()">${U("Commencer la formation","Start the course")}</a>
+ <a class="btn out" href="#/connexion">${U("Se connecter","Log in")}</a>
+ <a class="btn out" href="#/connexion">${U("Créer un compte","Create an account")}</a></div></div>`;
+}
+function startApp(){ S.set("welcomed",true); location.hash="#/accueil"; }
+
+/* ---- Accueil ---- */
+function vHome(){
+ const cs=cats(), all=allLessons(), d=doneMap(), hl=S.get("hl",[]);
+ const last=(hl[0]&&lessonById(hl[0].id)) || all.find(l=>!d[l.id]&&canOpenL(l)) || all[0];
+ const tile=(href,ic,lb,col)=>`<a class="tile" href="#/${href}"><i style="background:${col}">${ic}</i>${lb}</a>`;
+ const ms=cs.find(c=>c.items.some(l=>l.n===1&&!l.legacy));
+ const cp=last?catProgress(cs.find(c=>c.name===last.c)||cs[0]):{p:0};
+ return `<div class="tb"><a class="ib" href="#/menu" aria-label="Menu">☰</a><h1>${logoSVG(26).replace('width="26" height="26"','width="26" height="26" style="vertical-align:middle;margin-right:6px"')}Atelier Mobile<small style="display:block;font-size:11px;color:var(--org);font-weight:700">Répar Academy</small></h1><span class="tbr"><a class="ib" href="#/recherche" aria-label="Recherche">🔍</a></span></div>
+ <div class="hello"><h2>${U("Bonjour","Hello")}${firstName()?" "+esc(firstName()):""} !</h2><p>${U("Prêt à apprendre aujourd'hui ?","Ready to learn today?")}</p></div>
+ <a class="search" href="#/recherche">🔍 ${U("Rechercher une leçon…","Search a lesson…")}</a>
+ <div class="tiles">${tile("analyser","🔎",U("Analyser","Diagnose"),"#0ea5e9")}${tile("lecons","📘",U("Leçons","Lessons"),"#7c3aed")}${tile("quiz","❓","Quiz","#ef4444")}${tile("progres","📊",U("Progrès","Progress"),"#6366f1")}${tile("certificats","🎓",U("Certificat","Certificate"),"#10b981")}</div>
+ <a class="banner" href="#/categories"><div class="art">${pcbArt("banner-ms",0,360,140)}</div><div class="tx"><b>${U("Formation en<br>Micro-soudure","Micro-soldering<br>course")}</b><small>${MS.length} ${U("leçons complètes","complete lessons")}</small></div></a>
+ <div class="sec"><h3>${U("Continuer ma formation","Continue my course")}</h3></div>
+ ${last?`<a class="li" href="#/${canOpenL(last)?"lecon/"+last.id:"abonnement"}"><div class="th">${art(last)}</div><div class="tx"><b>L${pad2(last.n)} – ${esc(last.t)}</b><small>${esc(last.c)}</small><div class="pbar"><i style="width:${cp.p}%"></i></div></div><div class="play">▶</div></a>`:""}
+ <div class="sec"><h3>${U("Catégories","Categories")}</h3><a href="#/categories">${U("Tout voir","See all")} ›</a></div>
+ ${cs.slice(0,3).map(catRow).join("")}`;
+}
+function catRow(c){ const p=catProgress(c); return `<a class="li" href="#/liste/${c.i}"><div class="th">${pcbArt("cat-"+c.name,c.i)}</div><div class="tx"><b>${esc(c.name)}</b><small>(${c.items.length} ${U("leçons","lessons")}) · ${p.p}%</small></div><div class="play" style="background:transparent;color:var(--mut)">›</div></a>`; }
+function vCategories(){ return topbar(U("Catégories de formation","Course categories"),{right:`<a class="ib" href="#/recherche">🔍</a>`})+`<div style="padding-top:6px">${cats().map(catRow).join("")}</div>`; }
+
+/* ---- Liste des leçons ---- */
+function vLessonsList(parts){
+ const cs=cats(), ci=parts[0]==="liste"?parseInt(parts[1],10):-1, c=ci>=0?cs[ci]:null;
+ const tab=(parts[0]==="liste"?parts[2]:parts[1])||"Toutes", base=c?"liste/"+ci:"lecons";
+ let items=c?c.items:allLessons(); const n=items.length;
+ if(tab!=="Toutes") items=items.filter(l=>l.v===tab);
+ const tabs=["Toutes",...NIV.filter(v=>allLessons().some(l=>l.v===v))];
+ return topbar((c?esc(c.name):U("Leçons","Lessons"))+` (${n})`,{right:`<a class="ib" href="#/recherche">🔍</a>`,back:!!c||true})
+  +`<div class="seg">${tabs.map(t=>`<a class="${t===tab?"on":""}" href="#/${base}/${encodeURIComponent(t)}">${t==="Toutes"?U("Toutes","All"):t}</a>`).join("")}</div>`
+  +(items.length?items.map(lessonItem).join(""):`<p class="mut" style="text-align:center;margin:30px">${U("Aucune leçon ici pour le moment.","No lessons here yet.")}</p>`);
+}
+
+/* ---- Une leçon (3 écrans : Leçon / Schéma / À faire et à éviter) ---- */
+function vLesson(parts){
+ const L=lessonById(parts[1]); if(!L) return vLessonsList(["lecons"]);
+ const tab=parts[2]||"lecon", ci=catIdx(L.c);
+ if(!canOpenL(L)) return topbar(esc(L.t))+`<div class="box" style="text-align:center"><div style="font-size:48px">🔒</div><p>${sub()?U("Cette leçon est réservée à l'abonnement "+(L.a==="atelier"?"Atelier":"Pro")+".","This lesson needs the "+(L.a==="atelier"?"Workshop":"Pro")+" subscription."):(hadSub()?tr("expired"):tr("locked"))}</p><a class="btn b-org" href="#/abonnement">${sub()?U("Voir les abonnements","See plans"):tr("goPro")}</a></div>`;
+ if(tab==="lecon") pushHist("hl",{id:L.id,t:Date.now()});
+ const saved=S.get("dl",[]).includes(L.id);
+ const tabs=`<div class="seg">${[["lecon",U("Leçon","Lesson")],["schema",U("Schéma","Diagram")],["faire",U("À faire / À éviter","Do / Avoid")]].map(([k,n])=>`<a class="${k===tab?"on":""}" href="#/lecon/${L.id}/${k}">${n}</a>`).join("")}</div>`;
+ const head=`<div class="tb"><a class="ib" href="javascript:goBack()">←</a><h1>L${pad2(L.n)} – ${esc(L.t)}</h1><span class="tbr"></span></div>`;
+ let body, next, nextLabel;
+ if(tab==="lecon"){
+  const ms=mats(L);
+  body=`<div class="hero">${art(L)}<div class="sh">${esc(L.t)}</div><a class="ib dl" href="javascript:toggleSave('${L.id}')" aria-label="Enregistrer">${saved?"✅":"⤓"}</a></div>${tabs}
+  <div class="box"><h4>✔ ${U("Objectif","Goal")}</h4><p>${esc(L.i?L.i.split(". ")[0].replace(/\.$/,"")+".":U("Comprendre la technique et l'appliquer en sécurité.","Understand the technique and apply it safely."))}</p></div>
+  ${L.i&&L.i.includes(". ")?`<div class="box"><p>${esc(L.i)}</p></div>`:""}
+  ${L.r.length?`<div class="box"><h4>${U("À retenir","Key points")}</h4><ul>${L.r.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
+  ${ms.length?`<div class="box"><h4>▸ ${U("Matériel nécessaire","Materials needed")}</h4><div class="mat">${ms.map(m=>`<span><i>${m[1]}</i>${m[2]}</span>`).join("")}</div></div>`:""}
+  ${L.legacy?`<div class="box"><h4>${U("Étapes","Steps")}</h4>${L.e.map((x,i)=>`<div class="st"><b>${i+1}</b><span>${esc(x)}</span></div>`).join("")}</div>`:""}`;
+  next=`#/lecon/${L.id}/schema`; nextLabel=U("Suivant","Next");
+ } else if(tab==="schema"){
+  const sv=L.legacy&&SVG[L.svg]?`<div class="sch" style="padding:8px">${SVG[L.svg]}</div>`:`<div class="sch">${L.img?`<img src="${L.img}" style="width:100%;display:block" alt="">`:schemaSVG(L,ci)}</div>`;
+  body=`${tabs}${sv}${L.s?`<p class="mut" style="margin:0 16px 6px;font-size:12.5px">${esc(L.s)}</p>`:""}<div class="box"><h4>— ${U("Étapes principales","Main steps")}</h4>${L.e.map((x,i)=>`<div class="st"><b>${i+1}</b><span>${esc(x)}</span></div>`).join("")}</div>`;
+  next=`#/lecon/${L.id}/faire`; nextLabel=U("Suivant","Next");
+ } else {
+  const good=L.r.length?L.r.slice(0,4):L.e.slice(0,3), bad=L.x;
+  body=`${tabs}<div class="good"><h4>✔ ${U("Ce qu'il faut faire","What to do")}</h4><ul>${good.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+  <div class="bad"><h4>✖ ${U("Ce qu'il ne faut pas faire","What not to do")}</h4><ul>${(bad.length?bad:[U("Travailler sans protection ni méthode.","Working without protection or method.")]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`;
+  next=`javascript:finishLesson('${L.id}')`; nextLabel=L.q.length?U("Terminer et passer au quiz","Finish and take the quiz"):U("Terminer la leçon ✓","Finish lesson ✓");
+ }
+ return head+body+`<div class="stk"><a class="btn b-acc" href="${next}">${nextLabel} ›</a></div>`;
+}
+function finishLesson(id){ markDone(id); const L=lessonById(id); if(L&&L.q.length) location.hash="#/quiz/run/"+id; else { toast(U("Leçon terminée ✅","Lesson completed ✅")); location.hash="#/lecons"; } }
+function toggleSave(id){ let d=S.get("dl",[]); d=d.includes(id)?d.filter(x=>x!==id):[id,...d]; S.set("dl",d); toast(d.includes(id)?U("Leçon enregistrée","Lesson saved"):U("Retirée des enregistrements","Removed")); render(); }
+
+/* ---- Recherche ---- */
+function vSearch(){
+ setTimeout(()=>{ const i=document.getElementById("sq"); if(!i) return; const draw=()=>{ const q=i.value.trim().toLowerCase(); const r=q?allLessons().filter(l=>(l.t+" "+l.c+" "+l.i).toLowerCase().includes(q)):[]; document.getElementById("sres").innerHTML=`<div class="sec"><h3>${U("Résultats","Results")} (${r.length})</h3></div>`+r.map(lessonItem).join(""); }; i.oninput=draw; i.focus(); },0);
+ return `<div class="tb"><a class="ib" href="javascript:goBack()">←</a><div style="flex:1"><input id="sq" placeholder="${U("Rechercher une leçon…","Search a lesson…")}" style="margin:0"></div></div><div id="sres"></div>`;
+}
+
+/* ---- Quiz ---- */
+let QZ=null;
+function quizSets(){ return cats().map(c=>({c,n:c.items.filter(l=>l.q.length).length})).filter(x=>x.n>0); }
+function vQuizList(){
+ return topbar("Quiz",{back:false})+`<p class="mut" style="margin:12px 16px">${U("Teste tes connaissances par catégorie.","Test your knowledge by category.")}</p>`
+  +quizSets().map(({c,n})=>`<a class="li" href="#/quiz/run/c${c.i}"><div class="th">${pcbArt("cat-"+c.name,c.i)}</div><div class="tx"><b>${esc(c.name)}</b><small>${n} ${U("questions","questions")}</small></div><div class="play">▶</div></a>`).join("");
+}
+function startQuiz(id){
+ let ls; if(id[0]==="c"&&/^c\d+$/.test(id)){ ls=cats()[+id.slice(1)].items; } else { const l=lessonById(id); ls=l?[l]:[]; }
+ const items=[]; ls.forEach(l=>l.q.forEach(q=>items.push({q:q.question,ch:q.choix,rep:q.reponse,lid:l.id,t:l.t})));
+ QZ={id,items,i:0,sel:-1,score:0,title:id[0]==="c"&&/^c\d+$/.test(id)?cats()[+id.slice(1)].name:(lessonById(id)||{}).t};
+}
+function vQuizRun(parts){
+ if(!QZ||QZ.id!==parts[2]) startQuiz(parts[2]);
+ const q=QZ.items[QZ.i];
+ if(!q) return topbar("Quiz")+`<div class="box" style="text-align:center"><p>${U("Pas de question pour cette leçon.","No question for this lesson.")}</p><a class="btn b-acc" href="#/quiz">OK</a></div>`;
+ if(QZ.done){ const p=Math.round(100*QZ.score/QZ.items.length); return topbar("Quiz – "+esc(QZ.title||""))+`<div class="ring" style="background:conic-gradient(var(--acc) ${p}%,var(--card2) 0)"><div style="position:absolute;inset:10px;border-radius:50%;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center"><b>${p}%</b><small>${QZ.score}/${QZ.items.length}</small></div></div><p style="text-align:center;margin:0 16px 12px">${p>=70?U("Bravo ! 🎉","Well done! 🎉"):U("Continue de t'entraîner 💪","Keep practising 💪")}</p><div class="pg"><a class="btn b-acc" href="#/quiz">${U("Autres quiz","More quizzes")}</a><a class="btn b-ghost" href="#/progres">${U("Voir ma progression","My progress")}</a></div>`; }
+ const opts=q.ch.map((c,i)=>{ let cl=""; if(QZ.sel>-1){ if(i===q.rep) cl="ok"; else if(i===QZ.sel) cl="ko"; } return `<button class="qopt ${cl}" onclick="answerQ(${i})"><i></i>${esc(c)}</button>`; }).join("");
+ return topbar("Quiz – "+esc(QZ.title||""))+`<div class="pg"><p class="mut" style="margin-top:14px">Question ${QZ.i+1}/${QZ.items.length}</p><h3 style="font-size:18px;margin:6px 0 12px">${esc(q.q)}</h3>${opts}
+ ${QZ.sel>-1?`<a class="btn b-acc" href="javascript:nextQ()">${QZ.i+1<QZ.items.length?U("Suivant","Next")+" ›":U("Voir le résultat","See result")}</a>`:""}</div>`;
+}
+function answerQ(i){ if(QZ.sel>-1) return; QZ.sel=i; if(i===QZ.items[QZ.i].rep) QZ.score++; render(); }
+function nextQ(){ if(QZ.i+1<QZ.items.length){ QZ.i++; QZ.sel=-1; } else { QZ.done=true; const qs=S.get("qs",{}); qs[QZ.id]={s:QZ.score,t:QZ.items.length,at:Date.now()}; S.set("qs",qs); } render(); }
+
+/* ---- Progression ---- */
+function vProgress(){
+ const all=allLessons(), d=doneMap(), n=all.filter(l=>d[l.id]).length, p=all.length?Math.round(100*n/all.length):0, cs=cats();
+ const certs=cs.filter(c=>catProgress(c).p===100).length;
+ return topbar(U("Ma progression","My progress"),{back:false})
+ +`<div class="ring" style="background:conic-gradient(var(--acc) ${p}%,var(--card2) 0)"><div style="position:absolute;inset:11px;border-radius:50%;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center"><b>${p}%</b><small>${U("Formation globale","Overall")}</small></div></div>
+ <div class="kpis"><div class="kpi"><b>${n}</b><small>${U("Leçons terminées","Lessons done")}</small></div><div class="kpi"><b>${all.length}</b><small>${U("Leçons totales","Total lessons")}</small></div><div class="kpi"><b>${certs}</b><small>${U("Certificats obtenus","Certificates")}</small></div></div>
+ <div class="sec"><h3>${U("Par catégorie","By category")}</h3></div>
+ ${cs.map(c=>{const q=catProgress(c); return `<a class="li" href="#/liste/${c.i}" style="display:block"><div style="display:flex;justify-content:space-between"><b style="font-size:14px">${esc(c.name)}</b><span style="color:var(--acc);font-weight:800">${q.p}%</span></div><small style="color:var(--mut)">${q.n}/${q.t}</small><div class="pbar"><i style="width:${q.p}%"></i></div></a>`}).join("")}`;
+}
+
+/* ---- Profil ---- */
+function vProfile(){
+ const u=user(), s=sub();
+ if(!u) return topbar(U("Mon profil","My profile"),{back:false})+`<div class="box" style="text-align:center"><p>${U("Connecte-toi pour retrouver ton profil, tes certificats et ton abonnement.","Log in to see your profile, certificates and subscription.")}</p><a class="btn b-acc" href="#/connexion">${tr("login")}</a></div><div style="padding:0 16px">${prow("langue","🌍",tr("language"))}${prow("parametres","⚙️",tr("settings"))}${prow("aide","❓",U("Aide & Support","Help & Support"))}</div>`;
+ const nm=u.displayName||u.phoneNumber||u.email||"";
+ const badge=isAdmin()?"👑 "+tr("admin"):s?U("Abonné ","Subscribed ")+(s.plan==="pro"?"Pro":"Atelier"):U("Compte gratuit","Free account");
+ return topbar(U("Mon profil","My profile"),{back:false})
+ +`<div class="av">${u.photoURL?`<img src="${esc(u.photoURL)}" referrerpolicy="no-referrer" alt="">`:esc((nm[0]||"?").toUpperCase())}</div><h3 style="text-align:center;margin:4px 0 0">${esc(nm)}</h3><p class="mut" style="text-align:center">${esc(u.email||"")}</p><p style="text-align:center"><span class="pillb ${s||isAdmin()?"o":""}" style="font-size:13px;padding:4px 14px">${badge}</span></p>
+ <div style="padding:0 16px">${prow("compte","👤",U("Mes informations","My information"))}${prow("abonnement","⭐",U("Mon abonnement","My subscription"))}${prow("certificats","🎓",U("Mes certificats","My certificates"))}${prow("telechargements","⤓",U("Mes téléchargements","My downloads"))}${prow("historique","🕘",tr("history"))}
+ <a class="row" href="javascript:RA.logout&&RA.logout()"><span class="ic">↪</span><span class="tx">${U("Déconnexion","Log out")}</span></a></div>`;
+}
+const prow=(h,ic,l)=>`<a class="row" href="#/${h}"><span class="ic">${ic}</span><span class="tx">${l}</span>›</a>`;
+
+/* ---- Certificats ---- */
+function vCerts(){
+ const cs=cats(), all=allLessons(), d=doneMap(), nm=(user()&&(user().displayName||user().email))||"";
+ const earned=cs.filter(c=>catProgress(c).p===100);
+ const fullOk=all.length>0&&all.every(l=>d[l.id]);
+ return topbar(U("Mes certificats","My certificates"),{panel:true})
+ +`<div class="pg">${fullOk?certCard(U("Formation complète","Full course"),"__all__"):""}${cs.map(c=>{const q=catProgress(c); return q.p===100?certCard(c.name,c.name):`<div class="cert lk"><b>${esc(c.name)}</b><br><small>${q.n}/${q.t} ${U("leçons terminées","lessons done")}</small></div>`}).join("")}</div>
+ ${earned.length||fullOk?"":`<p class="mut" style="text-align:center;margin:10px 20px">${U("Termine toutes les leçons d'une catégorie pour obtenir ton certificat.","Finish all lessons of a category to earn your certificate.")}</p>`}`;
+}
+function certCard(title,key){ return `<div class="cert"><div style="font-size:30px">🎓</div><b>CERTIFICAT DE FORMATION</b><br><span>${esc(title)}</span><br><a class="btn b-acc" style="width:auto;padding:10px 20px" href="javascript:dlCert(decodeURIComponent('${encodeURIComponent(title)}'))">${U("Télécharger","Download")}</a></div>`; }
+function dlCert(title){
+ const u=user(), nm=(u&&(u.displayName||u.email||u.phoneNumber))||"";
+ const c=document.createElement("canvas"); c.width=1200; c.height=850; const x=c.getContext("2d");
+ x.fillStyle="#fbf3d9"; x.fillRect(0,0,1200,850); x.strokeStyle="#c9a227"; x.lineWidth=14; x.strokeRect(30,30,1140,790); x.lineWidth=3; x.strokeRect(52,52,1096,746);
+ x.fillStyle="#3b2f0b"; x.textAlign="center";
+ x.font="bold 30px sans-serif"; x.fillText("ATELIER MOBILE · RÉPAR ACADEMY",600,140);
+ x.font="bold 64px serif"; x.fillText("CERTIFICAT",600,260); x.font="30px serif"; x.fillText("DE FORMATION",600,305);
+ x.font="26px sans-serif"; x.fillText("Décerné à",600,400); x.font="bold 58px serif"; x.fillText(nm||"—",600,480);
+ x.font="26px sans-serif"; x.fillText("pour avoir terminé la formation",600,550); x.font="bold 40px serif"; x.fillText(title,600,615);
+ x.font="22px sans-serif"; x.fillText(new Date().toLocaleDateString("fr-FR"),600,720);
+ const a=document.createElement("a"); a.href=c.toDataURL("image/png"); a.download="certificat.png"; document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* ---- Historique ---- */
+function vHistory(){
+ const hl=S.get("hl",[]), hd=S.get("hd",[]);
+ const lr=h=>{const L=lessonById(h.id); if(!L) return ""; return `<a class="li" href="#/${canOpenL(L)?"lecon/"+L.id:"abonnement"}"><div class="th">${art(L)}</div><div class="tx"><b>L${pad2(L.n)} – ${esc(L.t)}</b><small>${when(h.t)}</small></div><div class="play">${canOpenL(L)?"▶":"🔒"}</div></a>`;};
+ const dr=h=>`<a class="li" href="#/lecon/${h.lesson}"><div class="th" style="display:flex;align-items:center;justify-content:center;font-size:26px">🔍</div><div class="tx"><b>${esc(h.q)}</b><small>${when(h.t)}</small></div><div class="play">›</div></a>`;
+ setTimeout(()=>{const b=document.getElementById("clr"); if(b) b.onclick=()=>{S.set("hl",[]);S.set("hd",[]);render();}},0);
+ return topbar(tr("history"),{panel:true})+`<div class="sec"><h3>${tr("lastLessons")}</h3></div>${hl.length?hl.map(lr).join(""):`<p class="mut" style="margin:0 16px">${tr("empty")}</p>`}<div class="sec"><h3>${tr("lastDiag")}</h3></div>${hd.length?hd.map(dr).join(""):`<p class="mut" style="margin:0 16px">${tr("empty")}</p>`}${(hl.length||hd.length)?`<div class="pg"><button class="btn b-ghost" id="clr">${tr("clear")}</button></div>`:""}`;
+}
+
+/* ---- Téléchargements (leçons enregistrées) ---- */
+function vDownloads(){
+ const ls=S.get("dl",[]).map(lessonById).filter(Boolean);
+ return topbar(U("Téléchargements","Downloads"),{panel:true})+`<div class="seg"><a class="on">${U("Enregistrées","Saved")}</a></div>`
+ +(ls.length?ls.map(lessonItem).join(""):`<p class="mut" style="text-align:center;margin:30px 20px">${U("Aucune leçon enregistrée. Touche ⤓ dans une leçon pour l'ajouter ici.","No saved lesson. Tap ⤓ in a lesson to add it here.")}</p>`);
+}
+
+/* ---- Menu latéral ---- */
+function vMenu(){
+ const u=user(), item=(h,ic,l,on)=>`<a class="mrow ${on?"on":""}" href="#/${h}"><i>${ic}</i>${l}</a>`;
+ return `<div style="padding:16px 12px 24px"><div style="display:flex;align-items:center;gap:10px;padding:4px 8px 14px">${logoSVG(40)}<div><b style="font-size:17px">Atelier Mobile</b><br><small style="color:var(--org);font-weight:700">Répar Academy</small></div><a class="ib" style="margin-left:auto" href="javascript:closePanel()">✕</a></div>
+ ${item("accueil","🏠",U("Accueil","Home"),true)}${item("analyser","🔎",U("Analyser la panne","Diagnose a fault"))}${item("categories","🎓",U("Mes formations","My courses"))}${item("categories","🗂️",U("Catégories","Categories"))}${item("progres","📈",U("Ma progression","My progress"))}${item("certificats","🏅",U("Certificats","Certificates"))}${item("telechargements","⤓",U("Téléchargements","Downloads"))}${item("historique","🕘",tr("history"))}${item("abonnement","⭐",U("Abonnement","Subscription"))}${item("parametres","⚙️",tr("settings"))}${item("aide","❓",U("Aide & Support","Help & Support"))}${item("apropos","ℹ️",U("À propos","About"))}
+ ${isAdmin()?item("admin","👑",tr("admArea")):""}${u?"":item("connexion","👤",tr("login"))}</div>`;
+}
+
+/* ---- Paramètres ---- */
+function themeMode(){ try{ return localStorage.getItem("ra_theme_mode")||"system"; }catch(e){ return "system"; } }
+function setThemeMode(m){ try{localStorage.setItem("ra_theme_mode",m)}catch(e){} const t=m==="system"?((window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches)?"light":"dark"):m; document.documentElement.setAttribute("data-theme",t); render(); }
+function vSettings(){
+ const m=themeMode(), rad=(k,l)=>`<a class="rad ${m===k?"on":""}" href="javascript:setThemeMode('${k}')"><i></i>${l}</a>`;
+ return topbar(tr("settings"),{panel:true})+`<div class="pg"><h3>${U("Apparence","Appearance")}</h3>${rad("light",U("Mode clair","Light mode"))}${rad("dark",U("Mode sombre","Dark mode"))}${rad("system",U("Système","System"))}
+ <h3>${tr("language")}</h3><select onchange="lang=this.value;S.set('lang',lang);render()"><option value="fr" ${lang==="fr"?"selected":""}>Français</option><option value="bm" ${lang==="bm"?"selected":""}>Bamanankan</option><option value="en" ${lang==="en"?"selected":""}>English</option></select>
+ ${lang==="bm"?`<p class="mut" style="margin-top:8px">${tr("langNote")}</p>`:""}
+ <h3 style="margin-top:20px">${U("Compte et abonnement","Account and subscription")}</h3>${prow(user()?"compte":"connexion","👤",user()?tr("myAccount"):tr("login"))}${prow("abonnement","⭐",tr("account"))}${prow("historique","🕘",tr("history"))}
+ <h3 style="margin-top:20px">📄</h3>${prow("politique/confidentialite","🔒",tr("privacy"))}${prow("politique/donnees","🗄️",U("Politique relative aux données","Data policy"))}${prow("politique/cookies","🍪",tr("cookies"))}${prow("politique/conditions","📜",tr("terms"))}${prow("politique/remboursement","💳",tr("refund"))}${prow("politique/mentions","⚖️",tr("legal"))}</div>`;
+}
+
+/* ---- Aide & Support ---- */
+function vHelp(){
+ const wa=t=>`https://wa.me/${PHONE}?text=${encodeURIComponent(t)}`;
+ const faq=[[U("Comment fonctionne l'analyse d'une panne ?","How does fault diagnosis work?"),U("Décris la panne ou ajoute une photo : le site te donne la cause probable et la méthode de réparation.","Describe the fault or add a photo: the site gives the likely cause and the repair method.")],
+  [U("Comment m'abonner ?","How do I subscribe?"),U("Ouvre Abonnement, choisis Pro ou Atelier, paie par Orange Money, Wave ou Moov Money, puis envoie la référence de la transaction. Ton abonnement est activé après vérification.","Open Subscription, choose Pro or Workshop, pay by Orange Money, Wave or Moov Money, then send the transaction reference. Your subscription is activated after checking.")],
+  [U("Mon abonnement n'apparaît pas","My subscription does not show"),U("Attends la vérification de ta demande, puis rouvre la page Abonnement. Sinon écris-nous sur WhatsApp.","Wait for your request to be checked, then reopen the Subscription page. Otherwise write to us on WhatsApp.")]];
+ return topbar(U("Aide & Support","Help & Support"),{panel:true})+`<div class="pg"><details class="faq card"><summary>${U("Centre d'aide (FAQ)","Help centre (FAQ)")}</summary>${faq.map(f=>`<details class="faq"><summary>${f[0]}</summary><p>${f[1]}</p></details>`).join("")}</details>
+ <a class="row" href="${wa("Bonjour, j'ai une question sur Atelier Mobile – Répar Academy.")}" target="_blank"><span class="ic">💬</span><span class="tx">${tr("contact")}<small>WhatsApp +223 77 37 02 54</small></span>›</a>
+ <a class="row" href="${wa("Je signale un problème sur le site : ")}" target="_blank"><span class="ic">⚠️</span><span class="tx">${U("Signaler un problème","Report a problem")}</span>›</a>
+ <a class="row" href="${wa("J'ai une suggestion pour le site : ")}" target="_blank"><span class="ic">💡</span><span class="tx">${U("Suggestions","Suggestions")}</span>›</a>
+ <a class="btn b-acc" href="${wa("Bonjour, j'ai besoin d'aide.")}" target="_blank">${U("Chat avec le support","Chat with support")}</a></div>`;
+}
+/* ---- À propos ---- */
+function vAbout(){
+ return topbar(U("À propos","About"),{panel:true})+`<div class="pg" style="text-align:center"><div style="margin-top:20px">${logoSVG(80)}</div><h2 style="margin-top:8px">Atelier Mobile</h2><p style="color:var(--org);font-weight:700">Répar Academy</p><p class="mut">Version 1.0.0</p><p class="mut" style="margin:10px 0 20px">${U("Application de formation complète en réparation mobile et micro-soudure.","Complete training app in mobile repair and micro-soldering.")}</p>
+ <div style="text-align:left">${prow("politique/mentions","⚖️",tr("legal"))}${prow("politique/confidentialite","🔒",tr("privacy"))}${prow("politique/conditions","📜",tr("terms"))}</div></div>`;
+}
+
+/* ---- Abonnement (cartes) et paiement ---- */
+function vSub(){
+ const s=sub(); setTimeout(()=>{ if(window.RA&&RA.refresh) RA.refresh().then(ch=>{ if(ch) render(); }); loadMyReq(); },0);
+ const cur=s?s.plan:"free";
+ const card=(id,cls,name,price,feat)=>`<div class="pl ${cls} ${cur===id?"cur":""}"><b>${name}</b><span class="pr">${price}</span><small>${id==="free"?"":tr("perMonth")}</small><ul>${feat.map(f=>`<li>${f}</li>`).join("")}</ul></div>`;
+ return topbar(U("Abonnement","Subscription"),{panel:true})+`<p style="text-align:center;margin:12px 16px 0">${U("Débloquez toutes les leçons<br>et devenez un expert !","Unlock all lessons<br>and become an expert!")}</p><div id="reqBox" style="margin:0 16px"></div>
+ ${s?`<div class="box" style="text-align:center"><span class="badge">✓ ${tr("subscribed")} ${s.admin?"👑":(s.plan==="pro"?"Pro":"Atelier")}</span><p class="mut" style="margin-top:6px">${tr("until")}${fmtDate(s.until)}</p></div>`:""}
+ <div class="plans">${card("free","g0",U("Gratuit","Free"),"0 FCFA",[U("Leçons gratuites","Free lessons"),U("3 diagnostics offerts","3 free diagnoses")])}
+ ${card("pro","g1","Pro",PLANS.pro.price.toLocaleString("fr-FR")+" FCFA",tr("proF"))}
+ ${card("atelier","g3","Atelier",PLANS.atelier.price.toLocaleString("fr-FR")+" FCFA",tr("atF"))}</div>
+ <div class="pg">${s&&!s.admin&&s.plan==="atelier"?"":`<a class="btn b-acc" href="#/payer/${s&&s.plan==="pro"?"atelier":"pro"}">${U("S'abonner maintenant","Subscribe now")}</a>`}${s&&s.plan==="pro"&&!s.admin?"":`<a class="btn b-ghost" href="#/payer/atelier">Atelier – ${PLANS.atelier.price.toLocaleString("fr-FR")} FCFA</a>`}</div>`;
+}
+let PAYM="orange";
+function vPay(parts){
+ const plan=parts[1]; if(!PLANS[plan]) return vSub();
+ const name=plan==="pro"?"Pro":"Atelier", price=PLANS[plan].price;
+ const MET={orange:["Orange Money","#f97316","OM"],wave:["Wave","#0ea5e9","W"],moov:["Moov Money","#2563eb","MM"]};
+ const msg=encodeURIComponent(`Bonjour, j'ai payé l'abonnement ${name} (${price} FCFA) sur Atelier Mobile – Répar Academy. Voici ma preuve de paiement :`);
+ setTimeout(()=>{ const b=document.getElementById("act"); if(!b) return; b.onclick=async()=>{
+  if(!document.getElementById("consent").checked){toast(pick(CONSENT_ERR));return;}
+  const ref=document.getElementById("code").value.trim();
+  if(ref.length<4){toast(tr("needRef"));return;}
+  if(!user()){ go("abonnement"); return; }
+  b.disabled=true;
+  try{ await RA.sendPayment({plan,amount:price,reference:ref,payerPhone:document.getElementById("payer").value.trim(),method:PAYM}); toast(tr("reqSent")); go("abonnement"); }
+  catch(e){ b.disabled=false; toast(tr("reqErr")); } }; },0);
+ return topbar(U("Paiement","Payment"),{panel:true})+`<div class="pg"><p style="margin:12px 0 4px">${U("Choisissez votre moyen de paiement","Choose your payment method")}</p>
+ ${Object.keys(MET).map(k=>`<a class="pm ${PAYM===k?"on":""}" href="javascript:PAYM='${k}';render()"><i style="background:${MET[k][1]}">${MET[k][2]}</i>${MET[k][0]}</a>`).join("")}
+ <p style="text-align:center;font-size:18px;margin:12px 0"><b>${U("Montant","Amount")} : ${price.toLocaleString("fr-FR")} FCFA</b> · ${name}</p>
+ <div class="card"><div class="step"><div class="n">1</div><p>${tr("payStep1")}<br><b style="font-size:20px">+223 77 37 02 54</b></p></div>
+ <div class="step"><div class="n">2</div><p>${tr("payStep2")}</p></div><a class="btn b-grn" href="https://wa.me/${PHONE}?text=${msg}" target="_blank">${tr("whatsapp")}</a>
+ <div class="step" style="margin-top:16px"><div class="n">3</div><p>${tr("payStep3")}</p></div>
+ <input id="code" placeholder="${tr("refPh")}"><input id="payer" type="tel" placeholder="${tr("payerPh")}">
+ <label style="display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:14px;line-height:1.45"><input type="checkbox" id="consent" style="width:22px;height:22px;margin:2px 0 0;flex:0 0 22px"><span>${pick(CONSENT)} <a href="#/politique/remboursement" style="color:var(--acc)">${tr("refund")}</a></span></label>
+ <button class="btn b-acc" id="act">${U("Payer maintenant","Pay now")} – ${tr("sendReq").toLowerCase()}</button></div><p class="mut" style="text-align:center">🔒 ${U("Paiement vérifié par l'administrateur","Payment checked by the administrator")}</p></div>`;
+}
+async function loadMyReq(){
+ const box=document.getElementById("reqBox"); if(!box||!window.RA||!RA.myRequests||!user()) return;
+ try{ const l=(await RA.myRequests()).slice(0,3);
+  box.innerHTML=l.filter(r=>r.status!=="approved").map(r=>`<div class="warn">${r.status==="pending"?"⏳ "+tr("reqPending"):"❌ "+tr("reqRejected")}<br><small>${r.plan==="pro"?"Pro":"Atelier"} · ${Number(r.amount).toLocaleString("fr-FR")} FCFA · ${esc(r.reference||"")}</small></div>`).join(""); }catch(e){}
+}
+
+
+/* ================= POLITIQUES, ANALYSE, ADMINISTRATEUR, NAVIGATION ================= */
+function vPolicy(parts){
+ const id=parts[1], p=POLICIES[id], title=p?tr(p.title):id;
+ return topbar(title,{panel:true})+`<div class="box">${p&&p.text?p.text:`<p class="mut">${tr("policySoon")}</p>`}</div>`;
+}
+function vAnalyzePage(){ return topbar(U("Analyser la panne","Diagnose a fault"),{menu:true})+`<div class="pg">${vAnalyze()}</div>`; }
+
+/* ---- Espace administrateur ---- */
+const ADM={f:"actifs",q:"",edit:null,lessons:[],users:[],reqs:[]};
+const AT={pro:"Pro",atelier:"Atelier"};
+function vAdmin(parts){
+ if(!isAdmin()) return topbar(tr("admArea"),{back:false})+`<div class="box"><p>${U("Accès réservé à l'administrateur.","Administrator only.")}</p></div>`;
+ const tab=parts[1]||"demandes"; setTimeout(()=>admLoad(tab),0);
+ const tabs=[["demandes","Demandes"],["abonnes","Abonnés"],["lecons","Leçons"],["ajouter","Ajouter"]];
+ return topbar("👑 "+tr("admArea"),{back:false})+`<div class="stat" id="admStats"></div><div class="seg">${tabs.map(([k,n])=>`<a class="${k===tab?"on":""}" href="#/admin/${k}">${n}</a>`).join("")}</div><div id="admBody" class="adm"><p class="mut" style="margin:16px">${tr("loading")}</p></div>`;
+}
+function admErr(e){ return `<div class="box"><p class="mut">Erreur : ${esc((e&&(e.code||e.message))||"inconnue")}.<br>Vérifie que les règles Firestore sont publiées et que tu es connecté avec ton compte administrateur.</p></div>`; }
+const userCard=u=>{ const now=Date.now(), on=u.plan&&u.until>now;
+ return `<div class="li" style="display:block"><b>${esc(u.name||u.email||u.phone||u.uid)}</b> <span class="pillb ${on?"g":(u.plan?"r":"")}">${on?AT[u.plan]+" · "+U("actif","active"):(u.plan?U("expiré","expired"):U("gratuit","free"))}</span>
+ <small style="display:block;color:var(--mut);margin-top:3px">${esc(u.email||"")} ${esc(u.phone||"")}${u.plan?`<br>${on?U("Jusqu'au ","Until "):U("Expiré le ","Expired on ")}${fmtDate(u.until)}`:""}</small>
+ <div class="mini"><button class="g" onclick="admSet('${u.uid}','pro')">+30 j Pro</button><button class="g" onclick="admSet('${u.uid}','atelier')">+30 j Atelier</button><button class="r" onclick="admStop('${u.uid}')">Arrêter</button></div></div>`; };
+async function admLoad(tab){
+ const body=()=>document.getElementById("admBody"); if(!body()) return;
+ if(!window.RA||!RA.pending){ body().innerHTML=admErr({message:"connexion indisponible"}); return; }
+ try{
+  const [reqs,users]=await Promise.all([RA.pending(),RA.allUsers()]); ADM.reqs=reqs; ADM.users=users;
+  const now=Date.now(), act=users.filter(u=>u.plan&&u.until>now).length;
+  const st=document.getElementById("admStats"); if(st) st.innerHTML=`<div class="kpi"><b>${act}</b><small>Abonnés actifs</small></div><div class="kpi"><b>${reqs.length}</b><small>En attente</small></div><div class="kpi"><b>${users.length}</b><small>Comptes</small></div>`;
+  if(!body()) return;
+  if(tab==="demandes"){
+   body().innerHTML=`<div class="sec"><h3>Demandes en attente</h3></div>`+(reqs.length?reqs.map(r=>`<div class="li" style="display:block"><b>${AT[r.plan]||r.plan}</b> · ${Number(r.amount).toLocaleString("fr-FR")} FCFA <span class="pillb o">en attente</span>${r.method?`<span class="pillb">${esc(r.method)}</span>`:""}
+    <small style="display:block;color:var(--mut);margin-top:3px">${esc(r.email||r.phone||r.uid)}<br>Réf : ${esc(r.reference||"")} · Payé par : ${esc(r.payerPhone||"—")}<br>${r.createdAt?when(r.createdAt):""}</small>
+    <div class="mini"><button class="g" onclick="admApprove('${r.id}')">Valider et activer</button><button class="r" onclick="admReject('${r.id}')">Refuser</button></div></div>`).join(""):`<p class="mut" style="margin:0 16px">Aucune demande en attente.</p>`);
+  } else if(tab==="abonnes"){
+   const f=ADM.f, q=ADM.q.toLowerCase();
+   let list=users.filter(u=>f==="actifs"?(u.plan&&u.until>now):f==="expires"?(u.plan&&u.until<=now):true);
+   if(q) list=list.filter(u=>((u.email||"")+(u.phone||"")+(u.name||"")).toLowerCase().includes(q));
+   body().innerHTML=`<div class="seg">${[["actifs","En cours"],["expires","Expirés"],["tous","Tous"]].map(([k,n])=>`<button class="${f===k?"on":""}" onclick="ADM.f='${k}';admLoad('abonnes')">${n}</button>`).join("")}</div>
+    <div style="padding:0 16px"><input placeholder="Chercher (email, nom, numéro)" value="${esc(ADM.q)}" onchange="ADM.q=this.value;admLoad('abonnes')"></div>
+    <div class="sec"><h3>${list.length} client${list.length>1?"s":""}</h3></div>`+(list.map(userCard).join("")||`<p class="mut" style="margin:0 16px">Aucun client.</p>`);
+  } else if(tab==="lecons"){
+   ADM.lessons=await RA.allLessons();
+   body().innerHTML=`<div class="sec"><h3>Leçons ajoutées (${ADM.lessons.length})</h3><a href="#/admin/ajouter" onclick="ADM.edit=null">+ Ajouter</a></div>`+(ADM.lessons.length?ADM.lessons.map(l=>`<div class="li" style="display:block"><div style="display:flex;gap:10px;align-items:center"><div class="th">${l.image?`<img src="${l.image}" alt="">`:pcbArt("fs"+l.id,catIdx(l.categorie))}</div><div style="flex:1"><b>${esc(l.titre)}</b> <span class="pillb ${l.statut==="publie"?"g":"o"}">${l.statut==="publie"?"publiée":"brouillon"}</span><small style="display:block;color:var(--mut)">${esc(l.categorie)} · ${esc(l.niveau)} · ${esc(l.acces)}</small></div></div>
+    <div class="mini"><button onclick="admEdit('${l.id}')">Modifier</button><button class="g" onclick="admPub('${l.id}','${l.statut==="publie"?"brouillon":"publie"}')">${l.statut==="publie"?"Dépublier":"Publier"}</button><button class="r" onclick="admDel('${l.id}')">Supprimer</button></div></div>`).join(""):`<p class="mut" style="margin:0 16px">Aucune leçon ajoutée pour le moment. Les 60 leçons de base sont déjà dans le site.</p>`);
+  } else { body().innerHTML=admForm(ADM.edit?ADM.lessons.find(x=>x.id===ADM.edit)||{}:{}); }
+ }catch(e){ if(body()) body().innerHTML=admErr(e); }
+}
+function admForm(d){
+ const cn=[...new Set(cats().map(c=>c.name))], q=(d.quiz&&d.quiz[0])||{choix:[],reponse:0}, v=(x)=>esc(x==null?"":x);
+ const sel=(id,arr,cur)=>`<select id="${id}">${arr.map(o=>`<option ${o===cur?"selected":""}>${o}</option>`).join("")}</select>`;
+ return `<div class="sec"><h3>${d.id?"Modifier la leçon":"Ajouter une leçon"}</h3></div>
+ <label class="fld">Titre<input id="fT" value="${v(d.titre)}" placeholder="Ex : Remplacer un connecteur de charge"></label>
+ <label class="fld">Catégorie<input id="fC" list="fCl" value="${v(d.categorie)}" placeholder="Choisis ou écris une nouvelle catégorie"><datalist id="fCl">${cn.map(c=>`<option value="${esc(c)}">`).join("")}</datalist></label>
+ <label class="fld">Niveau${sel("fN",NIV,d.niveau||"Débutant")}</label>
+ <label class="fld">Accès${sel("fA",["gratuit","pro","atelier"],d.acces||"pro")}</label>
+ <label class="fld">Durée (minutes)<input id="fD" type="number" value="${v(d.duree_minutes||10)}"></label>
+ <label class="fld">Introduction<textarea id="fI">${v(d.introduction)}</textarea></label>
+ <label class="fld">À retenir (un point par ligne)<textarea id="fR">${(d.a_retenir||[]).map(esc).join("\n")}</textarea></label>
+ <label class="fld">Étapes (une étape par ligne)<textarea id="fE">${(d.etapes||[]).map(esc).join("\n")}</textarea></label>
+ <label class="fld">Erreurs à éviter (une par ligne)<textarea id="fX">${(d.erreurs_frequentes||[]).map(esc).join("\n")}</textarea></label>
+ <label class="fld">Question de quiz (facultatif)<input id="fQ" value="${v(q.question)}"></label>
+ ${[0,1,2].map(i=>`<label class="fld" style="display:flex;gap:8px;align-items:center"><input type="radio" name="fQr" value="${i}" ${(q.reponse||0)===i?"checked":""} style="width:22px;margin:0"><input id="fQ${i+1}" value="${v(q.choix[i])}" placeholder="Réponse ${i+1}${i===0?" (coche la bonne)":""}" style="margin:0"></label>`).join("")}
+ <label class="fld">Image (facultatif)<input id="fImg" type="file" accept="image/*"></label>${d.image?`<div class="th" style="margin:8px 16px;width:120px;height:90px"><img src="${d.image}" alt=""></div>`:""}
+ <div class="pg"><button class="btn b-grn" onclick="admSave(true)">Publier</button><button class="btn b-ghost" onclick="admSave(false)">Enregistrer en brouillon</button>${d.id?`<a class="btn b-ghost" href="#/admin/lecons" onclick="ADM.edit=null">Annuler</a>`:""}</div>`;
+}
+function readImg(file,max=800){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>{ const im=new Image(); im.onload=()=>{ const k=Math.min(1,max/Math.max(im.width,im.height)); const c=document.createElement("canvas"); c.width=Math.round(im.width*k); c.height=Math.round(im.height*k); c.getContext("2d").drawImage(im,0,0,c.width,c.height); let q=.78,u=c.toDataURL("image/jpeg",q); while(u.length>600000&&q>.3){ q-=.1; u=c.toDataURL("image/jpeg",q); } res(u); }; im.onerror=rej; im.src=r.result; }; r.onerror=rej; r.readAsDataURL(file); }); }
+async function admSave(publish){
+ const g=id=>document.getElementById(id).value.trim(), lines=id=>g(id).split("\n").map(x=>x.trim()).filter(Boolean);
+ const d={titre:g("fT"),categorie:g("fC"),niveau:g("fN"),acces:g("fA"),duree_minutes:+g("fD")||10,introduction:g("fI"),a_retenir:lines("fR"),etapes:lines("fE"),erreurs_frequentes:lines("fX"),statut:publish?"publie":"brouillon"};
+ if(!d.titre||!d.categorie||!d.etapes.length){ toast("Titre, catégorie et au moins une étape sont obligatoires."); return; }
+ const q=g("fQ"), ch=[g("fQ1"),g("fQ2"),g("fQ3")].filter(Boolean); d.quiz=[];
+ if(q&&ch.length>=2){ const r=document.querySelector('input[name=fQr]:checked'); d.quiz=[{question:q,choix:ch,reponse:Math.min(+(r?r.value:0),ch.length-1)}]; }
+ try{
+  const f=document.getElementById("fImg").files[0]; if(f) d.image=await readImg(f); else if(ADM.edit){ const o=ADM.lessons.find(x=>x.id===ADM.edit); if(o&&o.image) d.image=o.image; }
+  await RA.saveLesson(ADM.edit,d); toast(publish?"Leçon publiée ✅":"Brouillon enregistré ✅"); ADM.edit=null; await RA.loadLessons(); location.hash="#/admin/lecons"; render();
+ }catch(e){ toast("Échec : "+((e&&(e.code||e.message))||e)); }
+}
+function admEdit(id){ ADM.edit=id; location.hash="#/admin/ajouter"; }
+async function admPub(id,st){ try{ await RA.lessonStatus(id,st); await RA.loadLessons(); toast(st==="publie"?"Leçon publiée ✅":"Leçon dépubliée"); }catch(e){ toast("Échec : "+((e&&e.message)||e)); } admLoad("lecons"); }
+async function admDel(id){ if(!confirm("Supprimer cette leçon ?")) return; try{ await RA.deleteLesson(id); await RA.loadLessons(); toast("Leçon supprimée"); }catch(e){ toast("Échec : "+((e&&e.message)||e)); } admLoad("lecons"); }
+async function admApprove(id){ const r=ADM.reqs.find(x=>x.id===id); if(!r||!PLANS[r.plan]) return; try{ await RA.approve(r,PLANS[r.plan].days); toast("Abonnement "+AT[r.plan]+" activé ✅"); }catch(e){ toast("Échec : "+((e&&e.message)||e)); } admLoad("demandes"); }
+async function admReject(id){ try{ await RA.reject(id); toast("Demande refusée"); }catch(e){ toast("Échec : "+((e&&e.message)||e)); } admLoad("demandes"); }
+async function admSet(uid,plan){ try{ await RA.setPlan(uid,plan,PLANS[plan].days); toast("Abonnement mis à jour ✅"); }catch(e){ toast("Échec : "+((e&&e.message)||e)); } admLoad("abonnes"); }
+async function admStop(uid){ try{ await RA.stopPlan(uid); toast("Abonnement arrêté"); }catch(e){ toast("Échec : "+((e&&e.message)||e)); } admLoad("abonnes"); }
+
+/* ---- Navigation ---- */
+const PANELS=["menu","parametres","aide","apropos","historique","telechargements","abonnement","payer","certificats","connexion","compte","langue","politique"];
+const PANEL_TITLE={connexion:()=>tr("loginTitle"),compte:()=>tr("myAccount"),langue:()=>tr("language")};
+const NAV_OF={accueil:"accueil",analyser:"accueil",recherche:"accueil",progres:"accueil",categories:"lecons",liste:"lecons",lecons:"lecons",lecon:"lecons",quiz:"quiz",profil:"profil",admin:"admin"};
+let lastBase="#/accueil"; const pstack=[];
+function go(p){ location.hash="#/"+p; }
+function closePanel(){ if(!document.body.classList.contains("pan")) return; location.hash=lastBase; }
+function panelBack(){ if(pstack.length>1){ pstack.pop(); location.hash=pstack[pstack.length-1]; } else closePanel(); }
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closePanel(); });
+const NEEDS=["abonnement","payer","compte","admin"];
+function buildNav(page){
+ const cur=NAV_OF[page]||"accueil";
+ const it=[["accueil","🏠",U("Accueil","Home")],["lecons","📘",U("Leçons","Lessons")],["quiz","❓","Quiz"],["profil","👤",U("Profil","Profile")]];
+ if(isAdmin()) it.push(["admin","👑","Admin"]);
+ document.getElementById("nav").innerHTML=it.map(([h,ic,l])=>`<a href="#/${h}" class="${h===cur?"act":""}"><b>${ic}</b><span>${l}</span></a>`).join("");
+}
+function render(){
+ document.documentElement.lang=lang==="bm"?"bm":lang;
+ const parts=(location.hash.replace("#/","")||"accueil").split("/").map(x=>{ try{return decodeURIComponent(x)}catch(e){return x} });
+ const page=parts[0]||"accueil", isPanel=PANELS.includes(page);
+ const basePage=(isPanel?lastBase:location.hash).replace("#/","").split("/")[0]||"accueil";
+ if(!isPanel) lastBase=location.hash||"#/accueil";
+ if(isPanel){ const i=pstack.indexOf(location.hash); if(i>-1) pstack.length=i+1; else pstack.push(location.hash); } else pstack.length=0;
+ document.body.classList.toggle("pan",isPanel);
+ const nonav=["bienvenue","lecon"].includes(isPanel?basePage:page)||((isPanel?basePage:page)==="quiz"&&parts[1]==="run"&&!isPanel);
+ document.body.classList.toggle("nonav",nonav);
+ buildNav(isPanel?basePage:page);
+ const V={accueil:vHome,bienvenue:vWelcome,analyser:vAnalyzePage,categories:vCategories,liste:()=>vLessonsList(parts),lecons:()=>vLessonsList(parts),lecon:()=>vLesson(parts),recherche:vSearch,
+  quiz:()=>parts[1]==="run"?vQuizRun(parts):vQuizList(),progres:vProgress,profil:vProfile,admin:()=>vAdmin(parts),menu:vMenu,parametres:vSettings,aide:vHelp,apropos:vAbout,historique:vHistory,
+  telechargements:vDownloads,abonnement:vSub,payer:()=>vPay(parts),certificats:vCerts,connexion:vLoginPage,compte:vAccount,langue:vLang,politique:()=>vPolicy(parts),pro:()=>vLessonsList(["lecons"]),atelier:()=>vLessonsList(["lecons"])};
+ const target=document.getElementById(isPanel?"panelBody":"app");
+ const toTop=()=>{ if(isPanel) document.getElementById("panel").scrollTop=0; else window.scrollTo(0,0); };
+ const ensureBase=()=>{ const app=document.getElementById("app"); if(app.innerHTML.trim()) return; const bp=basePage; const f=V[bp]; const needs=NEEDS.includes(bp)&&!user(); app.innerHTML=(f&&!needs&&bp!=="bienvenue"&&!PANELS.includes(bp)?f:vHome)(); if(bp==="analyser") bindAnalyze(); };
+ if(NEEDS.includes(page)&&!user()){
+  if(isPanel) ensureBase();
+  const w=`<div class="pg" style="padding-top:12px">${authReady()?vLogin():`<p class="mut" style="text-align:center;margin-top:40px"><span class="spin"></span> ${tr("loading")}</p>`}</div>`;
+  target.innerHTML=(isPanel?topbar(tr("loginTitle"),{panel:true}):topbar(tr("loginTitle"),{back:false}))+w; toTop(); if(authReady()) bindLogin(); return;
+ }
+ let html=(V[page]||vHome)();
+ if(isPanel){ ensureBase(); if(page!=="menu"&&html.indexOf('class="tb"')===-1){ html=html.replace(/<a class="back"[^>]*>.*?<\/a>/,""); html=topbar((PANEL_TITLE[page]||(()=>""))(),{panel:true})+`<div class="pg">${html}</div>`; } }
+ target.innerHTML=html; toTop();
+ if(!isPanel&&page==="analyser") bindAnalyze();
+}
+window.addEventListener("hashchange",()=>render());
+function runSplash(){
+ const sp=document.getElementById("splash"); if(!sp) return; const bar=sp.querySelector(".sp-bar i"), pc=document.getElementById("sp-pct"); let p=0;
+ const t=setInterval(()=>{ p+=8; if(p>=100){ p=100; clearInterval(t); setTimeout(()=>{ sp.classList.add("out"); setTimeout(()=>sp.remove(),450); },150); } bar.style.width=p+"%"; pc.textContent=p+"%"; },70);
+}
+if(!location.hash && !S.get("welcomed",false)) location.hash="#/bienvenue";
+runSplash(); render();
+
 </script>
-
-<!-- ============ CONNEXION FIREBASE (Google + numéro de téléphone) ============ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult,
   RecaptchaVerifier, signInWithPhoneNumber, signOut, setPersistence, browserLocalPersistence }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, collection, query, where, getDocs, serverTimestamp, Timestamp }
+import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, collection, query, where, getDocs, serverTimestamp, Timestamp, deleteDoc }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* >>> CONFIGURATION FIREBASE DU PROJET <<< */
@@ -958,7 +1303,7 @@ else {
     try{
       const ref = doc(db,"users",u.uid); let s = await getDoc(ref);
       if(!s.exists()){
-        await setDoc(ref,{ uid:u.uid, email:(u.email||"").toLowerCase(), phone:u.phoneNumber||"", name:u.displayName||"", createdAt:serverTimestamp() });
+        await setDoc(ref,{ uid:u.uid, email:(u.email||"").toLowerCase(), phone:u.phoneNumber||"", name:u.displayName||"", createdAt:serverTimestamp(), consentAt:serverTimestamp(), consentVersion:"2026-11" });
         s = await getDoc(ref);
       }
       const d = s.data()||{}, old = RA.profile;
@@ -967,11 +1312,11 @@ else {
     }catch(e){ console.warn("Firestore indisponible :", e && e.code); RA.profile = null; RA.dbError = true; return false; }
   }
   RA.refresh = () => RA.user ? loadProfile(RA.user) : Promise.resolve(false);
-  RA.sendPayment = async ({plan,amount,reference,payerPhone}) => {
+  RA.sendPayment = async ({plan,amount,reference,payerPhone,method}) => {
     const u = auth.currentUser; if(!u) throw new Error("non connecté");
-    await addDoc(collection(db,"paymentRequests"),{ uid:u.uid, email:(u.email||"").toLowerCase(), phone:u.phoneNumber||"", plan, amount:Number(amount), reference, payerPhone:payerPhone||"", status:"pending", createdAt:serverTimestamp() });
+    await addDoc(collection(db,"paymentRequests"),{ uid:u.uid, email:(u.email||"").toLowerCase(), phone:u.phoneNumber||"", plan, amount:Number(amount), reference, payerPhone:payerPhone||"", method:method||"", status:"pending", createdAt:serverTimestamp() });
   };
-  const toReq = d => { const x=d.data(); return { id:d.id, uid:x.uid, email:x.email, phone:x.phone, plan:x.plan, amount:x.amount, reference:x.reference, payerPhone:x.payerPhone, status:x.status, createdAt:ms(x.createdAt) }; };
+  const toReq = d => { const x=d.data(); return { id:d.id, uid:x.uid, email:x.email, phone:x.phone, plan:x.plan, amount:x.amount, reference:x.reference, payerPhone:x.payerPhone, method:x.method, status:x.status, createdAt:ms(x.createdAt) }; };
   RA.myRequests = async () => { const u=auth.currentUser; if(!u) return []; const r=await getDocs(query(collection(db,"paymentRequests"),where("uid","==",u.uid))); return r.docs.map(toReq).sort((a,b)=>b.createdAt-a.createdAt); };
   RA.pending = async () => { const r=await getDocs(query(collection(db,"paymentRequests"),where("status","==","pending"))); return r.docs.map(toReq).sort((a,b)=>a.createdAt-b.createdAt); };
   const extend = async (uid, plan, days) => {
@@ -984,6 +1329,25 @@ else {
   RA.reject = id => updateDoc(doc(db,"paymentRequests",id),{ status:"rejected" });
   RA.setPlan = (uid, plan, days) => extend(uid, plan, days);
   RA.stopPlan = uid => setDoc(doc(db,"users",uid),{ planUntil:Timestamp.now() },{ merge:true });
+
+  RA.allUsers = async () => { const r=await getDocs(collection(db,"users")); return r.docs.map(d=>{ const x=d.data(); return { uid:d.id, email:x.email, phone:x.phone, name:x.name, plan:x.plan||"", until:ms(x.planUntil) }; }); };
+  const lessonOut = d => { const x=d.data(); return Object.assign({ id:d.id }, x, { createdAt:ms(x.createdAt) }); };
+  RA.allLessons = async () => { const r=await getDocs(collection(db,"lessons")); return r.docs.map(lessonOut).sort((a,b)=>b.createdAt-a.createdAt); };
+  RA.saveLesson = async (id, data) => {
+    if(id){ await setDoc(doc(db,"lessons",id), Object.assign({}, data, { updatedAt:serverTimestamp() }), { merge:true }); return id; }
+    const r = await addDoc(collection(db,"lessons"), Object.assign({}, data, { createdAt:serverTimestamp() })); return r.id;
+  };
+  RA.lessonStatus = (id, statut) => updateDoc(doc(db,"lessons",id), { statut });
+  RA.deleteLesson = id => deleteDoc(doc(db,"lessons",id));
+  RA.loadLessons = async () => {
+    try{
+      let lv=["gratuit"]; const P=RA.profile;
+      if(window.isAdmin && isAdmin()) lv=["gratuit","pro","atelier"];
+      else if(P && P.plan && P.until>Date.now()) lv = P.plan==="atelier" ? ["gratuit","pro","atelier"] : ["gratuit","pro"];
+      const r = await getDocs(query(collection(db,"lessons"), where("statut","==","publie"), where("acces","in",lv)));
+      window.FSL = r.docs.map(d=>window.normFS(lessonOut(d))).sort((a,b)=>a.ts-b.ts);
+    }catch(e){ console.warn("Leçons Firestore indisponibles :", e && e.code); }
+  };
   RA.findUsers = async (q) => {
     q = (q||"").trim(); let f, v;
     if(q.includes("@")){ f="email"; v=q.toLowerCase(); }
@@ -1012,7 +1376,8 @@ else {
   getRedirectResult(auth).catch(()=>{});
   onAuthStateChanged(auth, (u) => {
     RA.user = u; RA.ready = true;
-    if(u){ loadProfile(u).then(()=>{ window.render && render(); }); } else { RA.profile = null; }
+    if(!u) RA.profile = null;
+    (u ? loadProfile(u) : Promise.resolve()).then(()=>RA.loadLessons()).then(()=>{ window.render && render(); });
     if(u){
       /* Ancien abonnement enregistré sur cet appareil : on le rattache au compte */
       try{ const old=localStorage.getItem("ra_sub"); if(old && !localStorage.getItem("ra_sub_"+u.uid)){ localStorage.setItem("ra_sub_"+u.uid, old); localStorage.removeItem("ra_sub"); } }catch(e){}
