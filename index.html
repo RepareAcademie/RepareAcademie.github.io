@@ -1186,6 +1186,10 @@ function admForm(d){
  const cn=[...new Set(cats().map(c=>c.name))], q=(d.quiz&&d.quiz[0])||{choix:[],reponse:0}, v=(x)=>esc(x==null?"":x);
  const sel=(id,arr,cur)=>`<select id="${id}">${arr.map(o=>`<option ${o===cur?"selected":""}>${o}</option>`).join("")}</select>`;
  return `<div class="sec"><h3>${d.id?"Modifier la leçon":"Ajouter une leçon"}</h3></div>
+ <div class="box" style="margin:8px 16px"><h4 style="margin:0 0 6px">📋 Coller une leçon complète</h4><p class="mut" style="margin:0 0 8px;font-size:13px">Colle ici toute la leçon d'un seul coup (le modèle envoyé par Claude), puis touche « Publier ». Les cases se remplissent toutes seules.</p>
+ <textarea id="fPaste" style="min-height:220px" placeholder="TITRE : …&#10;CATÉGORIE : …&#10;NIVEAU : Débutant&#10;ACCÈS : pro&#10;DURÉE : 15&#10;INTRODUCTION :&#10;…&#10;À RETENIR :&#10;- …&#10;ÉTAPES :&#10;1. …&#10;ERREURS :&#10;- …&#10;QUIZ : question ?&#10;* bonne réponse&#10;- autre réponse"></textarea>
+ <button class="btn b-ghost" type="button" onclick="admFillPaste()" style="margin-top:8px">Remplir les cases automatiquement</button></div>
+ <details ${d.id?"open":""} style="margin:0 16px"><summary style="cursor:pointer;padding:10px 0;font-weight:600">Voir ou corriger les cases une par une</summary>
  <label class="fld">Titre<input id="fT" value="${v(d.titre)}" placeholder="Ex : Remplacer un connecteur de charge"></label>
  <label class="fld">Catégorie<input id="fC" list="fCl" value="${v(d.categorie)}" placeholder="Choisis ou écris une nouvelle catégorie"><datalist id="fCl">${cn.map(c=>`<option value="${esc(c)}">`).join("")}</datalist></label>
  <label class="fld">Niveau${sel("fN",NIV,d.niveau||"Débutant")}</label>
@@ -1198,10 +1202,39 @@ function admForm(d){
  <label class="fld">Question de quiz (facultatif)<input id="fQ" value="${v(q.question)}"></label>
  ${[0,1,2].map(i=>`<label class="fld" style="display:flex;gap:8px;align-items:center"><input type="radio" name="fQr" value="${i}" ${(q.reponse||0)===i?"checked":""} style="width:22px;margin:0"><input id="fQ${i+1}" value="${v(q.choix[i])}" placeholder="Réponse ${i+1}${i===0?" (coche la bonne)":""}" style="margin:0"></label>`).join("")}
  <label class="fld">Image (facultatif)<input id="fImg" type="file" accept="image/*"></label>${d.image?`<div class="th" style="margin:8px 16px;width:120px;height:90px"><img src="${d.image}" alt=""></div>`:""}
+ </details>
  <div class="pg"><button class="btn b-grn" onclick="admSave(true)">Publier</button><button class="btn b-ghost" onclick="admSave(false)">Enregistrer en brouillon</button>${d.id?`<a class="btn b-ghost" href="#/admin/lecons" onclick="ADM.edit=null">Annuler</a>`:""}</div>`;
+}
+function admParse(txt){
+ txt=(txt||"").trim(); if(!txt) return null;
+ if(txt[0]==="{"){ try{ return JSON.parse(txt); }catch(e){} }
+ const norm=x=>x.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z]/g,"");
+ const keyOf=h=>{ const n=norm(h); if(n==="titre")return"titre"; if(n.startsWith("categ"))return"categorie"; if(n==="niveau")return"niveau"; if(n==="acces")return"acces"; if(n.startsWith("duree"))return"duree_minutes"; if(n.startsWith("intro"))return"introduction"; if(n==="aretenir"||n==="pointscles")return"a_retenir"; if(n==="etapes"||n==="etape")return"etapes"; if(n.startsWith("erreur")||n==="aeviter")return"erreurs_frequentes"; if(n==="quiz"||n==="question")return"quiz"; if(n==="reponses"||n==="reponse")return"choix"; return null; };
+ const buf={}; let cur=null;
+ txt.split(/\r?\n/).forEach(line=>{ const m=line.match(/^\s*([A-Za-zÀ-ÿ' ]{3,25})\s*:\s*(.*)$/); const k=m&&keyOf(m[1]); if(k){ cur=k; buf[k]=buf[k]||[]; if(m[2].trim()) buf[k].push(m[2].trim()); } else if(cur&&line.trim()) buf[cur].push(line.trim()); });
+ const clean=x=>x.replace(/^([-•*·]|\d+\s*[.)])\s*/,"").trim(), d={};
+ ["titre","categorie","niveau","acces"].forEach(k=>{ if(buf[k]) d[k]=buf[k].join(" ").trim(); });
+ if(buf.duree_minutes) d.duree_minutes=parseInt(buf.duree_minutes.join(" "),10)||10;
+ if(buf.introduction) d.introduction=buf.introduction.join(" ");
+ ["a_retenir","etapes","erreurs_frequentes"].forEach(k=>{ if(buf[k]) d[k]=buf[k].map(clean).filter(Boolean); });
+ const ql=(buf.quiz||[]).concat(buf.choix||[]);
+ if(ql.length){ const ch=[]; let rep=0; ql.slice(1).forEach(l=>{ const ok=/^\s*\*|\(bonne\)|✓|✅/i.test(l); const t=clean(l).replace(/\(bonne\)|✓|✅/gi,"").trim(); if(t){ if(ok) rep=ch.length; ch.push(t); } }); d.quiz=[{question:clean(ql[0]),choix:ch.slice(0,3),reponse:Math.min(rep,2)}]; }
+ return d;
+}
+function admFillPaste(silent){
+ const box=document.getElementById("fPaste"); if(!box||!box.value.trim()) return false;
+ const d=admParse(box.value); if(!d||!d.titre){ toast("Je ne trouve pas le titre : la leçon doit commencer par « TITRE : … »."); return false; }
+ const set=(id,v)=>{ const e=document.getElementById(id); if(e&&v!=null&&v!=="") e.value=v; };
+ const pickOpt=(id,v)=>{ const e=document.getElementById(id); if(!e||!v) return; const n=x=>x.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,""); const o=[...e.options].find(o=>n(o.value)===n(v)||n(o.value).startsWith(n(v).slice(0,5))); if(o) e.value=o.value; };
+ set("fT",d.titre); set("fC",d.categorie); pickOpt("fN",d.niveau); pickOpt("fA",d.acces); set("fD",d.duree_minutes); set("fI",d.introduction);
+ set("fR",(d.a_retenir||[]).join("\n")); set("fE",(d.etapes||[]).join("\n")); set("fX",(d.erreurs_frequentes||[]).join("\n"));
+ const q=d.quiz&&d.quiz[0]; if(q){ set("fQ",q.question); (q.choix||[]).forEach((c,i)=>set("fQ"+(i+1),c)); const r=document.querySelector('input[name=fQr][value="'+(q.reponse||0)+'"]'); if(r) r.checked=true; }
+ if(!silent){ const dt=document.querySelector("#admBody details"); if(dt) dt.open=true; toast("Cases remplies ✅ Vérifie puis touche Publier."); }
+ return true;
 }
 function readImg(file,max=800){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>{ const im=new Image(); im.onload=()=>{ const k=Math.min(1,max/Math.max(im.width,im.height)); const c=document.createElement("canvas"); c.width=Math.round(im.width*k); c.height=Math.round(im.height*k); c.getContext("2d").drawImage(im,0,0,c.width,c.height); let q=.78,u=c.toDataURL("image/jpeg",q); while(u.length>600000&&q>.3){ q-=.1; u=c.toDataURL("image/jpeg",q); } res(u); }; im.onerror=rej; im.src=r.result; }; r.onerror=rej; r.readAsDataURL(file); }); }
 async function admSave(publish){
+ admFillPaste(true);
  const g=id=>document.getElementById(id).value.trim(), lines=id=>g(id).split("\n").map(x=>x.trim()).filter(Boolean);
  const d={titre:g("fT"),categorie:g("fC"),niveau:g("fN"),acces:g("fA"),duree_minutes:+g("fD")||10,introduction:g("fI"),a_retenir:lines("fR"),etapes:lines("fE"),erreurs_frequentes:lines("fX"),statut:publish?"publie":"brouillon"};
  if(!d.titre||!d.categorie||!d.etapes.length){ toast("Titre, catégorie et au moins une étape sont obligatoires."); return; }
@@ -1390,5 +1423,1246 @@ else {
   });
 }
 </script>
+<!-- ===== RÉPAR'ACADÉMIE : MAQUETTES RÉALISTES ZOOMABLES (69 leçons) — à coller juste avant </body> ===== -->
+<script>
+/* ===== Répar'Académie : maquettes réalistes zoomables ===== */
+(function(){
+"use strict";
+const MQ = window.MQ = {scenes:{}};
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+let _r = 1;
+const seed = s => { _r = 0; for (const c of String(s)) _r = (Math.imul(_r ^ c.charCodeAt(0), 16777619) + 2166136261) | 0; };
+const rnd = () => { _r = _r + 0x6D2B79F5 | 0; let t = Math.imul(_r ^ _r >>> 15, 1 | _r); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+const RR = (a,b) => a + (b-a)*rnd();
+const f1 = n => Math.round(n*10)/10;
+
+/* ---------- primitives ---------- */
+const rc = (x,y,w,h,f,o={}) => `<rect x="${f1(x)}" y="${f1(y)}" width="${f1(w)}" height="${f1(h)}"${o.rx?` rx="${o.rx}"`:""} fill="${f}"${o.s?` stroke="${o.s}" stroke-width="${o.sw||1}"`:""}${o.op!=null?` opacity="${o.op}"`:""}${o.t?` transform="${o.t}"`:""}/>`;
+const ci = (x,y,r,f,o={}) => `<circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(r)}" fill="${f}"${o.s?` stroke="${o.s}" stroke-width="${o.sw||1}"`:""}${o.op!=null?` opacity="${o.op}"`:""}/>`;
+const el = (x,y,rx,ry,f,o={}) => `<ellipse cx="${f1(x)}" cy="${f1(y)}" rx="${f1(rx)}" ry="${f1(ry)}" fill="${f}"${o.s?` stroke="${o.s}" stroke-width="${o.sw||1}"`:""}${o.op!=null?` opacity="${o.op}"`:""}/>`;
+const pa = (d,f,o={}) => `<path d="${d}" fill="${f||"none"}"${o.s?` stroke="${o.s}" stroke-width="${o.sw||1}"`:""}${o.lc?` stroke-linecap="${o.lc}"`:""}${o.lj?` stroke-linejoin="${o.lj}"`:""}${o.op!=null?` opacity="${o.op}"`:""}${o.da?` stroke-dasharray="${o.da}"`:""}/>`;
+const tx = (x,y,t,o={}) => `<text x="${f1(x)}" y="${f1(y)}" font-size="${o.s||14}" fill="${o.c||"#e8eef0"}" text-anchor="${o.a||"middle"}" font-family="${o.mono?"ui-monospace,Menlo,Consolas,monospace":"Arial,Helvetica,sans-serif"}" font-weight="${o.w||600}"${o.op!=null?` opacity="${o.op}"`:""}${o.r?` transform="rotate(${o.r} ${f1(x)} ${f1(y)})"`:""}>${esc(t)}</text>`;
+const G = (x,y,s,inner,r=0) => `<g transform="translate(${f1(x)} ${f1(y)})${r?` rotate(${r})`:""}${s!==1?` scale(${s})`:""}">${inner}</g>`;
+const shadow = (inner, dx=4, dy=7) => `<g transform="translate(${dx} ${dy})" opacity=".45" filter="url(#mqBlur)">${inner}</g>`;
+const arrow = (x1,y1,x2,y2,c="#ffb547",w=5) => { const a=Math.atan2(y2-y1,x2-x1), L=w*3.2; const p=(an)=>`${f1(x2-L*Math.cos(a+an))} ${f1(y2-L*Math.sin(a+an))}`; return pa(`M${f1(x1)} ${f1(y1)}L${f1(x2-L*.7*Math.cos(a))} ${f1(y2-L*.7*Math.sin(a))}`,"none",{s:c,sw:w,lc:"round"})+pa(`M${f1(x2)} ${f1(y2)}L${p(.45)}L${p(-.45)}Z`,c); };
+const carrow = (d,c="#ffb547",w=5) => pa(d,"none",{s:c,sw:w,lc:"round"});
+const tag = (x,y,t,c="#0f172a",bg="#fde68a",s=16) => { const w=t.length*s*.58+16; return rc(x-w/2,y-s*.95,w,s*1.5,bg,{rx:5})+tx(x,y+s*.3,t,{s,c,w:700}); };
+const bad = (x,y,s=1) => G(x,y,s,ci(0,0,22,"#c62828",{s:"#fff",sw:3})+pa("M-9 -9L9 9M9 -9L-9 9","none",{s:"#fff",sw:5,lc:"round"}));
+const good = (x,y,s=1) => G(x,y,s,ci(0,0,22,"#2f7d4f",{s:"#fff",sw:3})+pa("M-10 0L-3 8L11 -8","none",{s:"#fff",sw:5,lc:"round",lj:"round"}));
+const card = (x,y,w,h,title) => rc(x+4,y+6,w,h,"rgba(0,0,0,.35)",{rx:12})+rc(x,y,w,h,"#f4f1e8",{rx:12,s:"#cfc8b6"})+(title?rc(x,y,w,44,"#c47a22",{rx:12})+rc(x,y+30,w,14,"#c47a22")+tx(x+w/2,y+29,title,{s:20,c:"#fff",w:700}):"");
+
+/* ---------- définitions communes (insérées une seule fois dans la page) ---------- */
+MQ.defs = `<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs>
+<filter id="mqBlur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5"/></filter>
+<filter id="mqGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
+<radialGradient id="mqPcbB" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#1f7590"/><stop offset=".6" stop-color="#145a70"/><stop offset="1" stop-color="#0c3f51"/></radialGradient>
+<radialGradient id="mqPcbG" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#2f7f45"/><stop offset=".6" stop-color="#1f6534"/><stop offset="1" stop-color="#154a26"/></radialGradient>
+<radialGradient id="mqPcbK" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#2b3036"/><stop offset=".6" stop-color="#1c2025"/><stop offset="1" stop-color="#111417"/></radialGradient>
+<linearGradient id="mqShield" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e6eaec"/><stop offset=".45" stop-color="#b9c1c5"/><stop offset=".55" stop-color="#cfd6d9"/><stop offset="1" stop-color="#959ea3"/></linearGradient>
+<pattern id="mqDimple" width="10" height="10" patternUnits="userSpaceOnUse"><circle cx="5" cy="5" r="1.3" fill="#7d878c"/></pattern>
+<linearGradient id="mqGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7df92"/><stop offset=".5" stop-color="#d4a843"/><stop offset="1" stop-color="#a77a20"/></linearGradient>
+<linearGradient id="mqCu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0a46b"/><stop offset=".5" stop-color="#c8743c"/><stop offset="1" stop-color="#9a5226"/></linearGradient>
+<linearGradient id="mqTin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6f7f8"/><stop offset=".55" stop-color="#c3c8cc"/><stop offset="1" stop-color="#8d959a"/></linearGradient>
+<linearGradient id="mqTinH" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8d959a"/><stop offset=".45" stop-color="#f6f7f8"/><stop offset="1" stop-color="#9aa1a6"/></linearGradient>
+<linearGradient id="mqIC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34383b"/><stop offset="1" stop-color="#141618"/></linearGradient>
+<linearGradient id="mqCap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfa877"/><stop offset=".5" stop-color="#a7804f"/><stop offset="1" stop-color="#7d5c36"/></linearGradient>
+<linearGradient id="mqRes" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a3a"/><stop offset="1" stop-color="#121212"/></linearGradient>
+<linearGradient id="mqSteel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef1f3"/><stop offset=".5" stop-color="#a9b1b6"/><stop offset="1" stop-color="#6f777c"/></linearGradient>
+<linearGradient id="mqSteelV" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6f777c"/><stop offset=".45" stop-color="#eef1f3"/><stop offset="1" stop-color="#7f878c"/></linearGradient>
+<linearGradient id="mqBat" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3d4248"/><stop offset=".5" stop-color="#2a2e33"/><stop offset="1" stop-color="#1c1f23"/></linearGradient>
+<linearGradient id="mqFpc" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b5620e"/><stop offset=".5" stop-color="#e5952f"/><stop offset="1" stop-color="#b5620e"/></linearGradient>
+<linearGradient id="mqFpcV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b5620e"/><stop offset=".5" stop-color="#e5952f"/><stop offset="1" stop-color="#b5620e"/></linearGradient>
+<linearGradient id="mqHandle" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b8fd6"/><stop offset=".5" stop-color="#2f5fa6"/><stop offset="1" stop-color="#1d3d70"/></linearGradient>
+<linearGradient id="mqGrip" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4f55"/><stop offset=".5" stop-color="#25292d"/><stop offset="1" stop-color="#131518"/></linearGradient>
+<linearGradient id="mqRed" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ef5350"/><stop offset="1" stop-color="#8e1b1b"/></linearGradient>
+<linearGradient id="mqYellow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd54f"/><stop offset="1" stop-color="#c79100"/></linearGradient>
+<linearGradient id="mqCase" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b4046"/><stop offset="1" stop-color="#1f2327"/></linearGradient>
+<linearGradient id="mqLcd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9d3a6"/><stop offset="1" stop-color="#93b07e"/></linearGradient>
+<linearGradient id="mqLed" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f1a12"/><stop offset="1" stop-color="#050806"/></linearGradient>
+<radialGradient id="mqLens" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#4a5d8f"/><stop offset=".35" stop-color="#1a2240"/><stop offset=".8" stop-color="#05070d"/><stop offset="1" stop-color="#000"/></radialGradient>
+<radialGradient id="mqRing" cx=".5" cy=".5" r=".5"><stop offset=".78" stop-color="#2a2d31"/><stop offset=".9" stop-color="#c3c9cd"/><stop offset="1" stop-color="#6b7176"/></radialGradient>
+<radialGradient id="mqScrew" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#f2f4f5"/><stop offset=".6" stop-color="#a7aeb2"/><stop offset="1" stop-color="#6c7378"/></radialGradient>
+<radialGradient id="mqHeat" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffdd55" stop-opacity=".95"/><stop offset=".45" stop-color="#ff7a1a" stop-opacity=".6"/><stop offset="1" stop-color="#ff3d00" stop-opacity="0"/></radialGradient>
+<linearGradient id="mqAir" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9a3c" stop-opacity=".75"/><stop offset="1" stop-color="#ff5a1f" stop-opacity=".08"/></linearGradient>
+<radialGradient id="mqSolder" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#c9ced2"/><stop offset="1" stop-color="#7c858a"/></radialGradient>
+<linearGradient id="mqFlux" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd27a" stop-opacity=".9"/><stop offset="1" stop-color="#c98a22" stop-opacity=".7"/></linearGradient>
+<linearGradient id="mqWater" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6ec6ff"/><stop offset="1" stop-color="#1e6fb8"/></linearGradient>
+<linearGradient id="mqMatG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f6f5a"/><stop offset="1" stop-color="#1f4f40"/></linearGradient>
+<linearGradient id="mqFr4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9c38a"/><stop offset="1" stop-color="#9c9562"/></linearGradient>
+<linearGradient id="mqGlass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3c4a5e"/><stop offset=".5" stop-color="#121821"/><stop offset="1" stop-color="#05070b"/></linearGradient>
+<linearGradient id="mqPaper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf9f3"/><stop offset="1" stop-color="#ece7da"/></linearGradient>
+<linearGradient id="mqOx" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7fc29b"/><stop offset="1" stop-color="#3f8f6a"/></linearGradient>
+<pattern id="mqGrille" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="2" fill="#0b0c0d"/></pattern>
+<pattern id="mqKnurl" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M0 6L6 0" stroke="#000" stroke-opacity=".35" stroke-width="1.4"/></pattern>
+<pattern id="mqBraid" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M0 0L8 8M8 0L0 8" stroke="#8a4b1d" stroke-width="1.6"/></pattern>
+<pattern id="mqMatGrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="1.2"/></pattern>
+</defs></svg>`;
+
+/* ---------- pièces électroniques ---------- */
+function traces(x,y,w,h,n,col="#2a8aa3"){ let s=`<g stroke="${col}" stroke-width="1.6" fill="none" opacity=".5">`; for(let i=0;i<n;i++){ let px=RR(x,x+w),py=RR(y,y+h),d=`M${f1(px)} ${f1(py)}`; for(let k=0;k<3;k++){ if(rnd()<.5) px=Math.min(x+w,Math.max(x,px+RR(-70,70))); else py=Math.min(y+h,Math.max(y,py+RR(-70,70))); d+=`L${f1(px)} ${f1(py)}`; } s+=`<path d="${d}"/><circle cx="${f1(px)}" cy="${f1(py)}" r="2.4" fill="#c8b06a" stroke="none"/>`; } return s+"</g>"; }
+function smdTiny(x,y){ const k=rnd(); const w=k<.55?12:k<.8?9:15, h=k<.55?6:5, body=k<.55?"url(#mqCap)":k<.8?"url(#mqRes)":"#c9a35f"; const v=rnd()<.5; return G(x,y,1,rc(-w/2,-h/2,w,h,body,{rx:.8})+rc(-w/2,-h/2,2.6,h,"url(#mqTin)")+rc(w/2-2.6,-h/2,2.6,h,"url(#mqTin)"),v?90:0); }
+function cluster(x,y,w,h,n){ let s=""; for(let i=0;i<n;i++) s+=smdTiny(RR(x+8,x+w-8),RR(y+6,y+h-6)); return s; }
+function pcb(x,y,w,h,o={}){ seed(o.seed||(x+":"+y)); const fill=o.color==="green"?"url(#mqPcbG)":o.color==="black"?"url(#mqPcbK)":"url(#mqPcbB)", tc=o.color==="green"?"#4fa86a":o.color==="black"?"#4b5560":"#2a8aa3";
+  let s=rc(x+5,y+8,w,h,"rgba(0,0,0,.45)",{rx:o.rx??12})+rc(x,y,w,h,fill,{rx:o.rx??12,s:"#0a2a33",sw:2});
+  if(o.traces!==0) s+=traces(x+6,y+6,w-12,h-12,o.traces||Math.round(w*h/5000),tc);
+  if(o.vias!==0){ for(let i=0;i<(o.vias||Math.round(w*h/2500));i++) s+=ci(RR(x+6,x+w-6),RR(y+6,y+h-6),1.9,"#c8b06a",{op:.8}); }
+  if(o.smd) s+=cluster(x+10,y+10,w-20,h-20,o.smd);
+  return s; }
+function shield(x,y,w,h,label){ return rc(x+3,y+5,w,h,"rgba(0,0,0,.45)",{rx:5})+rc(x,y,w,h,"url(#mqShield)",{rx:5,s:"#8d969a"})+rc(x,y,w,h,"url(#mqDimple)",{rx:5,op:.5})+rc(x+8,y+8,w-16,h-16,"none",{rx:3,s:"rgba(255,255,255,.4)"})+(label?tx(x+w/2,y+h-12,label,{s:12,c:"#59636a",w:700}):""); }
+function ic(x,y,w,h,label,o={}){ let s=rc(x+2,y+3,w,h,"rgba(0,0,0,.5)",{rx:2});
+  if(o.pins){ const n=o.pins; for(let i=0;i<n;i++){ const p=x+6+i*(w-12)/(n-1); s+=rc(p-1.6,y-5,3.2,5.5,"url(#mqTin)")+rc(p-1.6,y+h-.5,3.2,5.5,"url(#mqTin)"); if(o.quad){ const q=y+6+i*(h-12)/(n-1); s+=rc(x-5,q-1.6,5.5,3.2,"url(#mqTin)")+rc(x+w-.5,q-1.6,5.5,3.2,"url(#mqTin)"); } } }
+  s+=rc(x,y,w,h,"url(#mqIC)",{rx:2.5})+ci(x+7,y+7,2.4,"#5a5f63");
+  if(label) s+=tx(x+w/2,y+h/2+4,label,{s:Math.min(13,w/4.2),c:"#a5adb1",mono:1,w:500});
+  if(o.sub) s+=tx(x+w/2,y+h/2+18,o.sub,{s:Math.min(9,w/6),c:"#7d868a",mono:1,w:400});
+  return s; }
+/* composant CMS vu en gros plan : k = R, C, L, D, F, LED ; L = longueur */
+function smd(x,y,k,L=80,o={}){ const H=L*.5, e=L*.2; let b="";
+  const body={R:"url(#mqRes)",C:"url(#mqCap)",L:"#4a4f53",D:"url(#mqRes)",F:"#ece9e0",LED:"#f3f1ea"}[k];
+  b+=rc(-L/2+3,-H/2+5,L,H,"rgba(0,0,0,.45)",{rx:3});
+  b+=rc(-L/2,-H/2,L,H,body,{rx:L*.04});
+  if(k!=="L"||true) b+=rc(-L/2,-H/2,e,H,"url(#mqTin)",{rx:L*.03})+rc(L/2-e,-H/2,e,H,"url(#mqTin)",{rx:L*.03});
+  if(k==="R") b+=tx(0,H*.18,o.code||"103",{s:H*.5,c:"#f2f2f2",mono:1,w:500});
+  if(k==="L") b+=tx(0,H*.18,o.code||"4R7",{s:H*.45,c:"#d7dadc",mono:1,w:500});
+  if(k==="D") b+=rc(-L/2+e+L*.06,-H/2,L*.08,H,"#bfc5c8");
+  if(k==="F") b+=tx(0,H*.2,o.code||"F",{s:H*.5,c:"#333",w:700});
+  if(k==="LED") b+=el(0,0,L*.22,H*.32,"#fff59d",{s:"#e0c64a",sw:1.5})+ci(0,0,L*.07,"#ffeb3b");
+  return G(x,y,1,b,o.rot||0); }
+function bga(x,y,w,h,n){ let s=rc(x,y,w,h,"#2a6b4c",{rx:3}); const st=w/n; for(let i=0;i<n;i++) for(let j=0;j<Math.round(h/st);j++) s+=ci(x+st/2+i*st,y+st/2+j*st,st*.32,"url(#mqSolder)"); return s; }
+function btb(x,y,w,h){ let s=rc(x+2,y+3,w,h,"rgba(0,0,0,.45)",{rx:2})+rc(x,y,w,h,"#e8e2d6",{rx:2,s:"#9c9486",sw:.8})+rc(x+4,y+h*.18,w-8,h*.64,"#2a2a2a",{rx:1.5}); const n=Math.max(4,Math.floor((w-14)/5)); for(let i=0;i<n;i++){ const p=x+7+i*(w-14)/(n-1); s+=rc(p-1,y+h*.2,2.2,h*.14,"url(#mqGold)")+rc(p-1,y+h*.66,2.2,h*.14,"url(#mqGold)"); } return s; }
+function fpcConn(x,y,w,h){ let s=rc(x+2,y+3,w,h,"rgba(0,0,0,.45)",{rx:2})+rc(x,y,w,h,"#efe9dc",{rx:2,s:"#a69e8f"})+rc(x+3,y+h*.55,w-6,h*.35,"#2b2b2b",{rx:1}); const n=Math.floor((w-8)/6); for(let i=0;i<n;i++) s+=rc(x+5+i*6,y+h,3,7,"url(#mqTin)"); s+=rc(x-6,y+h*.2,6,h*.6,"url(#mqTin)")+rc(x+w,y+h*.2,6,h*.6,"url(#mqTin)"); return s; }
+function screw(x,y,r=11){ return ci(x+1,y+2,r,"rgba(0,0,0,.4)")+ci(x,y,r,"url(#mqScrew)",{s:"#555",sw:.8})+pa(`M${x-r*.5} ${y}H${x+r*.5}M${x} ${y-r*.5}V${y+r*.5}`,"none",{s:"#3a3a3a",sw:r*.2,lc:"round"}); }
+function usbc(x,y,s=1,labels=true){ const w=164,h=92; let b=rc(3,5,w,h,"rgba(0,0,0,.5)",{rx:8});
+  b+=rc(-14,16,18,24,"url(#mqTin)",{rx:2})+rc(w-4,16,18,24,"url(#mqTin)",{rx:2})+rc(-14,56,18,20,"url(#mqTin)",{rx:2})+rc(w-4,56,18,20,"url(#mqTin)",{rx:2});
+  b+=rc(0,0,w,h,"url(#mqSteel)",{rx:8,s:"#6f777c",sw:1.2})+rc(12,30,w-24,h-38,"#0d0f10",{rx:20})+rc(30,50,w-60,14,"#2b2f32",{rx:3});
+  const top=["GND","TX1+","TX1−","VBUS","CC1","D+","D−","SBU1","VBUS","RX2−","RX2+","GND"], bot=["GND","RX1+","RX1−","VBUS","SBU2","D−","D+","CC2","VBUS","TX2−","TX2+","GND"];
+  for(let i=0;i<12;i++){ const p=34+i*8.4, c1=top[i]==="VBUS"?"#e8b04a":top[i]==="GND"?"#d5d5d5":"url(#mqGold)", c2=bot[i]==="VBUS"?"#e8b04a":bot[i]==="GND"?"#d5d5d5":"url(#mqGold)";
+    b+=rc(p,51,4.4,4.2,c1)+rc(p,58.6,4.4,4.2,c2);
+    if(labels){ b+=`<text x="${f1(p+2.2)}" y="46" font-size="2.7" fill="#ffe6a8" text-anchor="end" transform="rotate(-60 ${f1(p+2.2)} 46)" font-family="monospace">A${i+1} ${top[i]}</text><text x="${f1(p+2.2)}" y="68" font-size="2.7" fill="#ffe6a8" transform="rotate(60 ${f1(p+2.2)} 68)" font-family="monospace">B${12-i} ${bot[i]}</text>`; } }
+  b+=tx(w/2,20,"USB TYPE-C 24P",{s:7,c:"#3b4246"});
+  return G(x,y,s,b); }
+function microUsb(x,y,s=1){ let b=rc(3,5,120,50,"rgba(0,0,0,.5)",{rx:5})+rc(-12,10,14,18,"url(#mqTin)")+rc(118,10,14,18,"url(#mqTin)")+pa("M0 4Q0 0 4 0H116Q120 0 120 4V40L108 50H12L0 40Z","url(#mqSteel)",{s:"#6f777c"})+pa("M12 14H108V34L100 42H20L12 34Z","#0d0f10")+rc(24,20,72,8,"#2b2f32",{rx:2}); const n=["VBUS","D−","D+","ID","GND"]; for(let i=0;i<5;i++){ b+=rc(30+i*13,28,6,4,"url(#mqGold)")+tx(33+i*13,60+ (i%2)*7,n[i],{s:5,c:"#ffe6a8",mono:1}); } return G(x,y,s,b); }
+function mic(x,y,s=1){ return G(x,y,s,rc(2,3,60,40,"rgba(0,0,0,.45)",{rx:4})+rc(0,0,60,40,"url(#mqShield)",{rx:4,s:"#7f878b"})+ci(30,20,5.5,"#111")+tx(30,35,"MIC",{s:7,c:"#59636a"})); }
+function battery(x,y,w,h,o={}){ let s=rc(x+5,y+8,w,h,"rgba(0,0,0,.5)",{rx:14})+rc(x,y,w,h,"url(#mqBat)",{rx:14,s:"#111",sw:2});
+  if(o.swollen) s=rc(x+5,y+8,w,h,"rgba(0,0,0,.5)",{rx:30})+pa(`M${x} ${y+20}Q${x} ${y} ${x+20} ${y}H${x+w-20}Q${x+w} ${y} ${x+w} ${y+20}Q${x+w+28} ${y+h/2} ${x+w} ${y+h-20}Q${x+w} ${y+h} ${x+w-20} ${y+h}H${x+20}Q${x} ${y+h} ${x} ${y+h-20}Q${x-28} ${y+h/2} ${x} ${y+20}Z`,"url(#mqBat)",{s:"#111",sw:2});
+  const lw=w*.8,lx=x+w*.1,ly=y+h*.16; s+=rc(lx,ly,lw,h*.42,"#ecebe8",{rx:6})+rc(lx,ly,lw,h*.08,"#c47a22",{rx:6})+rc(lx,ly+h*.05,lw,h*.03,"#c47a22");
+  const fs=Math.max(9,Math.min(18,w/22)); s+=tx(x+w/2,ly+h*.06,"BATTERIE Li-ion",{s:fs,c:"#fff",w:700})+tx(x+w/2,ly+h*.15,"3,87 V · 5000 mAh · 19,35 Wh",{s:fs*.8,c:"#222",w:500})+tx(x+w/2,ly+h*.22,"Charge max : 4,45 V",{s:fs*.7,c:"#444",w:400})+tx(x+w/2,ly+h*.3,"NE PAS PERCER NI CHAUFFER",{s:fs*.72,c:"#b4442e",w:700});
+  let bc=""; for(let i=0;i<30;i++) bc+=rc(lx+lw*.15+i*lw*.022,ly+h*.33,i%3?1.4:3,h*.06,"#222"); s+=bc;
+  if(o.tabs) s+=rc(x+w*.25,y+h-6,w*.12,40,"#e8e6df",{rx:3})+rc(x+w*.63,y+h-6,w*.12,40,"#e8e6df",{rx:3});
+  return s; }
+function batConn(x,y,s=1){ let b=rc(3,5,170,70,"rgba(0,0,0,.45)",{rx:4})+rc(0,0,170,70,"#e8e2d6",{rx:4,s:"#9c9486"})+rc(8,10,154,50,"#232323",{rx:3});
+  const pads=[["+","#d84343"],["+","#d84343"],["NTC","#3d8bd8"],["−","#cfcfcf"],["−","#cfcfcf"]];
+  pads.forEach((p,i)=>{ b+=rc(18+i*30,18,18,34,"url(#mqGold)",{rx:2})+tx(27+i*30,90,p[0],{s:14,c:p[1],w:800}); });
+  return G(x,y,s,b); }
+function flexStrip(d,w=30){ return pa(d,"none",{s:"rgba(0,0,0,.4)",sw:w+4,lc:"round"})+pa(d,"none",{s:"#c9761d",sw:w,lc:"round"})+pa(d,"none",{s:"#f0ad57",sw:w*.18,lc:"round",op:.6}); }
+function lens(x,y,r){ return ci(x,y,r*1.35,"url(#mqRing)")+ci(x,y,r,"url(#mqLens)")+ci(x-r*.35,y-r*.35,r*.2,"rgba(255,255,255,.35)"); }
+function coax(d){ return pa(d,"none",{s:"rgba(0,0,0,.45)",sw:9})+pa(d,"none",{s:"#cfd3d6",sw:7})+pa(d,"none",{s:"#7d8488",sw:2,op:.6}); }
+function rfConn(x,y,r=15){ return ci(x,y,r,"#d9d4c7",{s:"#8f887a"})+ci(x,y,r*.6,"url(#mqGold)")+ci(x,y,r*.23,"#6b5420"); }
+
+/* ---------- outils ---------- */
+function iron(x,y,ang,o={}){ const tip=o.tip||"conique"; let b="";
+  b+=rc(-430,-17,180,34,"#3b3f44",{rx:6})+rc(-250,-22,170,44,"url(#mqGrip)",{rx:16})+rc(-250,-22,170,44,"url(#mqKnurl)",{rx:16,op:.6})+rc(-80,-12,60,24,"url(#mqSteel)",{rx:4})+rc(-20,-7,60,14,"url(#mqSteel)");
+  if(tip==="conique") b+=pa("M40 -7L88 -1.2Q92 0 88 1.2L40 7Z","url(#mqTin)",{s:"#6b7176"});
+  else if(tip==="biseau") b+=pa("M40 -7L80 -7L92 4L40 7Z","url(#mqTin)",{s:"#6b7176"})+pa("M80 -7L92 4L82 4Z","#e9eef0");
+  else if(tip==="couteau") b+=pa("M40 -7L70 -7Q96 -4 96 5L40 7Z","url(#mqTin)",{s:"#6b7176"});
+  else if(tip==="ox") b+=pa("M40 -7L88 -1.2Q92 0 88 1.2L40 7Z","#3a2b20",{s:"#1a120c"})+ci(70,-2,3,"#5a3b23")+ci(58,3,2.5,"#2b1d12");
+  if(o.hot) b+=ci(90,0,16,"url(#mqHeat)");
+  b+=pa("M-430 0C-480 0 -500 40 -560 60","none",{s:"#25292d",sw:10,lc:"round"});
+  return G(x,y,o.s||1,b,ang); }
+function hotAir(x,y,ang,o={}){ let b="";
+  const nw=o.nozzle||14;
+  if(o.air!==false){ const L=o.airLen||110; b+=pa(`M${-nw*.6} 40L${-nw*.6-L*.35} ${40+L}H${nw*.6+L*.35}L${nw*.6} 40Z`,"url(#mqAir)"); for(let i=-1;i<=1;i++) b+=pa(`M${i*nw*.5} 46Q${i*nw*1.5} ${40+L*.5} ${i*(nw+L*.3)} ${36+L}`,"none",{s:"#ffcf8a",sw:2,op:.7,da:"6 6"}); }
+  b+=rc(-26,-260,52,170,"url(#mqGrip)",{rx:22})+rc(-26,-200,52,80,"url(#mqKnurl)",{op:.5})+rc(-20,-92,40,70,"url(#mqSteelV)",{rx:6})+pa(`M-18 -22L${-nw*.6} 40H${nw*.6}L18 -22Z`,"url(#mqSteelV)",{s:"#6f777c"});
+  b+=pa("M0 -260C0 -320 40 -330 70 -380","none",{s:"#25292d",sw:12,lc:"round"});
+  return G(x,y,o.s||1,b,ang); }
+function station(x,y,o={}){ let b=rc(4,8,300,170,"rgba(0,0,0,.45)",{rx:14})+rc(0,0,300,170,"url(#mqCase)",{rx:14,s:"#555"});
+  b+=rc(20,20,120,58,"url(#mqLed)",{rx:6,s:"#333"})+tx(80,62,o.t||"350°C",{s:30,c:"#ff4d3d",mono:1,w:700})+tx(80,96,"TEMP",{s:12,c:"#9aa"});
+  b+=rc(160,20,120,58,"url(#mqLed)",{rx:6,s:"#333"})+tx(220,62,o.air||"AIR 40",{s:24,c:"#38d16a",mono:1,w:700})+tx(220,96,"DÉBIT",{s:12,c:"#9aa"});
+  for(let i=0;i<4;i++) b+=ci(45+i*70,135,18,"url(#mqSteel)",{s:"#333"})+tx(45+i*70,140,["▲","▼","◀","▶"][i],{s:12,c:"#333"});
+  return G(x,y,o.s||1,b); }
+function microscope(x,y,s=1){ let b=rc(-160,330,320,40,"url(#mqCase)",{rx:10})+rc(-40,-200,40,540,"url(#mqSteelV)",{rx:8});
+  b+=rc(-140,250,280,80,"#e9ece9",{rx:8,s:"#999"})+rc(-120,262,240,56,"url(#mqMatG)",{rx:6});
+  b+=rc(-60,-120,120,60,"url(#mqCase)",{rx:10})+ci(-75,-90,22,"url(#mqSteel)",{s:"#333"})+rc(-80,-104,10,28,"url(#mqKnurl)");
+  b+=pa("M-60 -60L-50 40H50L60 -60Z","url(#mqCase)")+el(0,40,70,14,"#ddd",{s:"#888"})+el(0,40,52,9,"#fff9d6",{op:.9})+el(0,44,60,10,"url(#mqHeat)",{op:.25});
+  b+=G(0,-160,1,rc(-70,-40,140,60,"url(#mqCase)",{rx:12})+G(-38,-40,1,rc(-12,-70,24,70,"#222",{rx:5}),-12)+G(38,-40,1,rc(-12,-70,24,70,"#222",{rx:5}),12));
+  b+=ci(80,-150,24,"url(#mqSteel)",{s:"#333"})+ci(80,-150,10,"#444");
+  b+=ci(-110,150,26,"url(#mqSteel)",{s:"#333"})+rc(-136,140,8,20,"url(#mqKnurl)");
+  return G(x,y,s,b); }
+function multimeter(x,y,o={}){ let b=rc(6,10,300,520,"rgba(0,0,0,.45)",{rx:30})+rc(0,0,300,520,"#f2c230",{rx:30,s:"#9a7a10",sw:2})+rc(16,16,268,488,"url(#mqCase)",{rx:22});
+  b+=rc(36,36,228,110,"url(#mqLcd)",{rx:8,s:"#222",sw:3})+tx(150,112,o.d||"0.512",{s:52,c:"#1d2a17",mono:1,w:700})+tx(250,136,o.u||"V",{s:20,c:"#1d2a17",w:700,a:"end"})+tx(52,62,o.m||"DC",{s:14,c:"#1d2a17",a:"start",w:700});
+  b+=ci(150,290,86,"#2a2e33",{s:"#111",sw:3})+ci(150,290,62,"url(#mqCase)",{s:"#444"});
+  const marks=[["OFF",-90],["V⎓",-50],["V~",-10],["Ω",30],["▶|",70],["•)))",110],["A",150],["mA",190]]; marks.forEach(([t,a])=>{ const r=a*Math.PI/180; b+=tx(150+Math.cos(r)*104,290+Math.sin(r)*104+5,t,{s:15,c:"#f2f2f2",w:700}); });
+  const ar=(o.dial??30)*Math.PI/180; b+=G(150,290,1,rc(-14,-74,28,148,"#d9d9d9",{rx:10})+rc(-4,-70,8,30,"#c62828",{rx:3}),(o.dial??30)+90);
+  [["10A",60,"#c62828"],["mA",120,"#c62828"],["COM",180,"#111"],["VΩ",240,"#c62828"]].forEach(([t,px,c])=>{ b+=ci(px,450,20,"#111",{s:"#555",sw:3})+ci(px,450,8,"#444")+tx(px,488,t,{s:15,c:"#f2f2f2",w:700}); if(o.jacks&&o.jacks.includes(t)) b+=ci(px,450,16,t==="COM"?"#222":"#c62828",{s:"#fff",sw:1.5}); });
+  return G(x,y,o.s||1,b); }
+function probe(x1,y1,x2,y2,c){ const col=c==="r"?"url(#mqRed)":"#1b1b1b"; const a=Math.atan2(y2-y1,x2-x1)*180/Math.PI; const L=Math.hypot(x2-x1,y2-y1); return pa(`M${x1} ${y1}C${x1} ${y1+120} ${x2-Math.cos(a*Math.PI/180)*180} ${y2-Math.sin(a*Math.PI/180)*180-60} ${x2-Math.cos(a*Math.PI/180)*150} ${y2-Math.sin(a*Math.PI/180)*150}`,"none",{s:c==="r"?"#c62828":"#1b1b1b",sw:7,lc:"round"})+G(x2,y2,1,rc(-150,-11,110,22,col,{rx:9})+rc(-46,-7,10,14,c==="r"?"#8e1b1b":"#000")+rc(-38,-3,38,6,"url(#mqSteel)",{rx:2}),a); }
+function psu(x,y,o={}){ let b=rc(6,10,360,200,"rgba(0,0,0,.45)",{rx:12})+rc(0,0,360,200,"url(#mqCase)",{rx:12,s:"#555"});
+  b+=rc(20,20,150,64,"url(#mqLed)",{rx:6})+tx(95,68,o.v||"4.20",{s:40,c:"#ff4d3d",mono:1,w:700})+tx(160,80,"V",{s:14,c:"#ff4d3d",a:"end"});
+  b+=rc(190,20,150,64,"url(#mqLed)",{rx:6})+tx(265,68,o.a||"0.032",{s:40,c:"#38d16a",mono:1,w:700})+tx(330,80,"A",{s:14,c:"#38d16a",a:"end"});
+  b+=ci(70,140,24,"url(#mqSteel)",{s:"#222"})+ci(150,140,24,"url(#mqSteel)",{s:"#222"})+tx(70,186,"TENSION",{s:11,c:"#aaa"})+tx(150,186,"COURANT",{s:11,c:"#aaa"});
+  b+=ci(250,145,18,"#c62828",{s:"#fff",sw:2})+ci(310,145,18,"#111",{s:"#fff",sw:2})+tx(250,186,"+",{s:18,c:"#ff6b6b"})+tx(310,186,"−",{s:18,c:"#ddd"});
+  return G(x,y,o.s||1,b); }
+function tweezers(x,y,ang,s=1){ return G(x,y,s,pa("M0 -6L230 -2L232 2L0 6Z","url(#mqSteel)",{s:"#6f777c"})+pa("M0 6L230 14L232 18L0 14Z","url(#mqSteel)",{s:"#6f777c"})+rc(-10,-8,40,24,"#2f5fa6",{rx:6,op:.85}),ang); }
+function screwdriver(x,y,ang,col="#c62828",s=1,bit="+"){ return G(x,y,s,rc(-170,-15,120,30,col,{rx:12})+rc(-170,-15,120,30,"url(#mqKnurl)",{rx:12,op:.4})+rc(-190,-12,24,24,"#333",{rx:6})+rc(-50,-4,140,8,"url(#mqSteel)")+pa("M90 -4L104 0L90 4Z","#9aa1a6")+tx(-110,6,bit,{s:16,c:"#fff",w:800}),ang); }
+function spudger(x,y,ang,s=1){ return G(x,y,s,pa("M-120 -10H80L120 -2V2L80 10H-120Q-130 0 -120 -10Z","#2b2f33",{s:"#111"}),ang); }
+function pick(x,y,ang,s=1){ return G(x,y,s,pa("M0 0L60 -30Q90 -20 70 20L0 0Z","#3aa0e8",{s:"#1e6fb8",sw:1.5,op:.9}),ang); }
+function suction(x,y,s=1){ return G(x,y,s,el(0,0,70,24,"#1e88e5",{op:.7,s:"#0d47a1",sw:2})+el(0,-4,46,14,"#64b5f6",{op:.6})+rc(-12,-90,24,80,"#ddd",{rx:10,s:"#999"})+ci(0,-96,20,"#e53935",{s:"#8e1b1b"})); }
+function syringe(x,y,ang,o={}){ const c=o.c||"url(#mqFlux)"; return G(x,y,o.s||1,rc(-150,-18,190,36,"#f3f3f3",{rx:6,s:"#aaa",op:.95})+rc(-140,-14,150,28,c,{rx:4})+rc(-200,-6,52,12,"#ddd",{s:"#999"})+rc(-210,-22,12,44,"#ccc",{rx:3})+rc(40,-10,30,20,"#2a7de1",{rx:3})+rc(70,-2,60,4,"url(#mqSteel)")+tx(-60,6,o.t||"FLUX",{s:14,c:"#5a3a05",w:800}),ang); }
+function spool(x,y,s=1,t="Sn63Pb37 · 0,3 mm"){ let b=ci(4,8,90,"rgba(0,0,0,.45)")+ci(0,0,90,"#2b2f33",{s:"#111",sw:2})+ci(0,0,70,"url(#mqSolder)")+ci(0,0,30,"#2b2f33")+ci(0,0,14,"#111"); for(let i=0;i<10;i++) b+=ci(0,0,34+i*3.6,"none",{s:"rgba(90,100,105,.35)",sw:1}); b+=pa("M60 50Q120 90 170 80","none",{s:"url(#mqTin)",sw:5,lc:"round"})+tag(0,120,t,"#0f172a","#e5e7eb",13); return G(x,y,s,b); }
+function wick(x,y,w,s=1){ return G(x,y,s,rc(0,-14,w,28,"url(#mqCu)",{rx:3})+rc(0,-14,w,28,"url(#mqBraid)",{rx:3})); }
+function pump(x,y,ang,s=1){ return G(x,y,s,rc(-260,-26,220,52,"url(#mqSteelV)",{rx:10})+rc(-300,-10,40,20,"#333",{rx:4})+ci(-150,-34,12,"#c62828")+pa("M-40 -18L60 -6V6L-40 18Z","#e8e8e8",{s:"#999"})+rc(60,-4,30,8,"#fff",{s:"#999"}),ang); }
+function kapton(x,y,s=1){ return G(x,y,s,ci(0,0,60,"#d98a1a",{op:.85,s:"#a35f06",sw:2})+ci(0,0,34,"#f2e3c4")+ci(0,0,28,"#2b2f33",{op:.3})+tx(0,6,"KAPTON",{s:13,c:"#6a3c00",w:800})); }
+function alu(x,y,w,h){ return pa(`M${x} ${y}L${x+w} ${y+6}L${x+w-4} ${y+h}L${x+6} ${y+h-4}Z`,"url(#mqSteel)",{s:"#9aa1a6",op:.95})+pa(`M${x+10} ${y+20}L${x+w-20} ${y+30}M${x+20} ${y+h-20}L${x+w-30} ${y+h-34}`,"none",{s:"#fff",sw:1.5,op:.5}); }
+function brush(x,y,ang,s=1){ return G(x,y,s,rc(-200,-8,160,16,"#7b4b25",{rx:6})+rc(-44,-11,24,22,"url(#mqSteel)")+pa("M-20 -12L40 -16L40 16L-20 12Z","#d6b46a")+pa("M-20 -6L40 -8M-20 0L40 0M-20 6L40 8","none",{s:"#a7853f",sw:1.2}),ang); }
+function bottle(x,y,t="ALCOOL IPA 99 %",s=1){ return G(x,y,s,rc(-50,-60,100,190,"#e9f4fb",{rx:16,s:"#9bb",op:.95})+rc(-50,-10,100,120,"#bfe3f7",{rx:10,op:.6})+rc(-20,-90,40,32,"#2a7de1",{rx:6})+rc(-40,20,80,60,"#fff",{rx:4})+tx(0,46,t.split(" ")[0],{s:13,c:"#1e3a5f",w:800})+tx(0,64,t.split(" ").slice(1).join(" "),{s:11,c:"#1e3a5f"})); }
+function wire(d,c="#e8c33a"){ return pa(d,"none",{s:"rgba(0,0,0,.4)",sw:6,lc:"round"})+pa(d,"none",{s:c,sw:4,lc:"round"}); }
+function joint(x,y,s=1,type="good"){ // coupe d'un joint CMS : pastille, composant, ménisque
+  let b=rc(-150,40,300,30,"url(#mqFr4)")+rc(-150,36,300,6,"#1f6534")+rc(-110,30,90,10,"url(#mqCu)");
+  b+=rc(-60,-20,120,50,"url(#mqCap)",{rx:4})+rc(-60,-20,26,50,"url(#mqTin)",{rx:3});
+  if(type==="good") b+=pa("M-108 31Q-86 28 -64 -18L-60 -18V31Z","url(#mqSolder)",{s:"#8b9397"});
+  if(type==="ball") b+=ci(-74,8,26,"url(#mqSolder)",{s:"#8b9397"});
+  if(type==="cold") b+=pa("M-108 31Q-100 6 -84 4Q-70 0 -60 -4V31Z","#8f9497",{s:"#5f666a"})+pa("M-100 22L-92 14M-88 18L-80 8","none",{s:"#5f666a",sw:2});
+  if(type==="excess") b+=pa("M-114 31Q-120 -10 -86 -30Q-62 -36 -56 -20V31Z","url(#mqSolder)",{s:"#8b9397"});
+  if(type==="insuff") b+=pa("M-100 31Q-80 30 -64 22L-60 22V31Z","url(#mqSolder)",{s:"#8b9397"});
+  if(type==="crack") b+=pa("M-108 31Q-86 28 -64 -18L-60 -18V31Z","url(#mqSolder)",{s:"#8b9397"})+pa("M-96 26L-86 14L-78 18L-70 4","none",{s:"#1b1b1b",sw:2.5});
+  return G(x,y,s,b); }
+function thJoint(x,y,s=1,type="good"){ let b=rc(-150,0,300,40,"url(#mqFr4)")+rc(-150,-4,300,6,"#1f6534")+rc(-150,38,300,6,"#1f6534")+rc(-40,-6,80,8,"url(#mqCu)")+rc(-40,38,80,8,"url(#mqCu)")+rc(-12,-4,24,48,"#3a3a3a")+rc(-5,-120,10,200,"url(#mqTinH)");
+  if(type==="good") b+=pa("M-40 -6Q-30 -8 -8 -60H8Q30 -8 40 -6Z","url(#mqSolder)",{s:"#8b9397"});
+  if(type==="ball") b+=ci(0,-30,30,"url(#mqSolder)",{s:"#8b9397"});
+  if(type==="cold") b+=pa("M-34 -6Q-26 -24 -8 -30H8Q26 -24 34 -6Z","#8f9497",{s:"#5f666a"})+pa("M-20 -14L-12 -22M8 -16L16 -24","none",{s:"#5f666a",sw:2});
+  if(type==="excess") b+=pa("M-46 -6Q-58 -60 -8 -80H8Q58 -60 46 -6Z","url(#mqSolder)",{s:"#8b9397"});
+  return G(x,y,s,b); }
+function phoneBack(x,y,s=1,col="#2f3a48"){ return G(x,y,s,rc(6,10,380,800,"rgba(0,0,0,.5)",{rx:60})+rc(0,0,380,800,col,{rx:60,s:"#111",sw:3})+rc(10,10,360,780,"none",{rx:52,s:"rgba(255,255,255,.12)",sw:2})+rc(30,30,150,170,"#151a20",{rx:30,s:"#444"})+lens(80,80,24)+lens(80,150,18)+ci(140,80,10,"#f6edc4")); }
+function phoneFront(x,y,s=1,o={}){ let b=rc(6,10,380,800,"rgba(0,0,0,.5)",{rx:60})+rc(0,0,380,800,"#1c1f24",{rx:60,s:"#000",sw:3})+rc(14,14,352,772,o.on?"#1d3a63":"url(#mqGlass)",{rx:50})+ci(190,48,12,"#05070b",{s:"#333",sw:2});
+  if(o.crack) b+=pa("M190 300L120 220M190 300L280 190M190 300L80 380M190 300L300 420M190 300L200 520M120 220L60 160M280 190L330 120","none",{s:"rgba(255,255,255,.7)",sw:2});
+  return G(x,y,s,b); }
+/* intérieur de téléphone (maquette du prototype, coordonnées 0..800 x 0..1700) */
+function phoneInterior(x,y,s=.5,o={}){ seed("phone"); let b="";
+  b+=rc(34,34,740,1660,"rgba(0,0,0,.5)",{rx:86})+rc(24,22,752,1664,"#3d4247",{rx:86,s:"#25292d",sw:3})+rc(40,38,720,1632,"#262a2e",{rx:72});
+  b+=pcb(70,54,678,482,{seed:"main",traces:60,vias:120,smd:70});
+  b+=shield(300,168,252,206,"CPU / RAM")+shield(572,112,170,168,"RF");
+  b+=rc(80,78,172,172,"#18191b",{rx:18,s:"#3b3f43",sw:2})+lens(166,164,52)+rc(104,282,104,104,"#18191b",{rx:14})+lens(156,334,28)+rc(226,296,44,44,"#f2efe3",{rx:6})+ci(248,318,9,"#fff6c9");
+  b+=rc(372,70,56,56,"#18191b",{rx:10})+lens(400,98,13)+rc(456,50,150,36,"#121314",{rx:8})+rc(470,60,122,16,"url(#mqGrille)",{rx:4});
+  b+=rc(586,302,160,118,"url(#mqShield)",{rx:4})+rc(600,318,132,86,"#20262a",{rx:3}); for(let i=0;i<6;i++) b+=rc(612+(i%3)*38,328+Math.floor(i/3)*42,20,26,"url(#mqGold)",{rx:2});
+  b+=ic(268,400,40,40,"PMIC")+ic(320,404,28,28,"CHG");
+  b+=btb(236,470,140,48)+btb(404,470,120,48)+btb(574,470,140,48)+rfConn(108,532,16);
+  b+=battery(136,596,488,688,{tabs:true});
+  b+=pa("M430 600V522","none",{s:"#c9761d",sw:34})+rc(410,470,100,48,"#d58a2e",{rx:3})+rc(420,478,80,32,"#1e1e1e",{rx:2});
+  b+=pa("M644 470H716V520Q716 530 706 540V1340Q716 1350 716 1360V1420H600V1372Q650 1372 654 1360V540Q644 530 644 520Z","url(#mqFpc)");
+  b+=coax("M108 532C108 600 104 640 106 700V1300C106 1350 140 1360 152 1392");
+  b+=pcb(62,1346,676,300,{seed:"sub",traces:30,vias:60,smd:24});
+  b+=ci(136,1478,50,"url(#mqShield)",{s:"#7f878b"})+tx(136,1483,"VIB",{s:14,c:"#59636a"})+rfConn(152,1392,16);
+  for(let i=0;i<6;i++){ const xx=306+i*24; b+=rc(xx,1468,16,10,"#1b1b1b")+rc(xx+3,1468,2,10,"#999"); }
+  for(let i=0;i<4;i++) b+=rc(468+(i%2)*28,1466+Math.floor(i/2)*20,22,12,"url(#mqCap)");
+  b+=btb(594,1372,128,48)+rc(540,1448,184,174,"#16181a",{rx:14,s:"#2f3337",sw:2})+rc(560,1470,144,104,"url(#mqGrille)",{rx:8})+mic(198,1572,1);
+  b+=usbc(318,1556,1,false);
+  b+=screw(498,1392)+screw(710,1620)+screw(116,1610)+screw(150,566)+screw(710,96)+screw(560,450);
+  if(o.zones){ const z=(xx,yy,w,h,c)=>rc(xx,yy,w,h,c,{rx:10,op:.38,s:c,sw:4}); b+=z(260,380,120,90,"#ef4444")+z(296,164,260,214,"#3b82f6")+z(568,108,178,176,"#22c55e")+z(456,44,160,50,"#eab308")+z(530,1440,200,190,"#eab308")+z(230,462,500,62,"#9ca3af")+z(300,1550,190,100,"#9ca3af"); }
+  return G(x,y,s,b); }
+
+/* ---------- export ---------- */
+Object.assign(MQ,{esc,seed,rnd,RR,rc,ci,el,pa,tx,G,shadow,arrow,carrow,tag,bad,good,card,pcb,shield,ic,smd,smdTiny,cluster,bga,btb,fpcConn,screw,usbc,microUsb,mic,battery,batConn,flexStrip,lens,coax,rfConn,
+ iron,hotAir,station,microscope,multimeter,probe,psu,tweezers,screwdriver,spudger,pick,suction,syringe,spool,wick,pump,kapton,alu,brush,bottle,wire,joint,thJoint,phoneBack,phoneFront,phoneInterior});
+MQ.add = (id, spec) => { MQ.scenes[id] = spec; };
+})();
+
+/* ---------- rendu, étiquettes et visionneuse zoomable ---------- */
+(function(){
+"use strict";
+const M = window.MQ, esc = M.esc;
+const W = 1000, FS = 22, LH = 27, COLW = 262;
+function wrap(t){ const words=t.split(" "); const lines=[""]; for(const w of words){ const cur=lines[lines.length-1]; if((cur+" "+w).trim().length>21 && cur){ lines.push(w); } else lines[lines.length-1]=(cur+" "+w).trim(); } return lines.slice(0,3); }
+const tw = s => s.length*FS*.56;
+function layout(sc){
+  const parts = sc.parts.map((p,i)=>({i:i+1,label:p[0],desc:p[1],ax:p[2],ay:p[3],bw:p[4]||70,bh:p[5]||70,side:p[6]}));
+  const L=[],R=[]; parts.forEach(p=>{ (p.side? (p.side==="l"?L:R) : (p.ax<W/2?L:R)).push(p); });
+  const mv=(from,to,dir)=>{ const c=from.filter(p=>!p.side).sort((a,b)=>dir*(a.ax-b.ax)); if(!c.length) return false; from.splice(from.indexOf(c[0]),1); to.push(c[0]); return true; };
+  while(L.length-R.length>2 && mv(L,R,-1)); while(R.length-L.length>2 && mv(R,L,1));
+  const H=sc.h;
+  [L,R].forEach(col=>{ col.sort((a,b)=>a.ay-b.ay);
+    col.forEach(p=>{ p.lines=wrap(p.i+". "+p.label); p.ph=p.lines.length*LH+12; p.pw=Math.min(COLW,Math.max(...p.lines.map(tw))+22); p.y=p.ay-p.ph/2; });
+    for(let k=1;k<col.length;k++){ const a=col[k-1],b=col[k]; if(b.y<a.y+a.ph+10) b.y=a.y+a.ph+10; }
+    const last=col[col.length-1]; if(last && last.y+last.ph>H-14){ let over=last.y+last.ph-(H-14); for(let k=col.length-1;k>=0;k--){ col[k].y-=over; if(k>0){ const gap=col[k].y-(col[k-1].y+col[k-1].ph+10); over=gap<0?-gap:0; if(!over) break; } } }
+    if(col[0] && col[0].y<14){ const sh=14-col[0].y; col.forEach(p=>p.y+=sh); }
+  });
+  L.forEach(p=>{ p.px=272-p.pw; }); R.forEach(p=>{ p.px=728; });
+  return parts;
+}
+function labelsSVG(parts){ let s='<g class="mqL">';
+  parts.forEach(p=>{ const left=p.px<W/2, ex=left?p.px+p.pw:p.px, ey=p.y+p.ph/2;
+    s+=`<g class="mqLb" data-i="${p.i}" data-ax="${p.ax}" data-ay="${p.ay}" data-ex="${ex}" data-ey="${ey}" data-cx="${p.px+p.pw/2}" data-pw="${p.pw}">`+
+      `<path class="mqLn" d="M${p.ax} ${p.ay}L${ex} ${ey}" stroke="#ff5a4a" stroke-width="2.2" fill="none"/><circle class="mqLd" cx="${p.ax}" cy="${p.ay}" r="5" fill="#ff5a4a" stroke="#fff" stroke-width="1.5"/>`+
+      `<g class="mqLt"><rect x="${p.px}" y="${p.y}" width="${p.pw}" height="${p.ph}" rx="7" fill="#c62828" stroke="#ff8a7a" stroke-width="1.4"/>`+
+      p.lines.map((l,k)=>`<text x="${p.px+11}" y="${p.y+6+LH*(k+1)-6}" font-size="${FS}" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-weight="700">${esc(l)}</text>`).join("")+`</g></g>`; });
+  return s+"</g>"; }
+const cache={};
+function svgOf(id){ if(cache[id]) return cache[id]; const sc=M.scenes[id]; if(!sc) return "";
+  const parts=layout(sc); sc._parts=parts;
+  const body=sc.draw();
+  const hits=parts.map(p=>`<rect class="mqHit" data-i="${p.i}" x="${p.ax-p.bw/2}" y="${p.ay-p.bh/2}" width="${p.bw}" height="${p.bh}" fill="transparent"/>`).join("");
+  return cache[id]=`<svg class="mqS" viewBox="0 0 ${W} ${sc.h}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(sc.title)}"><rect x="-2000" y="-2000" width="${W+4000}" height="${sc.h+4000}" fill="#101a22"/><rect x="-2000" y="-2000" width="${W+4000}" height="${sc.h+4000}" fill="url(#mqMatGrid)"/>${body}<g class="mqHl"></g>${hits}${labelsSVG(parts)}</svg>`; }
+M.html = function(id){ const sc=M.scenes[id]; if(!sc) return "";
+  const svg=svgOf(id);
+  return `<figure class="mqf" data-mq="${id}"><div class="mqv" role="button" tabindex="0" aria-label="Agrandir la maquette">${svg}<span class="mqz">🔍 Zoom</span></div>`+
+   `<figcaption><b>${esc(sc.title)}</b><span>Maquette réaliste · toutes les pièces sont nommées · pince ou touche pour zoomer</span></figcaption>`+
+   `<ol class="mqleg">${sc._parts.map(p=>`<li><button type="button" data-i="${p.i}"><i>${p.i}</i>${esc(p.label)}</button></li>`).join("")}</ol></figure>`; };
+
+/* ---------- styles ---------- */
+const css=`.mqf{margin:0;padding:0;background:#0b1222}
+.mqv{position:relative;cursor:zoom-in;background:#101a22;touch-action:manipulation}
+.mqv svg{width:100%;height:auto;display:block}
+.mqz{position:absolute;right:8px;top:8px;background:rgba(8,14,20,.8);color:#e8eef0;font:600 12px/1 system-ui,Arial;padding:7px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.18);pointer-events:none}
+.mqf figcaption{padding:10px 12px 4px;color:#cbd5e1;font:13px/1.4 system-ui,Arial}
+.mqf figcaption b{display:block;color:#f1f5f9;font-size:15px;margin-bottom:2px}
+.mqf figcaption span{color:#94a3b8;font-size:12px}
+.mqleg{list-style:none;margin:0;padding:8px 10px 12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.mqleg button{width:100%;display:flex;gap:7px;align-items:center;text-align:left;background:#13203a;border:1px solid #23324f;color:#e2e8f0;border-radius:9px;padding:6px 8px;font:500 12.5px/1.25 system-ui,Arial;cursor:pointer}
+.mqleg i,.mqo-list i{flex:none;font-style:normal;width:20px;height:20px;border-radius:50%;background:#c62828;color:#fff;font:700 11px/20px system-ui,Arial;text-align:center}
+.mqo{position:fixed;inset:0;z-index:99999;background:#0b1222;display:flex;flex-direction:column;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+.mqo-top{display:flex;align-items:center;gap:8px;padding:8px 10px;color:#f1f5f9;font:700 15px/1.2 system-ui,Arial;border-bottom:1px solid #1e2b45}
+.mqo-top span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mqo button.b{appearance:none;border:1px solid rgba(255,255,255,.18);background:#15233d;color:#eef3f1;min-width:42px;height:42px;border-radius:10px;font:700 18px/1 system-ui,Arial;cursor:pointer;padding:0 10px}
+.mqo-stage{position:relative;flex:1;min-height:0;overflow:hidden;touch-action:none;background:#101a22;cursor:grab}
+.mqo-stage svg{width:100%;height:100%;display:block}
+.mqo-tools{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:6px}
+.mqo-zl{position:absolute;left:10px;top:10px;background:rgba(8,14,20,.75);color:#cfd8d4;font:600 12px ui-monospace,monospace;padding:5px 8px;border-radius:6px}
+.mqo-info{padding:10px 12px;color:#cbd5e1;font:14px/1.45 system-ui,Arial;border-top:1px solid #1e2b45;min-height:64px}
+.mqo-info b{color:#fff;font-size:15px}
+.mqo-list{display:flex;gap:6px;overflow-x:auto;padding:0 10px 10px;scrollbar-width:thin}
+.mqo-list button{flex:none;display:flex;gap:6px;align-items:center;background:#13203a;border:1px solid #23324f;color:#e2e8f0;border-radius:999px;padding:6px 10px 6px 6px;font:500 12.5px system-ui,Arial;cursor:pointer;white-space:nowrap}
+.mqo-list button[aria-pressed="true"]{border-color:#f59e0b;background:#2a2412}
+.mqo button:focus-visible,.mqleg button:focus-visible,.mqv:focus-visible{outline:2px solid #f59e0b;outline-offset:2px}
+@keyframes mqdash{to{stroke-dashoffset:-40}}.mqHl rect{animation:mqdash 1.2s linear infinite}
+@media (prefers-reduced-motion:reduce){.mqHl rect{animation:none}}`;
+function inject(){ if(document.getElementById("mqCss")) return; const st=document.createElement("style"); st.id="mqCss"; st.textContent=css; document.head.appendChild(st); const d=document.createElement("div"); d.innerHTML=M.defs; document.body.appendChild(d.firstChild); }
+M.inject=inject;
+
+/* ---------- visionneuse plein écran ---------- */
+let O=null;
+function open(id, focus){
+  inject(); close(); const sc=M.scenes[id]; if(!sc) return;
+  O=document.createElement("div"); O.className="mqo"; O.setAttribute("role","dialog"); O.setAttribute("aria-modal","true"); O.setAttribute("aria-label",sc.title);
+  O.innerHTML=`<div class="mqo-top"><span>${esc(sc.title)}</span><button class="b" data-a="lbl" type="button" aria-pressed="true" title="Afficher ou cacher les étiquettes">🏷</button><button class="b" data-a="x" type="button" aria-label="Fermer">✕</button></div>
+  <div class="mqo-stage">${svgOf(id)}<div class="mqo-zl">×1.0</div><div class="mqo-tools"><button class="b" data-a="in" type="button" aria-label="Zoomer">+</button><button class="b" data-a="out" type="button" aria-label="Dézoomer">−</button><button class="b" data-a="fit" type="button" aria-label="Vue entière">⤢</button></div></div>
+  <div class="mqo-info"><b>Touche une pièce</b><br>Pince avec deux doigts pour zoomer, glisse pour te déplacer, touche deux fois pour agrandir.</div>
+  <div class="mqo-list">${sc._parts.map(p=>`<button type="button" data-i="${p.i}" aria-pressed="false"><i>${p.i}</i>${esc(p.label)}</button>`).join("")}</div>`;
+  document.body.appendChild(O); document.documentElement.style.overflow="hidden";
+  const stage=O.querySelector(".mqo-stage"), svg=stage.querySelector("svg"), zl=O.querySelector(".mqo-zl"), info=O.querySelector(".mqo-info");
+  const FULL={x:0,y:0,w:W,h:sc.h}; let vb={...FULL}, anim=0;
+  const lbls=[...svg.querySelectorAll(".mqLb")].map(g=>({g,t:g.querySelector(".mqLt"),ln:g.querySelector(".mqLn"),d:g.querySelector(".mqLd"),ax:+g.dataset.ax,ay:+g.dataset.ay,ex:+g.dataset.ex,ey:+g.dataset.ey,cx:+g.dataset.cx,pw:+g.dataset.pw}));
+  const fit=b=>{ const r=stage.getBoundingClientRect(), ar=r.width/Math.max(1,r.height); let {x,y,w,h}=b; if(w/h>ar){ const nh=w/ar; y-=(nh-h)/2; h=nh; } else { const nw=h*ar; x-=(nw-w)/2; w=nw; } return {x,y,w,h}; };
+  const apply=()=>{ svg.setAttribute("viewBox",`${vb.x} ${vb.y} ${vb.w} ${vb.h}`); const z=fit(FULL).w/vb.w; zl.textContent="×"+z.toFixed(1);
+    const k=z>1.4?Math.max(.16,1.4/z):1;
+    lbls.forEach(o=>{ o.t.setAttribute("transform",`translate(${o.cx} ${o.ey}) scale(${k}) translate(${-o.cx} ${-o.ey})`); const left=o.ex<=o.cx; const ex=o.cx+(left?1:-1)*o.pw*k/2; o.ln.setAttribute("d",`M${o.ax} ${o.ay}L${ex} ${o.ey}`); o.ln.setAttribute("stroke-width",2.2*Math.max(k,.35)); o.d.setAttribute("r",5*Math.max(k,.35)); }); };
+  const clamp=()=>{ const f=fit(FULL); vb.w=Math.min(Math.max(vb.w,f.w/40),f.w*1.3); vb.h=vb.w*f.h/f.w; vb.x=Math.min(Math.max(vb.x,-vb.w*.6),W-vb.w*.4); vb.y=Math.min(Math.max(vb.y,-vb.h*.6),sc.h-vb.h*.4); };
+  const animate=(t,ms=450)=>{ cancelAnimationFrame(anim); if(matchMedia("(prefers-reduced-motion: reduce)").matches) ms=1; const s={...vb},t0=performance.now(); const st=n=>{ const k=Math.min(1,(n-t0)/ms),e=1-Math.pow(1-k,3); for(const q of["x","y","w","h"]) vb[q]=s[q]+(t[q]-s[q])*e; apply(); if(k<1) anim=requestAnimationFrame(st); }; anim=requestAnimationFrame(st); };
+  const zoomAt=(f,cx,cy)=>{ const r=stage.getBoundingClientRect(); const px=vb.x+(cx-r.left)/r.width*vb.w, py=vb.y+(cy-r.top)/r.height*vb.h; vb.w/=f; vb.h/=f; vb.x=px-(cx-r.left)/r.width*vb.w; vb.y=py-(cy-r.top)/r.height*vb.h; clamp(); apply(); };
+  const mid=()=>{ const r=stage.getBoundingClientRect(); return [r.left+r.width/2,r.top+r.height/2]; };
+  const sel=i=>{ const p=sc._parts[i-1]; if(!p) return; info.innerHTML=`<b>${p.i}. ${esc(p.label)}</b><br>${esc(p.desc)}`;
+    svg.querySelector(".mqHl").innerHTML=`<rect x="${p.ax-p.bw/2-8}" y="${p.ay-p.bh/2-8}" width="${p.bw+16}" height="${p.bh+16}" rx="10" fill="none" stroke="#ffb547" stroke-width="4" stroke-dasharray="14 6"/>`;
+    O.querySelectorAll(".mqo-list button").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.i===i)); const lb=O.querySelector(`.mqo-list button[data-i="${i}"]`); if(lb) lb.scrollIntoView({block:"nearest",inline:"center"});
+    const Wd=Math.max(p.bw*2.4,220), Hd=Math.max(p.bh*2.4,220); animate(fit({x:p.ax-Wd/2,y:p.ay-Hd/2,w:Wd,h:Hd})); };
+  vb=fit(FULL); apply();
+  O.addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; const a=b.dataset.a;
+    if(a==="x") close(); else if(a==="in") zoomAt(1.6,...mid()); else if(a==="out") zoomAt(1/1.6,...mid()); else if(a==="fit") animate(fit(FULL));
+    else if(a==="lbl"){ const on=b.getAttribute("aria-pressed")!=="true"; b.setAttribute("aria-pressed",on); svg.querySelector(".mqL").style.display=on?"":"none"; }
+    else if(b.dataset.i) sel(+b.dataset.i); });
+  const pts=new Map(); let moved=0,t0=0,lastTap=0;
+  stage.addEventListener("pointerdown",e=>{ if(e.target.closest("button")) return; stage.setPointerCapture(e.pointerId); pts.set(e.pointerId,{x:e.clientX,y:e.clientY}); moved=0; t0=performance.now(); cancelAnimationFrame(anim); });
+  stage.addEventListener("pointermove",e=>{ if(!pts.has(e.pointerId)) return; const prev=pts.get(e.pointerId); pts.set(e.pointerId,{x:e.clientX,y:e.clientY}); const r=stage.getBoundingClientRect();
+    if(pts.size===1){ const dx=e.clientX-prev.x, dy=e.clientY-prev.y; moved+=Math.abs(dx)+Math.abs(dy); vb.x-=dx/r.width*vb.w; vb.y-=dy/r.height*vb.h; clamp(); apply(); }
+    else if(pts.size===2){ const v=[...pts.entries()]; const a=v[0][1], b=v[1][1]; const oa=v[0][0]===e.pointerId?prev:a, ob=v[1][0]===e.pointerId?prev:b; const d=Math.hypot(a.x-b.x,a.y-b.y), d0=Math.hypot(oa.x-ob.x,oa.y-ob.y); moved+=99; if(d0>0) zoomAt(d/d0,(a.x+b.x)/2,(a.y+b.y)/2); } });
+  const up=e=>{ if(!pts.has(e.pointerId)) return; pts.delete(e.pointerId);
+    if(moved<8 && performance.now()-t0<400){ const now=performance.now(); if(now-lastTap<300){ zoomAt(2,e.clientX,e.clientY); lastTap=0; return; } lastTap=now;
+      const elx=document.elementFromPoint(e.clientX,e.clientY); const h=elx&&elx.closest&&elx.closest(".mqHit,.mqLb"); if(h) sel(+h.dataset.i); } };
+  stage.addEventListener("pointerup",up); stage.addEventListener("pointercancel",up);
+  stage.addEventListener("wheel",e=>{ e.preventDefault(); zoomAt(Math.exp(-e.deltaY*.0018),e.clientX,e.clientY); },{passive:false});
+  O._key=e=>{ if(e.key==="Escape") close(); }; document.addEventListener("keydown",O._key);
+  O._rs=()=>{ vb=fit(FULL); apply(); }; addEventListener("resize",O._rs);
+  O.querySelector('[data-a="x"]').focus();
+  if(focus) setTimeout(()=>sel(focus),60);
+}
+function close(){ if(!O) return; document.removeEventListener("keydown",O._key); removeEventListener("resize",O._rs); O.remove(); O=null; document.documentElement.style.overflow=""; }
+M.open=open; M.close=close;
+document.addEventListener("click",e=>{ const f=e.target.closest&&e.target.closest(".mqf"); if(!f) return; const b=e.target.closest(".mqleg button"); if(b){ open(f.dataset.mq,+b.dataset.i); return; } if(e.target.closest(".mqv")){ const h=e.target.closest(".mqHit,.mqLb"); open(f.dataset.mq,h?+h.dataset.i:0); } });
+document.addEventListener("keydown",e=>{ if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("mqv")){ e.preventDefault(); open(e.target.closest(".mqf").dataset.mq); } });
+})();
+
+/* ---------- scènes : leçons de base ---------- */
+(function(){
+const M=window.MQ; const {rc,ci,el,pa,tx,G,arrow,tag,bad,good,card,pcb,shield,ic,smd,bga,btb,fpcConn,screw,usbc,microUsb,mic,battery,batConn,flexStrip,lens,coax,rfConn,
+ iron,hotAir,station,microscope,multimeter,probe,psu,tweezers,screwdriver,spudger,pick,suction,syringe,spool,wick,pump,kapton,alu,brush,bottle,wire,joint,thJoint,phoneBack,phoneFront,phoneInterior,cluster,seed}=M;
+const A=M.add;
+const mat=(x,y,w,h)=>rc(x+6,y+10,w,h,"rgba(0,0,0,.4)",{rx:16})+rc(x,y,w,h,"url(#mqMatG)",{rx:16})+rc(x,y,w,h,"url(#mqMatGrid)",{rx:16});
+const usbTester=(x,y,v="5.08V",a="1.25A")=>G(x,y,1,rc(4,8,200,110,"rgba(0,0,0,.45)",{rx:10})+rc(0,0,200,110,"#1f4ea3",{rx:10,s:"#0d2a5e"})+rc(16,14,168,64,"#05070b",{rx:4})+tx(100,44,v,{s:26,c:"#4ade80",mono:1,w:700})+tx(100,70,a,{s:22,c:"#facc15",mono:1,w:700})+rc(200,36,30,38,"url(#mqSteel)",{rx:3})+rc(-30,40,30,30,"url(#mqSteel)",{rx:3})+tx(100,98,"TESTEUR USB",{s:11,c:"#cfe0ff"}));
+const cable=(d)=>pa(d,"none",{s:"rgba(0,0,0,.4)",sw:14,lc:"round"})+pa(d,"none",{s:"#e9e9e9",sw:11,lc:"round"});
+const plugC=(x,y,ang=0)=>G(x,y,1,rc(-24,-60,48,70,"#efefef",{rx:10,s:"#bbb"})+rc(-16,10,32,26,"url(#mqSteel)",{rx:8}),ang);
+
+A("charge",{title:"Port de charge : contrôle et nettoyage",h:1060,parts:[
+ ["Port USB-C","La prise de charge vue de l'extérieur. Éclaire-la avec une lampe pour voir le fond.",500,190,150,50],
+ ["Poussière / peluche","La poche accumule des peluches tassées au fond : la fiche ne rentre plus jusqu'au bout.",470,190,40,30],
+ ["Micro (trou)","Le petit trou du micro est à côté du port : ne pique jamais dedans.",380,190,24,24],
+ ["Grille haut-parleur","Ne pas confondre avec le port. Nettoyage à la brosse sèche uniquement.",640,190,90,30],
+ ["Cure-dent en bois","Gratte doucement le fond du port. Jamais d'aiguille ni d'objet métallique : risque de court-circuit.",380,380,120,40],
+ ["Brosse sèche","Une brosse à dents sèche fait sortir la poussière.",600,410,140,40],
+ ["Alcool isopropylique","Un peu d'alcool à 99 % sur la brosse pour la rouille légère. Laisse sécher 5 minutes.",500,560,110,180],
+ ["Testeur USB","Branché entre le chargeur et le câble : environ 5 V et 0,5 à 2 A pendant la charge.",420,800,200,110],
+ ["Câble de charge","Essaie toujours un autre câble et un autre chargeur qui marchent.",620,790,60,60],
+ ["Carte fille de charge","Si le port reste mort après nettoyage : ouvre et contrôle la carte fille et sa nappe.",500,970,320,110],
+],draw(){ let s="";
+ s+=rc(250,90,500,200,"#3d4247",{rx:30,s:"#22262a",sw:3})+rc(262,102,476,176,"#2c3035",{rx:24});
+ s+=rc(420,166,160,50,"#0a0b0c",{rx:25,s:"#9aa1a6",sw:3})+rc(450,184,100,14,"#26292c",{rx:4});
+ for(let i=0;i<14;i++) s+=ci(440+i*4.2,200+(i%3)*3,3+(i%4),"#b7a58a",{op:.85});
+ s+=pa("M446 206Q470 196 492 208Q508 200 520 210","none",{s:"#d8cbb5",sw:3,op:.8});
+ s+=ci(380,191,8,"#050505",{s:"#666",sw:2});
+ for(let i=0;i<8;i++) s+=ci(610+i*12,191,4.5,"#050505");
+ s+=G(250,380,1,rc(0,-6,260,12,"#d8b27a",{rx:6})+pa("M260 -6L300 0L260 6Z","#c69a5c"),-8);
+ s+=brush(640,410,180,1);
+ s+=bottle(500,560,"ALCOOL IPA 99 %",1);
+ s+=cable("M690 830C760 860 770 920 720 940")+usbTester(330,750)+plugC(620,780,90)+cable("M300 795C260 800 250 850 280 880");
+ s+=pcb(340,920,320,110,{seed:"cf",traces:10,smd:16})+usbc(418,945,.95,false)+btb(352,940,60,26)+mic(590,955,.8);
+ return s; }});
+
+A("outils",{title:"Les outils de base du réparateur",h:1100,parts:[
+ ["Tapis antistatique","Protège les composants de l'électricité statique. Relie-le à la terre.",500,90,400,40],
+ ["Tournevis cruciforme","Le plus courant (PH000, PH00) pour les vis internes.",420,200,200,40],
+ ["Tournevis Torx","Embout en étoile, sur certains Samsung et Motorola.",420,280,200,40],
+ ["Tournevis Pentalobe","Embout à 5 branches, pour les vis du bas des iPhone.",420,360,200,40],
+ ["Pince brucelle","Pour saisir les petites vis et les nappes. Antistatique de préférence.",520,470,240,40],
+ ["Spatule plastique","Pour débrancher les connecteurs sans court-circuit.",450,560,240,30],
+ ["Médiator","Glissé dans la colle pour ouvrir. Jamais plus de 3 mm de profondeur.",640,600,90,70],
+ ["Ventouse","Soulève l'écran ou la vitre arrière après chauffage.",380,700,140,120],
+ ["Multimètre","Mesure la tension, la continuité et les diodes.",620,780,170,240],
+ ["Tapis magnétique (vis)","Range les vis dans l'ordre du démontage : elles n'ont pas toutes la même longueur.",400,960,220,120],
+],draw(){ let s=mat(270,60,460,1000);
+ s+=screwdriver(470,200,0,"#c62828",1,"+")+screwdriver(470,280,0,"#2f5fa6",1,"✱")+screwdriver(470,360,0,"#2f7d4f",1,"✿");
+ s+=tweezers(400,470,0,1)+spudger(450,560,0,1)+pick(610,610,0,1)+suction(380,740,1)+multimeter(620,780,{s:.48,d:"4.12",u:"V",dial:-50});
+ s+=rc(300,900,220,130,"#d9dde0",{rx:8,s:"#999"}); for(let i=0;i<4;i++) for(let j=0;j<3;j++){ s+=rc(312+i*52,912+j*38,44,30,"#c4cacd",{rx:4})+screw(334+i*52,927+j*38,j===1?5:6); }
+ return s; }});
+
+A("ouvrir",{title:"Ouvrir un smartphone en sécurité",h:1050,parts:[
+ ["Coque / vitre arrière","Tenue par une colle. Chauffe-la avant de la soulever.",500,560,300,300],
+ ["Air chaud ~80 °C","Chauffe les bords en mouvement, jamais au même endroit. Le dos doit être chaud au toucher, pas brûlant.",360,190,120,140],
+ ["Ventouse","Pose-la près du bord du bas, tire doucement pour créer un petit espace.",560,880,150,80],
+ ["Médiator (3 mm max)","Glisse-le dans l'espace et fais le tour. Ne l'enfonce pas plus de 3 mm : les nappes sont juste dessous.",660,700,90,90],
+ ["Zone des nappes","Côté où passent les nappes (souvent le côté des boutons). Va très doucement ici.",320,620,60,260],
+ ["Bloc caméras","Ne fais pas levier sur la vitre des caméras : elle casse facilement.",400,330,150,170],
+],draw(){ let s="";
+ s+=phoneBack(310,240,1);
+ s+=hotAir(360,170,-20,{s:.55,airLen:120,nozzle:16});
+ s+=rc(312,500,18,240,"rgba(255,80,60,.35)",{rx:6,s:"#ff5a4a",sw:2,da:"8 6"});
+ s+=suction(560,900,1);
+ s+=pick(650,690,20,1.1)+pa("M690 700H740","none",{s:"#fde68a",sw:3})+tx(744,706,"3 mm",{s:18,c:"#fde68a",a:"start"});
+ return s; }});
+
+A("batterie",{title:"Remplacer la batterie",h:1150,parts:[
+ ["Connecteur batterie","À débrancher EN PREMIER avec une spatule plastique.",500,250,170,70],
+ ["Nappe de batterie","Relie la batterie à la carte mère. Ne la plie pas à angle vif.",500,330,60,80],
+ ["Batterie Li-ion","Collée au châssis. Ne la perce pas, ne la plie pas, ne la chauffe pas.",500,640,420,500],
+ ["Languettes de colle","Tire-les doucement, à plat, vers le bas. Si elles cassent, mets quelques gouttes d'alcool isopropylique sous la batterie.",500,920,320,60],
+ ["Spatule plastique","Seul outil autorisé près de la batterie.",360,220,200,40],
+ ["Batterie gonflée","Danger : ne la chauffe pas, ne la perce pas. Mets-la dans un bac de sable.",780,1040,140,120,"r"],
+],draw(){ let s="";
+ s+=pcb(280,120,440,170,{seed:"bat",smd:30})+shield(300,140,160,110,"CPU")+batConn(415,215,1);
+ s+=pa("M500 300V400","none",{s:"#c9761d",sw:48})+pa("M500 300V400","none",{s:"#f0ad57",sw:8,op:.5});
+ s+=battery(290,390,420,520,{tabs:true});
+ s+=spudger(330,220,10,1);
+ s+=G(700,980,.5,battery(0,0,240,200,{swollen:true}))+bad(820,960,.9);
+ return s; }});
+
+A("ecran",{title:"Remplacer un écran (LCD ou OLED)",h:1150,parts:[
+ ["Vitre et dalle","L'écran complet : vitre tactile collée sur la dalle LCD ou OLED.",400,450,240,520],
+ ["Nappe de l'écran","Passe sous la carte mère. Elle est fragile : ne la plie jamais à angle vif.",590,820,60,120],
+ ["Connecteur écran (BTB)","Débranche la batterie avant. Clipse bien droit jusqu'au clic.",650,980,150,60],
+ ["Châssis","Cadre du téléphone. Nettoie bien l'ancienne colle avant de poser le nouvel écran.",820,500,120,600,"r"],
+ ["Joint de colle","Nouveau joint adhésif autour du cadre pour l'étanchéité.",820,180,140,40,"r"],
+ ["Connecteur batterie","Toujours débranché avant de toucher la nappe de l'écran.",760,1030,120,50,"r"],
+ ["Écran cassé","Vitre fissurée : le tactile peut encore marcher. Écran noir ou taches : la dalle est morte.",350,320,120,120],
+],draw(){ let s="";
+ s+=phoneFront(270,150,.62,{crack:true})+ pa("M560 820C600 840 620 900 640 960","none",{s:"#c9761d",sw:44})+rc(575,960,150,48,"#d58a2e",{rx:4})+rc(585,968,130,32,"#1e1e1e",{rx:2});
+ s+=rc(760,140,120,900,"#3d4247",{rx:40,s:"#22262a",sw:3})+rc(776,160,88,860,"#2a2e33",{rx:30})+rc(760,140,120,900,"none",{rx:40,s:"#f4f4f4",sw:4,da:"2 4",op:.7});
+ s+=pcb(560,920,320,140,{seed:"ec",smd:16})+btb(575,960,150,48)+btb(700,1010,120,44);
+ return s; }});
+
+A("touches",{title:"Téléphone à touches : clavier et carte",h:1150,parts:[
+ ["Coque avant","Coque en plastique, se clipse sur la coque arrière.",400,180,200,260],
+ ["Membrane à dômes","Chaque touche appuie sur un petit dôme métallique qui ferme le contact. Un dôme écrasé = touche morte.",500,560,240,220],
+ ["Contacts de touche","Pastilles dorées en cercles sur la carte. Nettoie-les à l'alcool si une touche ne répond plus.",620,800,120,90],
+ ["Écran LCD","Petit écran relié par une nappe ou des contacts à ressort.",620,250,160,140],
+ ["Carte mère","Porte le processeur, la radio et les contacts du clavier.",500,880,360,320],
+ ["Haut-parleur","Rond, à l'arrière ou en haut. Souvent à contacts à ressort.",360,990,80,80],
+ ["Connecteur de charge","Micro-USB ou rond selon le modèle, soudé sur la carte.",500,1090,130,60],
+],draw(){ let s="";
+ s+=G(300,60,1,rc(5,8,200,380,"rgba(0,0,0,.45)",{rx:30})+rc(0,0,200,380,"#2a2e33",{rx:30,s:"#111",sw:2})+rc(25,30,150,110,"#0b0d10",{rx:6})+(()=>{let k="";for(let r=0;r<5;r++)for(let c=0;c<3;c++)k+=rc(28+c*50,170+r*40,44,30,"#3b4046",{rx:12})+tx(50+c*50,191+r*40,"123456789*0#"[r*3+c]||"",{s:14,c:"#ddd"});return k;})());
+ s+=G(540,170,1,rc(4,6,170,150,"rgba(0,0,0,.4)",{rx:6})+rc(0,0,170,150,"#d8d8d8",{rx:6})+rc(10,10,150,110,"url(#mqLcd)",{rx:3})+rc(40,120,90,30,"#c9761d"));
+ s+=G(380,460,1,rc(0,0,240,210,"#e9e6dc",{rx:8,op:.9,s:"#aaa"})+(()=>{let k="";for(let r=0;r<4;r++)for(let c=0;c<3;c++)k+=ci(40+c*80,30+r*50,18,"url(#mqShield)",{s:"#888"});return k;})());
+ s+=pcb(320,720,360,330,{seed:"kp",color:"green",smd:30});
+ for(let r=0;r<3;r++)for(let c=0;c<3;c++){ const x=380+c*80,y=770+r*60; s+=ci(x,y,20,"url(#mqGold)")+ci(x,y,11,"#1f6534")+ci(x,y,6,"url(#mqGold)"); }
+ s+=ic(560,880,70,70,"CPU",{pins:10,quad:1})+ci(360,990,36,"#111",{s:"#444",sw:3})+ci(360,990,24,"url(#mqGrille)")+microUsb(440,1060,1);
+ return s; }});
+
+A("camera",{title:"Caméra : contrôle et remplacement",h:1100,parts:[
+ ["Module caméra","Bloc capteur + objectif. Ne touche jamais la lentille avec les doigts.",420,320,200,200],
+ ["Lentille","Une poussière ou une rayure ici donne une photo floue ou une tache.",420,320,90,90],
+ ["Nappe de la caméra","Reliée à la carte mère. Une nappe pliée = écran noir dans l'appli photo.",560,520,60,200],
+ ["Connecteur caméra (BTB)","Débranche la batterie, puis clipse bien droit.",560,660,140,56],
+ ["Vitre de protection","Vitre de l'objectif sur la coque arrière. Si elle est cassée, change-la seule.",700,240,120,120,"r"],
+ ["Poussière sur la lentille","Souffle à la poire, puis chiffon microfibre. Pas d'alcool sur la lentille.",380,280,30,30],
+ ["Carte mère","Le connecteur caméra est sur la carte mère.",500,820,400,230],
+],draw(){ let s="";
+ s+=G(320,220,1,rc(5,8,200,200,"rgba(0,0,0,.45)",{rx:24})+rc(0,0,200,200,"#18191b",{rx:24,s:"#3b3f43",sw:3})+lens(100,100,58)+ci(60,60,6,"#c9b48a",{op:.9})+ci(70,72,3.5,"#c9b48a"));
+ s+=pa("M480 420C560 470 560 560 560 640","none",{s:"#c9761d",sw:46})+pa("M480 420C560 470 560 560 560 640","none",{s:"#f0ad57",sw:8,op:.5});
+ s+=pcb(300,630,400,360,{seed:"cam",smd:40})+btb(490,634,140,52)+shield(330,720,200,170,"CPU")+shield(560,740,120,110,"PMU");
+ s+=ci(700,240,60,"#0a0d12",{s:"#9aa1a6",sw:6})+ci(700,240,48,"url(#mqGlass)")+pa("M672 214L712 260L736 236","none",{s:"rgba(255,255,255,.7)",sw:2});
+ return s; }});
+
+A("soudure",{title:"Bases de la soudure sur carte",h:1100,parts:[
+ ["Fer à souder","Panne propre et étamée, entre 320 et 360 °C pour la plupart des travaux.",420,240,200,60],
+ ["Panne","Pointe du fer. Toujours brillante : essuie-la et remets de l'étain.",480,300,50,40],
+ ["Fil d'étain","Apporte l'étain sur le joint, pas sur la panne.",660,330,160,60],
+ ["Flux","Aide l'étain à couler et évite l'oxydation. Une petite quantité suffit.",420,560,240,60],
+ ["Joint réussi","Forme de petit cône brillant et creusé.",420,800,180,90],
+ ["Joint raté","Boule ou joint mat et granuleux : à refaire avec du flux.",620,800,180,90],
+ ["Station à air chaud","Pour les composants CMS et les puces : buse adaptée, mouvement circulaire.",500,1000,300,160],
+],draw(){ let s="";
+ s+=pcb(280,330,440,140,{seed:"so",smd:30})+smd(500,390,"C",70);
+ s+=iron(480,330,-40,{tip:"conique",hot:true,s:.6})+pa("M700 280Q620 330 528 380","none",{s:"url(#mqTin)",sw:5,lc:"round"})+spool(700,250,.45);
+ s+=syringe(420,560,0,{s:.9});
+ s+=joint(420,800,.62,"good")+good(510,750,.8)+joint(620,800,.62,"ball")+bad(710,750,.8);
+ s+=station(350,920,{s:1,t:"380°C",air:"AIR 40"});
+ return s; }});
+
+A("cartemere",{title:"Les zones d'une carte mère",h:1080,parts:[
+ ["Processeur + mémoire (CPU / RAM)","Sous le grand blindage. Le cœur du téléphone.",470,330,250,200],
+ ["Circuit d'alimentation (PMIC)","Fabrique toutes les tensions de la carte à partir de la batterie.",350,560,70,70],
+ ["Circuit de charge","Gère la charge de la batterie à partir du connecteur USB.",450,560,60,60],
+ ["Zone radio (RF)","Réseau, Wi-Fi, Bluetooth. Sous son propre blindage.",640,240,160,160],
+ ["Circuit audio","Micro, haut-parleur, écouteur.",660,560,70,60],
+ ["Mémoire de stockage (UFS / eMMC)","Contient les données. Puce sensible à la chaleur.",640,440,90,70],
+ ["Connecteurs BTB","Écran, batterie, nappe principale.",500,700,440,60],
+ ["Condensateurs de filtrage","Des centaines de petits condensateurs : un seul en court-circuit peut bloquer la carte.",360,440,80,60],
+ ["Prise d'antenne","Câble coaxial vers les antennes.",320,190,40,40],
+],draw(){ let s="";
+ s+=pcb(270,150,460,600,{seed:"cm",smd:110});
+ s+=shield(345,230,250,200,"CPU / RAM")+shield(565,160,150,160,"RF")+ic(600,410,80,64,"UFS",{sub:"128GB"});
+ s+=ic(318,528,64,64,"PMIC",{pins:8,quad:1})+ic(424,534,52,52,"CHG")+ic(630,532,60,52,"AUDIO");
+ s+=btb(290,676,140,48)+btb(440,676,120,48)+btb(580,676,130,48)+rfConn(320,190,16);
+ s+=G(300,800,1,rc(0,0,400,200,"#0f1720",{rx:12,s:"#2b3a4a"})+tx(200,40,"Repères de couleur",{s:20,c:"#e2e8f0"})+rc(20,60,24,24,"#ef4444",{rx:4})+tx(54,79,"Alimentation",{s:17,a:"start",c:"#ddd"})+rc(210,60,24,24,"#3b82f6",{rx:4})+tx(244,79,"CPU / mémoire",{s:17,a:"start",c:"#ddd"})+rc(20,110,24,24,"#22c55e",{rx:4})+tx(54,129,"Radio (RF)",{s:17,a:"start",c:"#ddd"})+rc(210,110,24,24,"#eab308",{rx:4})+tx(244,129,"Audio",{s:17,a:"start",c:"#ddd"})+rc(20,160,24,24,"#9ca3af",{rx:4})+tx(54,179,"Connecteurs",{s:17,a:"start",c:"#ddd"}));
+ const z=(x,y,w,h,c)=>rc(x,y,w,h,c,{rx:10,op:.22,s:c,sw:4}); s+=z(306,516,190,90,"#ef4444")+z(338,222,264,216,"#3b82f6")+z(558,152,164,176,"#22c55e")+z(618,520,84,76,"#eab308")+z(284,668,432,64,"#9ca3af");
+ return s; }});
+})();
+
+/* ---------- scènes micro-soudure 01 à 20 ---------- */
+(function(){
+const M=window.MQ; const {rc,ci,el,pa,tx,G,arrow,tag,bad,good,card,pcb,shield,ic,smd,bga,btb,fpcConn,screw,usbc,microUsb,mic,battery,batConn,flexStrip,lens,coax,rfConn,
+ iron,hotAir,station,microscope,multimeter,probe,psu,tweezers,screwdriver,spudger,pick,suction,syringe,spool,wick,pump,kapton,alu,brush,bottle,wire,joint,thJoint,phoneBack,phoneFront,phoneInterior,cluster,seed}=M;
+const A=M.add;
+/* aides partagées */
+const lensC=(x,y,r)=>ci(x,y,r+6,"rgba(255,255,255,.08)",{s:"#9fb3c8",sw:4})+ci(x,y,r,"none",{s:"#cfe0f0",sw:2,op:.6}); // loupe
+const sym=(kind,x,y,c="#e2e8f0")=>{ const o={s:c,sw:4,lc:"round",lj:"round"}; let d="";
+  if(kind==="R") d=pa(`M${x-50} ${y}H${x-30}`,"none",o)+rc(x-30,y-12,60,24,"none",{s:c,sw:4})+pa(`M${x+30} ${y}H${x+50}`,"none",o);
+  if(kind==="C") d=pa(`M${x-50} ${y}H${x-8}M${x-8} ${y-22}V${y+22}M${x+8} ${y-22}V${y+22}M${x+8} ${y}H${x+50}`,"none",o);
+  if(kind==="L") d=pa(`M${x-50} ${y}H${x-36}`+[0,1,2,3].map(i=>`A9 9 0 0 1 ${x-36+18*(i+1)} ${y}`).join("")+`H${x+50}`,"none",o);
+  if(kind==="D") d=pa(`M${x-50} ${y}H${x+50}M${x-14} ${y-18}L${x+14} ${y}L${x-14} ${y+18}Z M${x+14} ${y-18}V${y+18}`,"none",o);
+  if(kind==="F") d=pa(`M${x-50} ${y}H${x+50}`,"none",o)+rc(x-26,y-11,52,22,"none",{s:c,sw:4});
+  if(kind==="U") d=rc(x-30,y-26,60,52,"none",{s:c,sw:4})+[ -14,0,14].map(k=>pa(`M${x-30} ${y+k}H${x-46}M${x+30} ${y+k}H${x+46}`,"none",o)).join("")+tx(x,y+7,"IC",{s:16,c});
+  return d; };
+const box=(x,y,w,h,t,c="#1e293b",tc="#e2e8f0",fs=17)=>rc(x+3,y+5,w,h,"rgba(0,0,0,.4)",{rx:10})+rc(x,y,w,h,c,{rx:10,s:"#334155",sw:2})+t.split("\n").map((l,i,a)=>tx(x+w/2,y+h/2+fs*.35+(i-(a.length-1)/2)*fs*1.2,l,{s:fs,c:tc,w:700})).join("");
+const chain=(items,x,y,gap,vertical=true)=>{ let s=""; items.forEach((it,i)=>{ const px=vertical?x:x+i*gap, py=vertical?y+i*gap:y; s+=it(px,py); if(i<items.length-1) s+= vertical?arrow(px,py+gap*.32,px,py+gap*.68,"#ffb547",5):arrow(px+gap*.32,py,px+gap*.68,py,"#ffb547",5); }); return s; };
+const paper=(x,y,w,h,title,rows,checks)=>{ let s=card(x,y,w,h,title); rows.forEach((r,i)=>{ const yy=y+80+i*((h-100)/rows.length); if(checks) s+=rc(x+22,yy-20,26,26,"#fff",{rx:4,s:"#555",sw:2})+(checks===true||checks[i]?pa(`M${x+26} ${yy-7}L${x+33} ${yy}L${x+46} ${yy-16}`,"none",{s:"#2f7d4f",sw:4,lc:"round"}):""); s+=tx(x+(checks?62:24),yy,r,{s:17,c:"#1f2937",a:"start",w:500}); }); return s; };
+Object.assign(M,{sym,box,chain,paper,lensC});
+const heatSpot=(x,y,r)=>ci(x,y,r,"url(#mqHeat)");
+
+A("microsoudure-01",{title:"Carte mère vue au microscope",h:1000,parts:[
+ ["Résistance CMS","Petit composant noir marqué d'un code (ici 103 = 10 kΩ). Limite le courant.",360,360,120,70],
+ ["Condensateur CMS","Composant beige sans marquage. Stocke et lisse la tension.",620,360,120,70],
+ ["Circuit intégré (puce)","Composant noir à plusieurs pattes ou billes. Le point indique la patte 1.",470,560,180,140],
+ ["Connecteur FPC","Reçoit une nappe. Ses broches se tordent facilement.",500,800,280,60],
+ ["Pistes en cuivre","Fils de cuivre gravés sous le vernis de la carte.",320,700,80,80],
+ ["Microscope (champ de vue)","Le cercle montre ce qu'on voit dans les oculaires : grossi 10 à 40 fois.",500,500,540,540],
+],draw(){ let s=pcb(240,240,520,620,{seed:"m1",smd:24,rx:4}); s+=smd(360,360,"R",130,{code:"103"})+smd(620,360,"C",130)+ic(390,500,170,130,"U2001",{pins:12,quad:1,sub:"PMIC"})+fpcConn(360,780,280,40);
+ s+=`<circle cx="500" cy="500" r="290" fill="none" stroke="#0b1222" stroke-width="60" opacity=".55"/>`+lensC(500,500,262); return s; }});
+
+A("microsoudure-02",{title:"Soudure, brasage et dessoudage",h:1000,parts:[
+ ["Pastille de cuivre","Zone de cuivre sur la carte où se soude la patte.",360,330,90,30],
+ ["Étain (ménisque)","Un bon joint forme une pente creuse et brillante.",380,300,60,60],
+ ["Patte du composant","Extrémité métallisée du composant.",450,270,60,60],
+ ["Joint raté en boule","L'étain n'a pas mouillé la pastille : contact mauvais.",380,680,80,80],
+ ["Carte (FR4)","Le support isolant de la carte.",500,370,300,40],
+ ["Panne du fer","Chauffe en même temps la pastille et la patte, pas seulement l'étain.",600,180,60,60],
+],draw(){ let s=joint(500,280,1.6,"good")+good(700,220)+joint(500,660,1.6,"ball")+bad(700,600)+iron(600,170,-140,{tip:"conique",hot:true,s:.45})+tx(500,520,"Bon joint",{s:22,c:"#86efac"})+tx(500,900,"Joint raté",{s:22,c:"#fca5a5"}); return s; }});
+
+A("microsoudure-03",{title:"Anatomie d'une carte mère",h:1000,parts:[
+ ["Alimentation (PMIC)","Zone rouge : fabrique les tensions de toute la carte.",420,330,70,60],
+ ["Processeur et mémoire","Zone bleue : CPU et RAM sous le blindage.",450,230,120,100],
+ ["Radio (RF)","Zone verte : réseau, Wi-Fi, Bluetooth.",620,210,90,90],
+ ["Audio","Zone jaune : écouteur, haut-parleur et micros.",530,270,80,40],
+ ["Connecteurs","Zone grise : écran, batterie, charge.",480,380,250,40],
+ ["Batterie","Reliée à la carte par son connecteur.",430,600,240,340],
+ ["Carte de charge","En bas : connecteur USB, micro, protections.",480,960,300,120],
+],draw(){ return phoneInterior(300,60,.5,{zones:true})+G(720,880,1,rc(0,0,0,0,"none")); }});
+
+A("microsoudure-04",{title:"Tailles des composants CMS",h:1050,parts:[
+ ["0805 (2,0 × 1,25 mm)","Le plus gros, facile à souder au fer.",300,240,140,80],
+ ["0603 (1,6 × 0,8 mm)","Courant sur les anciens téléphones.",470,240,110,60],
+ ["0402 (1,0 × 0,5 mm)","Très courant sur les smartphones.",600,240,80,50],
+ ["0201 (0,6 × 0,3 mm)","Minuscule : microscope obligatoire.",690,240,50,40],
+ ["01005 (0,4 × 0,2 mm)","Le plus petit : air chaud et grande précision.",740,240,40,30],
+ ["Règle en mm","Repère pour comparer les tailles.",520,370,460,40],
+ ["Boîtier QFN","Pattes sous les bords et pastille centrale de masse.",380,700,200,200],
+ ["Boîtier BGA","Billes d'étain sous la puce : se soude uniquement à l'air chaud.",640,700,200,200],
+],draw(){ let s=rc(250,140,520,280,"#1f6534",{rx:10})+smd(300,240,"R",120,{code:"472"})+smd(470,240,"C",96)+smd(600,240,"R",60,{code:"10"})+smd(690,240,"C",36)+smd(740,240,"C",24);
+ s+=rc(270,350,480,40,"#f2e8c9",{rx:4,s:"#a89a6a"}); for(let i=0;i<=24;i++) s+=pa(`M${280+i*19} 350V${i%5?362:372}`,"none",{s:"#333",sw:2}); [0,5,10,15,20].forEach((n,k)=>s+=tx(280+k*95,388,n+" mm",{s:12,c:"#333"}));
+ s+=G(380,700,1,rc(-90,-90,180,180,"url(#mqIC)",{rx:6})+tx(0,6,"QFN",{s:22,c:"#aaa"}))+G(380,880,1,rc(-90,-12,180,24,"#2a6b4c")+[...Array(9)].map((_,i)=>rc(-86+i*20,-14,10,6,"url(#mqTin)")).join("")+rc(-40,-14,80,6,"url(#mqTin)")+tx(0,40,"Vue de côté",{s:14,c:"#cbd5e1"}));
+ s+=G(640,700,1,bga(-90,-90,180,180,9))+G(640,880,1,rc(-90,-26,180,22,"url(#mqIC)")+[...Array(9)].map((_,i)=>ci(-80+i*20,2,8,"url(#mqSolder)")).join("")+rc(-90,10,180,8,"#2a6b4c")+tx(0,40,"Vue de côté",{s:14,c:"#cbd5e1"}));
+ return s; }});
+
+A("microsoudure-05",{title:"Planche d'identification des composants",h:1150,parts:[
+ ["Résistance (R)","Corps noir, code chiffré. Symbole : rectangle.",400,170,110,60],
+ ["Condensateur (C)","Corps beige ou brun, sans marquage. Symbole : deux traits.",400,320,110,60],
+ ["Bobine (L)","Corps gris foncé, code type 4R7. Symbole : boucles.",400,470,110,60],
+ ["Diode (D)","Trait clair = cathode. Symbole : triangle et barre.",400,620,110,60],
+ ["Fusible (F)","Corps clair marqué F ou T. Coupe le courant en cas de surcharge.",400,770,110,60],
+ ["Circuit intégré (U)","Puce à pattes ou billes. Repère U sur la carte.",400,940,120,100],
+],draw(){ let s=rc(260,90,480,1000,"#0f1720",{rx:14,s:"#2b3a4a"});
+ [["R",170],["C",320],["L",470],["D",620],["F",770]].forEach(([k,y])=>{ s+=smd(400,y,k,110,{code:k==="R"?"103":k==="L"?"4R7":"F"})+M.sym(k,620,y)+tx(620,y+52,{R:"R1001",C:"C2012",L:"L3001",D:"D1101",F:"F1001"}[k],{s:15,c:"#94a3b8",mono:1}); s+=pa(`M270 ${y+75}H730`,"none",{s:"#22324a",sw:2}); });
+ s+=ic(340,890,120,100,"U5001",{pins:8,quad:1})+M.sym("U",620,940);
+ return s; }});
+
+A("microsoudure-06",{title:"Poste de micro-soudure (vue de dessus)",h:1150,parts:[
+ ["Microscope","Au centre, face à toi. Les deux yeux dans les oculaires.",500,330,200,320],
+ ["Support de carte","Tient la carte bien à plat sous le microscope.",500,560,220,70],
+ ["Tapis antistatique","Relié à la terre, sous tout le poste.",320,1040,180,40],
+ ["Station fer à souder","À droite si tu es droitier.",680,760,140,90],
+ ["Station à air chaud","À gauche, buse vers le bas quand elle est posée.",320,760,140,90],
+ ["Extracteur de fumée","Aspire les fumées de flux : elles sont nocives.",700,180,120,120],
+ ["Boîtes de rangement","Composants classés par valeur et par taille.",500,950,260,90],
+ ["Pince brucelle","Toujours au même endroit, à portée de main.",380,640,140,40],
+],draw(){ let s=rc(250,80,500,1010,"url(#mqMatG)",{rx:16})+rc(250,80,500,1010,"url(#mqMatGrid)",{rx:16});
+ s+=G(500,330,1,ci(0,0,140,"url(#mqCase)",{s:"#555",sw:3})+ci(-40,-10,30,"#111",{s:"#666",sw:4})+ci(40,-10,30,"#111",{s:"#666",sw:4})+ci(0,60,40,"#fff9d6",{op:.8}));
+ s+=rc(400,540,200,50,"#9aa1a6",{rx:8})+pcb(420,548,160,34,{seed:"m6",traces:4,vias:10,rx:4});
+ s+=G(320,760,.45,station(0,0,{t:"AIR"}).replace("translate(0 0)",""))+G(620,760,.45,station(0,0,{t:"340°C",air:"FER"}));
+ s+=rc(640,120,120,120,"#2b2f33",{rx:12,s:"#111"})+ci(700,180,44,"url(#mqGrille)")+tweezers(310,640,0,.6);
+ for(let i=0;i<6;i++) s+=rc(380+i*42,920,36,60,["#f87171","#60a5fa","#facc15","#4ade80","#c084fc","#fb923c"][i],{rx:5,op:.85,s:"#111"});
+ return s; }});
+
+A("microsoudure-07",{title:"Les trois formes de pannes",h:1000,parts:[
+ ["Panne conique","Pointe fine : petits joints précis, composants 0402.",420,220,80,40],
+ ["Panne biseautée","Face plate : bonne transmission de la chaleur, usage général.",420,500,80,40],
+ ["Panne couteau","Lame : traîner l'étain sur une rangée de pattes, nettoyer des pastilles.",420,780,80,40],
+ ["Usage : petit composant","Pointe sur un côté du 0402.",660,260,90,60],
+ ["Usage : joint courant","Face plate posée sur pastille et patte.",660,540,110,60],
+ ["Usage : rangée de pattes","Lame glissée le long des pattes avec du flux.",660,820,140,60],
+],draw(){ let s="";
+ [["conique",220],["biseau",500],["couteau",780]].forEach(([t,y])=>{ s+=iron(330,y,0,{tip:t,s:1}); });
+ s+=G(660,260,1,rc(-70,10,140,10,"#1f6534")+smd(0,0,"R",56,{code:"10"}))+G(660,540,1,rc(-70,10,140,10,"#1f6534")+smd(0,-2,"C",90));
+ s+=G(660,820,1,rc(-80,20,160,10,"#1f6534")+ic(-60,-20,120,36,"",{pins:9}));
+ return s; }});
+
+A("microsoudure-08",{title:"Station à air chaud",h:1050,parts:[
+ ["Poignée","Tiens-la verticale, sans trembler.",500,220,60,160],
+ ["Buse","Choisis une buse un peu plus grande que la puce.",500,410,50,70],
+ ["Cône d'air chaud","L'air chauffe une zone, pas un point. Il peut faire envoler les petits composants.",500,500,140,110],
+ ["Distance 1 à 2 cm","Garde la buse à 1 à 2 cm de la puce.",630,520,40,90],
+ ["Mouvement circulaire","Tourne en petits cercles pour chauffer de façon égale.",500,590,200,60],
+ ["Puce chauffée","Quand l'étain fond, la puce bouge légèrement : soulève à la pince.",500,640,120,40],
+ ["Écran de la station","Température (ex. 350 °C) et débit d'air (ex. 40).",500,900,300,170],
+],draw(){ let s=pcb(280,600,440,120,{seed:"m8",smd:24})+ic(440,622,120,40,"U3001");
+ s+=hotAir(500,440,0,{s:1,airLen:150,nozzle:22});
+ s+=pa("M630 470V600","none",{s:"#fde68a",sw:3})+pa("M618 470H642M618 600H642","none",{s:"#fde68a",sw:3})+tx(650,540,"1–2 cm",{s:18,c:"#fde68a",a:"start"});
+ s+=el(500,592,100,26,"none",{s:"#ffb547",sw:4})+arrow(590,600,600,588,"#ffb547",4);
+ s+=station(350,820,{t:"350°C",air:"AIR 40"});
+ return s; }});
+
+A("microsoudure-09",{title:"Microscope stéréo",h:1100,parts:[
+ ["Oculaires","Un pour chaque œil : règle l'écart à tes yeux.",500,180,140,80],
+ ["Molette de zoom","Change le grossissement (souvent ×7 à ×45).",580,200,60,60],
+ ["Tête du microscope","Contient les lentilles. Ne la touche pas pendant le travail.",500,250,140,70],
+ ["Mise au point","Monte ou descend la tête pour avoir une image nette.",390,500,60,60],
+ ["Éclairage en anneau","Lumière LED autour de l'objectif : pas d'ombre sur la carte.",500,440,140,40],
+ ["Distance de travail","Espace sous l'objectif pour passer le fer et la pince (8 à 10 cm).",500,560,40,120],
+ ["Colonne","Porte la tête. Doit être bien serrée.",480,700,40,280],
+ ["Socle et support","Lourd et stable. La carte se pose ici.",500,840,300,90],
+],draw(){ let s=microscope(500,500,1); s+=pa("M520 470V650","none",{s:"#fde68a",sw:3,da:"8 6"})+tx(532,570,"8–10 cm",{s:18,c:"#fde68a",a:"start"}); return s; }});
+
+A("microsoudure-10",{title:"Flux, étain et alliages",h:1100,parts:[
+ ["Bobine d'étain","Fil d'étain avec flux à l'intérieur. 0,3 mm pour la micro-soudure.",380,250,180,180],
+ ["Seringue de flux","Flux en gel : une petite goutte suffit.",620,240,220,60],
+ ["Sn63Pb37 : 183 °C","Étain-plomb : fond bas, facile. Lave-toi les mains après.",272,600,10,60,"l"],
+ ["Sn42Bi58 : 138 °C","Basse température : idéal pour retirer une puce sans abîmer la carte.",272,700,10,60,"l"],
+ ["SAC305 : 217 °C","Sans plomb, d'origine sur les téléphones : fond plus haut.",272,800,10,60,"l"],
+ ["Pâte à souder","Pour le reballing des puces BGA et les composants à l'air chaud.",500,930,200,90],
+],draw(){ let s=spool(380,250,1)+syringe(640,250,0,{s:.9});
+ s+=card(270,520,460,330,"Alliage · fusion · usage");
+ [["Sn63Pb37","183 °C","Usage général"],["Sn42Bi58","138 °C","Basse température"],["SAC305","217 °C","Sans plomb (origine)"]].forEach(([a,b,c],i)=>{ const y=600+i*100; s+=tx(300,y+6,a,{s:20,c:"#111",a:"start",w:800})+tx(500,y+6,b,{s:20,c:"#b4442e",w:800})+tx(700,y+6,c,{s:15,c:"#333",a:"end",w:500})+pa(`M290 ${y+40}H710`,"none",{s:"#d6cfbd",sw:2}); });
+ s+=G(500,930,1,rc(-90,-40,180,80,"#ddd",{rx:10,s:"#999"})+el(0,-40,90,16,"#bbb")+el(0,-40,74,11,"#a7adb1")+tx(0,20,"PÂTE",{s:16,c:"#333"}));
+ return s; }});
+
+A("microsoudure-11",{title:"Tresse, pompe et outils",h:1000,parts:[
+ ["Tresse à dessouder","Tresse de cuivre : elle absorbe l'étain fondu.",440,420,200,40],
+ ["Panne du fer","Appuie sur la tresse, jamais sur la carte directement.",470,360,50,50],
+ ["Étain qui remonte","L'étain fondu monte dans la tresse : la pastille devient propre.",400,420,60,40],
+ ["Pastilles propres","Pastilles plates et brillantes, prêtes pour le nouveau composant.",600,470,140,40],
+ ["Pompe à dessouder","Aspire l'étain d'un composant traversant.",500,720,260,60],
+ ["Flux","Ajoute du flux sur la tresse pour qu'elle absorbe mieux.",620,880,200,50],
+],draw(){ let s=pcb(270,430,460,140,{seed:"m11",smd:10,rx:6}); for(let i=0;i<6;i++) s+=rc(330+i*60,462,40,20,"url(#mqCu)",{rx:3})+(i<3?el(350+i*60,460,22,9,"url(#mqSolder)"):"");
+ s+=wick(330,420,220,1)+rc(340,410,80,22,"#c9ced2",{op:.7,rx:6})+arrow(380,445,380,412,"#ffb547",4)+iron(470,400,-60,{tip:"biseau",hot:true,s:.6});
+ s+=pump(560,720,0,1)+syringe(620,880,0,{s:.8});
+ return s; }});
+
+A("microsoudure-12",{title:"Sécurité ESD et batteries lithium",h:1100,parts:[
+ ["Bracelet antistatique","Au poignet, contre la peau.",380,280,140,90],
+ ["Cordon de terre","Relie le bracelet au tapis ou à la prise de terre.",500,250,200,60],
+ ["Tapis relié à la terre","Toutes les cartes se posent sur ce tapis.",520,420,360,80],
+ ["Batterie débranchée","Toujours débrancher avant de souder ou de chauffer.",450,800,240,220],
+ ["Connecteur isolé (Kapton)","Un morceau de Kapton sur le connecteur évite tout contact accidentel.",620,700,120,60],
+ ["Danger feu","Batterie percée ou chauffée = feu. Bac de sable à portée de main.",640,960,80,80],
+],draw(){ let s=rc(280,380,480,90,"url(#mqMatG)",{rx:10})+ci(700,425,12,"url(#mqSteel)");
+ s+=G(380,280,1,el(0,0,70,40,"#1e1e1e",{s:"#444",sw:6})+rc(-26,-22,52,44,"url(#mqSteel)",{rx:6})+ci(0,0,10,"#c62828"))+pa("M420 260C520 200 640 300 700 420","none",{s:"#e53935",sw:6,lc:"round"});
+ s+=battery(330,700,240,220)+pa("M450 700V640","none",{s:"#c9761d",sw:30})+G(560,640,1,rc(0,0,130,50,"#e8e2d6",{rx:4})+rc(6,6,118,38,"#232323"))+rc(560,676,130,48,"#d98a1a",{op:.75,rx:4})+tx(625,706,"KAPTON",{s:14,c:"#5a3200",w:800});
+ s+=G(640,960,1,pa("M0 -46L46 34H-46Z","#f5c518",{s:"#111",sw:4})+pa("M0 -18C10 -4 14 6 0 22C-14 6 -10 -4 0 -18Z","#c62828"));
+ return s; }});
+
+A("microsoudure-13",{title:"Tension, courant, résistance : le château d'eau",h:1100,parts:[
+ ["Hauteur d'eau = tension (V)","Plus l'eau est haute, plus elle pousse fort. C'est la tension.",380,300,180,240],
+ ["Débit = courant (A)","La quantité d'eau qui passe chaque seconde. C'est le courant.",560,700,80,60],
+ ["Tuyau étroit = résistance (Ω)","Un tuyau étroit freine l'eau. C'est la résistance.",520,620,90,40],
+ ["Robinet = interrupteur","Ouvert ou fermé : le courant passe ou ne passe pas.",640,620,50,60],
+ ["Batterie du téléphone","Même idée : la batterie est le château d'eau, les composants sont les tuyaux.",420,980,260,120],
+],draw(){ let s=G(380,120,1,rc(-100,0,200,360,"#9aa1a6",{rx:10,s:"#555",sw:3})+rc(-92,80,184,272,"url(#mqWater)",{rx:6})+pa("M-100 0L-120 -40H120L100 0Z","#7b8288")+pa("M-60 360L-90 520H90L60 360Z","#8a8f93"));
+ s+=pa("M440 560H520","none",{s:"#9aa1a6",sw:40})+pa("M520 620H600","none",{s:"#9aa1a6",sw:16})+pa("M440 560H520","none",{s:"url(#mqWater)",sw:30})+pa("M440 560C460 560 470 600 520 620H600","none",{s:"#9aa1a6",sw:16})+pa("M600 620H700V720","none",{s:"#9aa1a6",sw:22})+pa("M600 620H700V720","none",{s:"#4aa3e8",sw:12});
+ s+=rc(626,596,28,48,"#c62828",{rx:4})+ci(640,590,14,"#c62828")+pa("M690 740Q700 780 710 810","none",{s:"#4aa3e8",sw:8,da:"6 8"});
+ s+=G(420,980,.5,battery(-260,-120,520,240));
+ s+=tx(380,80,"U",{s:40,c:"#fde68a",w:800})+tx(560,760,"I",{s:40,c:"#fde68a",w:800})+tx(560,600,"R",{s:34,c:"#fde68a",w:800});
+ return s; }});
+
+A("microsoudure-14",{title:"Loi d'Ohm et puissance",h:1100,parts:[
+ ["Triangle U = R × I","Cache la valeur cherchée : U = R × I, R = U ÷ I, I = U ÷ R.",500,300,320,280],
+ ["Résistance 10 Ω","La résistance mesurée sur la ligne.",360,740,130,70],
+ ["Multimètre","Mesure la tension aux bornes : 3,8 V.",620,760,160,230],
+ ["Exemple chiffré","I = 3,8 V ÷ 10 Ω = 0,38 A. Puissance P = U × I = 1,44 W.",500,1000,440,100],
+],draw(){ let s=G(500,320,1,pa("M0 -150L170 130H-170Z","#1e293b",{s:"#ffb547",sw:6})+pa("M-115 30H115M0 30V130","none",{s:"#ffb547",sw:5})+tx(0,-10,"U",{s:70,c:"#fff",w:800})+tx(-60,105,"R",{s:60,c:"#fff",w:800})+tx(60,105,"I",{s:60,c:"#fff",w:800})+tx(0,90,"×",{s:40,c:"#ffb547"}));
+ s+=pcb(270,690,260,110,{seed:"m14",smd:6})+smd(360,740,"R",130,{code:"100"});
+ s+=multimeter(560,640,{s:.42,d:"3.80",u:"V",dial:-50,jacks:["COM","VΩ"]});
+ s+=card(280,950,440,120,"")+tx(500,1000,"I = 3,8 V ÷ 10 Ω = 0,38 A",{s:24,c:"#111",w:800})+tx(500,1044,"P = 3,8 V × 0,38 A ≈ 1,44 W",{s:22,c:"#b4442e",w:700});
+ return s; }});
+
+A("microsoudure-15",{title:"Courant continu et polarité",h:1050,parts:[
+ ["Borne + (rouge)","Plus de la batterie : environ 3,8 à 4,4 V.",370,350,60,80],
+ ["Borne NTC","Capteur de température de la batterie.",430,350,40,80],
+ ["Borne − (masse)","Moins de la batterie, relié à la masse de la carte.",510,350,60,80],
+ ["Pointe rouge sur +","Toujours la pointe rouge sur le plus.",340,250,60,120],
+ ["Pointe noire sur −","La pointe noire sur la masse.",560,250,60,120],
+ ["Multimètre en V⎓","Calibre tension continue. Lis 3,92 V.",500,800,180,260],
+],draw(){ let s=pcb(250,300,500,160,{seed:"m15",smd:16})+batConn(330,320,1.4);
+ s+=probe(560,960,358,345,"r")+probe(600,960,560,345,"k");
+ s+=multimeter(400,680,{s:.48,d:"3.92",u:"V",dial:-50,jacks:["COM","VΩ"]});
+ return s; }});
+
+A("microsoudure-16",{title:"Lire le code d'une résistance CMS",h:1000,parts:[
+ ["Code 103","Deux premiers chiffres = valeur, dernier chiffre = nombre de zéros.",500,320,320,160],
+ ["Extrémités métallisées","Les deux côtés qui se soudent sur les pastilles.",350,320,60,160],
+ ["Calcul","10 × 10³ = 10 000 Ω = 10 kΩ.",500,620,440,120],
+ ["Autres exemples","472 = 4,7 kΩ · 100 = 10 Ω · 4R7 = 4,7 Ω (R = virgule).",500,840,440,140],
+],draw(){ let s=smd(500,320,"R",340,{code:"103"});
+ s+=card(280,560,440,130,"")+tx(500,610,"1 0 3",{s:40,c:"#111",w:800,mono:1})+tx(500,664,"10 × 10³ = 10 000 Ω = 10 kΩ",{s:24,c:"#b4442e",w:700});
+ s+=card(280,770,440,150,"")+tx(500,820,"472 → 4 700 Ω = 4,7 kΩ",{s:21,c:"#111",w:600})+tx(500,858,"100 → 10 Ω",{s:21,c:"#111",w:600})+tx(500,896,"4R7 → 4,7 Ω",{s:21,c:"#111",w:600});
+ return s; }});
+
+A("microsoudure-17",{title:"Condensateurs sur une ligne d'alimentation",h:1000,parts:[
+ ["Ligne d'alimentation","Piste qui porte la tension (ex. VBAT).",500,330,440,30],
+ ["Condensateurs de filtrage","Reliés entre la ligne et la masse : ils lissent la tension.",420,420,180,80],
+ ["Condensateur en court-circuit","Il relie la ligne à la masse : il chauffe et la ligne tombe à 0 V.",640,420,80,80],
+ ["Masse (GND)","Grande surface de cuivre reliée au moins de la batterie.",500,530,440,30],
+ ["Multimètre : 0,2 Ω","Ligne mesurée vers la masse : valeur presque nulle = court-circuit.",500,820,180,260],
+],draw(){ let s=pcb(250,280,500,300,{seed:"m17",traces:6,smd:0}); s+=rc(270,318,460,24,"url(#mqCu)",{rx:4})+rc(270,520,460,24,"url(#mqCu)",{rx:4})+tx(282,312,"VBAT",{s:16,c:"#fde68a",a:"start"})+tx(282,572,"GND",{s:16,c:"#fde68a",a:"start"});
+ [340,420,500].forEach(x=>{ s+=pa(`M${x} 342V520`,"none",{s:"#c8743c",sw:8})+smd(x,430,"C",70,{rot:90}); });
+ s+=pa("M640 342V520","none",{s:"#c8743c",sw:8})+ci(640,430,60,"url(#mqHeat)")+smd(640,430,"C",70,{rot:90})+rc(596,384,88,92,"none",{s:"#ef4444",sw:4,rx:8});
+ s+=multimeter(410,690,{s:.48,d:"0.2",u:"Ω",dial:30,jacks:["COM","VΩ"]});
+ return s; }});
+
+A("microsoudure-18",{title:"Diodes et LED",h:1050,parts:[
+ ["Symbole de la diode","Le courant passe dans le sens de la flèche (anode → cathode).",400,220,160,80],
+ ["Cathode (trait)","Le trait clair sur le composant = la cathode = la barre du symbole.",530,420,40,90],
+ ["Diode CMS","Composant noir avec un trait clair d'un côté.",470,420,180,90],
+ ["Sens passant : 0,55 V","Rouge sur l'anode, noir sur la cathode : le multimètre affiche environ 0,5 à 0,7 V.",360,800,160,240],
+ ["Sens bloqué : OL","Pointes inversées : affichage OL. Si les deux sens donnent 0, la diode est en court-circuit.",640,800,160,240],
+ ["LED","Diode qui éclaire. Même repère de cathode.",650,240,90,60],
+],draw(){ let s=M.sym("D",400,220,"#e2e8f0")+arrow(330,180,470,180,"#ffb547",4)+smd(650,240,"LED",90);
+ s+=smd(470,420,"D",200);
+ s+=multimeter(280,660,{s:.42,d:"0.552",u:"V",m:"▶|",dial:70,jacks:["COM","VΩ"]})+multimeter(560,660,{s:.42,d:"OL",u:"",m:"▶|",dial:70,jacks:["COM","VΩ"]});
+ return s; }});
+
+A("microsoudure-19",{title:"Bobines et fusibles dans l'alimentation",h:1100,parts:[
+ ["Connecteur de charge","L'entrée de l'énergie (VBUS 5 V).",500,150,170,90],
+ ["Fusible","Juste après le connecteur. Coupé = plus rien ne passe.",500,330,110,60],
+ ["Circuit d'alimentation (PMIC)","Transforme la tension.",500,500,110,90],
+ ["Bobine","Stocke l'énergie et lisse le courant à la sortie du PMIC.",500,670,110,60],
+ ["Condensateur de sortie","Filtre la tension finale.",500,830,110,60],
+ ["Sortie vers les circuits","Tension stable pour le processeur, la mémoire, l'écran…",500,990,240,60],
+],draw(){ let s=pcb(300,80,400,980,{seed:"m19",traces:8,smd:10});
+ s+=usbc(418,105,1,false)+smd(500,330,"F",110,{code:"F"})+ic(445,450,110,100,"PMIC",{pins:6,quad:1})+smd(500,670,"L",110,{code:"1R0"})+smd(500,830,"C",110)+rc(380,970,240,46,"url(#mqCu)",{rx:6})+tx(500,1000,"VDD 1,8 V",{s:18,c:"#3a2108",w:800});
+ [[200,300],[370,445],[555,625],[705,790],[860,965]].forEach(([a,b])=>s+=arrow(500,a,500,b,"#ffb547",5));
+ return s; }});
+
+A("microsoudure-20",{title:"Préparer et entretenir la panne",h:1000,parts:[
+ ["Panne oxydée (avant)","Noire et terne : l'étain ne colle plus, la chaleur passe mal.",450,250,140,60],
+ ["Laine de laiton","Nettoie la panne sans l'abîmer (mieux qu'une éponge sèche).",640,500,120,100],
+ ["Panne étamée (après)","Brillante, couverte d'une fine couche d'étain.",450,750,140,60],
+ ["Étain frais","Remets un peu d'étain avant de ranger le fer.",620,780,60,60],
+],draw(){ let s=iron(470,250,0,{tip:"ox",s:1})+bad(620,200)+iron(470,750,0,{tip:"conique",hot:true,s:1})+good(620,700);
+ s+=G(640,500,1,ci(0,0,70,"#c49a35",{op:.95})+ci(0,0,70,"url(#mqBraid)",{op:.6})+ci(0,0,28,"#222"))+arrow(500,330,500,670,"#ffb547",6)+pa("M690 790Q640 780 560 752","none",{s:"url(#mqTin)",sw:5,lc:"round"});
+ return s; }});
+})();
+
+/* ---------- scènes micro-soudure 21 à 40 ---------- */
+(function(){
+const M=window.MQ; const {rc,ci,el,pa,tx,G,arrow,tag,bad,good,card,pcb,shield,ic,smd,bga,btb,fpcConn,screw,usbc,microUsb,mic,battery,batConn,flexStrip,lens,coax,rfConn,
+ iron,hotAir,station,microscope,multimeter,probe,psu,tweezers,screwdriver,spudger,pick,suction,syringe,spool,wick,pump,kapton,alu,brush,bottle,wire,joint,thJoint,phoneBack,phoneFront,phoneInterior,cluster,seed,sym,box,chain,paper,lensC}=M;
+const A=M.add;
+const heat=(x,y,r)=>ci(x,y,r,"url(#mqHeat)");
+const pads=(x,y,n,gap,w=34,h=20,tin)=>{ let s=""; for(let i=0;i<n;i++) s+=rc(x+i*gap,y,w,h,"url(#mqCu)",{rx:3})+(tin?el(x+i*gap+w/2,y+3,w*.45,6,"url(#mqSolder)"):""); return s; };
+
+A("microsoudure-21",{title:"Soudure traversante : bon joint et ratés",h:1150,parts:[
+ ["Joint conique réussi","Brillant, en forme de petit volcan, la patte bien entourée.",500,200,140,120],
+ ["Patte du composant","Traverse la carte par un trou métallisé.",500,130,30,80],
+ ["Joint en boule","Trop peu de chaleur sur la pastille : l'étain ne mouille pas.",500,470,120,120],
+ ["Joint froid","Mat et granuleux : la pièce a bougé pendant le refroidissement.",500,730,120,100],
+ ["Excès d'étain","Trop d'étain : risque de pont avec le voisin.",500,990,140,140],
+],draw(){ let s=""; [["good",230],["ball",500],["cold",760],["excess",1020]].forEach(([t,y])=>{ s+=thJoint(500,y,1,t)+(t==="good"?good(680,y-40):bad(680,y-40)); }); return s; }});
+
+A("microsoudure-22",{title:"Souder une résistance 0402",h:1100,parts:[
+ ["1. Pré-étamage","Une petite bosse d'étain sur UNE seule pastille.",380,220,100,60],
+ ["2. Pose à la pince","Tiens la résistance à la pince et refonds la bosse : elle se colle.",600,470,120,80],
+ ["3. Second côté","Soude l'autre côté, puis retouche le premier avec un peu de flux.",500,720,120,60],
+ ["Effet pierre tombale","Composant dressé : un côté a fondu avant l'autre. Chauffe les deux à la fois.",500,960,120,120],
+],draw(){ let s="";
+ s+=rc(280,190,440,60,"#1f6534",{rx:8})+pads(330,210,2,140,60,24)+el(360,210,26,10,"url(#mqSolder)")+tx(620,180,"①",{s:30,c:"#fde68a"});
+ s+=rc(280,440,440,60,"#1f6534",{rx:8})+pads(330,460,2,140,60,24)+smd(430,456,"R",160,{code:"10"})+tweezers(470,420,-30,.6)+tx(620,430,"②",{s:30,c:"#fde68a"});
+ s+=rc(280,690,440,60,"#1f6534",{rx:8})+pads(330,710,2,140,60,24)+smd(430,706,"R",160,{code:"10"})+pa("M352 712Q360 690 380 690V712Z","url(#mqSolder)")+pa("M508 712Q500 690 480 690V712Z","url(#mqSolder)")+good(640,700)+tx(620,680,"③",{s:30,c:"#fde68a"});
+ s+=rc(280,1000,440,40,"#1f6534",{rx:8})+pads(360,1010,2,140,60,20)+G(410,940,1,rc(-24,-60,48,120,"url(#mqRes)",{rx:3})+rc(-24,40,48,20,"url(#mqTin)")+rc(-24,-60,48,20,"url(#mqTin)"),-12)+bad(620,960);
+ return s; }});
+
+A("microsoudure-23",{title:"Dessouder un composant traversant",h:1000,parts:[
+ ["Pompe à dessouder","Arme-la, pose la buse sur le joint fondu, appuie sur le bouton.",560,300,300,80],
+ ["Buse en téflon","Résiste à la chaleur. Posée bien à plat sur le joint.",470,420,40,40],
+ ["Joint chauffé","Chauffe jusqu'à ce que l'étain soit bien liquide.",480,520,60,60],
+ ["Fer à souder","De l'autre côté ou juste à côté de la buse.",380,500,80,60],
+ ["Aspiration","L'étain est aspiré d'un coup : le trou devient libre.",500,380,40,90],
+],draw(){ let s=thJoint(500,560,1,"good")+heat(500,520,60)+pump(660,330,-60,1)+iron(380,500,-10,{tip:"conique",hot:true,s:.5})+arrow(500,470,520,400,"#ffb547",6); return s; }});
+
+A("microsoudure-24",{title:"Dessouder un composant CMS",h:1050,parts:[
+ ["Goutte d'étain","Noie le composant dans une grosse goutte d'étain : les deux côtés fondent ensemble.",380,320,140,60],
+ ["Panne biseautée","Elle chauffe toute la goutte en même temps.",360,240,80,60],
+ ["Résistance CMS","Elle glisse avec la goutte, sans forcer.",380,330,90,40],
+ ["Air chaud, petite buse","Autre méthode : buse fine, 300 à 330 °C, débit faible.",650,320,80,250],
+ ["Pince brucelle","Soulève le composant dès que l'étain est liquide.",660,520,160,60],
+ ["Pastilles à nettoyer","Après : tresse + flux pour des pastilles plates.",500,820,300,80],
+],draw(){ let s=pcb(260,380,480,170,{seed:"m24",smd:12})+smd(380,350,"R",90,{code:"471"})+el(380,340,80,34,"url(#mqSolder)",{op:.85})+iron(360,250,-30,{tip:"biseau",hot:true,s:.55});
+ s+=smd(650,350,"C",70)+hotAir(650,240,0,{s:.45,nozzle:8,airLen:90})+tweezers(560,530,-10,.6);
+ s+=pcb(330,770,340,110,{seed:"m24b",traces:3,smd:0})+pads(380,805,2,160,80,32);
+ return s; }});
+
+A("microsoudure-25",{title:"Grille d'inspection des soudures",h:1150,parts:[
+ ["Joint bon","Lisse, brillant, ménisque creusé.",380,230,200,120],
+ ["Joint froid","Mat, granuleux : refais-le avec du flux.",620,230,200,120],
+ ["Pont d'étain","Deux pastilles reliées : court-circuit.",380,560,200,140],
+ ["Bille d'étain","Petite bille perdue : elle peut créer un court-circuit plus tard.",620,560,200,140],
+ ["Excès d'étain","Trop d'étain : on ne voit plus la forme du composant.",380,900,200,120],
+ ["Manque d'étain","Contact fragile : ajoute un peu d'étain.",620,900,200,120],
+],draw(){ let s=rc(260,90,480,1010,"#0f1720",{rx:12,s:"#2b3a4a"});
+ s+=joint(380,230,.6,"good")+good(470,170,.7)+joint(620,230,.6,"cold")+bad(710,170,.7)+joint(380,900,.6,"excess")+bad(470,840,.7)+joint(620,900,.6,"insuff")+bad(710,840,.7);
+ s+=G(380,560,1,rc(-100,0,200,30,"#1f6534")+rc(-80,-10,30,14,"url(#mqCu)")+rc(-30,-10,30,14,"url(#mqCu)")+rc(20,-10,30,14,"url(#mqCu)")+rc(70,-10,30,14,"url(#mqCu)")+el(-25,-10,42,12,"url(#mqSolder)"))+bad(470,500,.7);
+ s+=G(620,560,1,rc(-100,0,200,30,"#1f6534")+smd(0,-10,"C",80)+ci(-60,-6,9,"url(#mqSolder)"))+bad(710,500,.7);
+ return s; }});
+
+A("microsoudure-26",{title:"Choisir panne et température",h:1100,parts:[
+ ["Composant 0402 / 0201","Panne conique fine · 300 à 330 °C.",272,260,10,80,"l"],
+ ["Joint courant, connecteur","Panne biseautée · 330 à 360 °C.",272,370,10,80,"l"],
+ ["Rangée de pattes, nettoyage","Panne couteau · 350 à 380 °C.",272,480,10,80,"l"],
+ ["Grosse masse (blindage)","Panne biseautée large + préchauffage · 380 à 420 °C.",272,590,10,80,"l"],
+ ["Étain sans plomb","Ajoute 20 à 30 °C ou mélange avec un étain basse température.",272,700,10,80,"l"],
+ ["Station réglée","Commence bas, monte par 10 °C si l'étain ne fond pas en 2 secondes.",500,940,300,160],
+],draw(){ let s=card(270,180,460,580,"Travail → panne → température"); [["0402 / 0201","conique","300–330 °C"],["Joint courant","biseau","330–360 °C"],["Rangée de pattes","couteau","350–380 °C"],["Blindage","biseau large","380–420 °C"],["Sans plomb","+20 à 30 °C","selon alliage"]].forEach(([a,b,c],i)=>{ const y=268+i*110; s+=tx(290,y,a,{s:19,c:"#111",a:"start",w:800})+tx(560,y,b,{s:17,c:"#444",w:600})+tx(710,y,c,{s:19,c:"#b4442e",a:"end",w:800})+pa(`M285 ${y+40}H715`,"none",{s:"#d6cfbd",sw:2}); });
+ s+=station(350,860,{t:"340°C",air:"FER"}); return s; }});
+
+A("microsoudure-27",{title:"Régler le débit d'air chaud",h:1050,parts:[
+ ["Débit faible (20–30)","Pour les petits composants 0402 : ils restent en place.",340,420,120,280],
+ ["Débit moyen (40–60)","Pour les puces moyennes, avec une buse adaptée.",500,420,120,280],
+ ["Débit fort (70+)","Trop fort : les petits composants voisins s'envolent.",660,420,120,280],
+ ["Composants qui restent","Avec un débit adapté, rien ne bouge autour.",340,640,120,50],
+ ["Composants qui s'envolent","Débit trop fort : composants soufflés et perdus.",660,620,140,90],
+],draw(){ let s=pcb(250,600,500,140,{seed:"m27",smd:30}); [[340,8,60],[500,14,100],[660,20,150]].forEach(([x,n,l])=>{ s+=hotAir(x,410,0,{s:.55,nozzle:n,airLen:l}); });
+ s+=smd(700,560,"C",30,{rot:30})+smd(620,540,"R",30,{rot:-40})+smd(730,520,"C",24,{rot:70})+arrow(660,600,710,540,"#ef4444",3)+bad(740,480,.7)+good(380,500,.7);
+ return s; }});
+
+A("microsoudure-28",{title:"Préparer une carte avant intervention",h:1100,parts:[
+ ["Carte sur son support","Bien fixée, à plat, elle ne bouge pas pendant le chauffage.",500,340,420,220],
+ ["Pinces du support","Serrent les bords de la carte, loin des composants.",290,340,40,80],
+ ["Éléments retirés","Batterie, caméras, nappes, carte SIM et blindages amovibles.",500,780,420,220],
+ ["Photo « avant »","Prends toujours une photo avant de commencer.",650,180,160,120],
+ ["Nettoyage alcool","Nettoie la zone avec de l'alcool isopropylique.",340,180,100,170],
+],draw(){ let s=rc(260,250,480,180,"#9aa1a6",{rx:10,s:"#555"})+pcb(300,270,400,140,{seed:"m28",smd:30})+shield(330,290,120,90,"CPU")+rc(270,300,40,80,"#444",{rx:6})+rc(690,300,40,80,"#444",{rx:6});
+ s+=G(650,180,1,rc(-80,-55,160,110,"#222",{rx:14})+lens(0,0,30)+rc(40,-70,30,16,"#333",{rx:4}))+bottle(340,180,"ALCOOL IPA 99 %",.75);
+ s+=card(280,680,440,220,"Retiré de la carte")+["✔ Batterie débranchée","✔ Caméras et nappes","✔ Carte SIM","✔ Blindage amovible"].map((t,i)=>tx(300,760+i*36,t,{s:19,c:"#1f2937",a:"start",w:600})).join("");
+ return s; }});
+
+A("microsoudure-29",{title:"Protéger les composants sensibles",h:1050,parts:[
+ ["Zone chauffée","Seule cette zone doit recevoir l'air chaud.",500,430,120,100],
+ ["Bouclier aluminium","Feuille d'alu autour de la zone : protège les plastiques et les voisins.",360,430,100,180],
+ ["Kapton sur connecteur","Le ruban Kapton protège le connecteur plastique voisin.",630,520,140,60],
+ ["Connecteur plastique","Il fond vite à l'air chaud : toujours le protéger.",630,520,120,40],
+ ["Rouleau de Kapton","Ruban jaune résistant à la chaleur.",640,830,130,130],
+ ["Buse d'air chaud","Garde-la au-dessus de la zone, en mouvement.",500,280,60,160],
+],draw(){ let s=pcb(250,380,500,220,{seed:"m29",smd:40})+ic(450,400,100,70,"U4001")+heat(500,435,90);
+ s+=alu(300,370,110,200)+alu(550,370,60,90)+btb(570,500,120,44)+rc(560,494,140,56,"#d98a1a",{rx:4,op:.7});
+ s+=hotAir(500,300,0,{s:.5,nozzle:14,airLen:70})+kapton(640,830,1);
+ return s; }});
+
+A("microsoudure-30",{title:"Contrôler la qualité d'un joint",h:1100,parts:[
+ ["Bon joint (creusé)","Ménisque concave : bonne mouillure.",380,230,180,100],
+ ["Joint insuffisant","Trop fin : contact fragile.",620,230,180,100],
+ ["Joint en excès","Bombé : cache des défauts, risque de pont.",380,480,180,120],
+ ["Multimètre en continuité","Bip entre la patte et la piste = bon contact électrique.",560,800,160,240],
+ ["Pointes sur patte et piste","Une pointe sur le composant, l'autre sur la piste plus loin.",380,760,100,60],
+],draw(){ let s=joint(380,230,.6,"good")+good(470,170,.7)+joint(620,230,.6,"insuff")+bad(710,170,.7)+joint(380,480,.6,"excess")+bad(470,410,.7);
+ s+=pcb(270,700,220,110,{seed:"m30",traces:4,smd:0})+smd(330,740,"C",60)+rc(380,760,100,10,"url(#mqCu)");
+ s+=probe(560,960,340,742,"r")+probe(600,960,450,762,"k")+multimeter(480,680,{s:.42,d:"0.3",u:"Ω",m:"•)))",dial:110,jacks:["COM","VΩ"]});
+ return s; }});
+
+A("microsoudure-31",{title:"Remplacer une résistance CMS",h:1050,parts:[
+ ["Avant : résistance brûlée","Corps noirci ou fissuré.",380,250,120,70],
+ ["Après : résistance neuve","Même code (ici 103) et même taille 0402.",620,250,120,70],
+ ["Pastilles nettoyées","Tresse + flux avant de poser la neuve.",500,420,240,50],
+ ["Mesure au multimètre","Hors circuit, la neuve doit afficher sa valeur : 10 kΩ.",560,780,170,250],
+],draw(){ let s=rc(260,200,480,100,"#1f6534",{rx:8})+smd(380,250,"R",110,{code:"103"})+ci(380,250,40,"#000",{op:.45})+pa("M360 236L372 262L388 240","none",{s:"#111",sw:3})+smd(620,250,"R",110,{code:"103"})+arrow(450,250,550,250,"#ffb547",6)+bad(380,180,.7)+good(620,180,.7);
+ s+=rc(300,400,400,50,"#1f6534",{rx:8})+pads(370,412,2,180,80,26);
+ s+=smd(400,830,"R",90,{code:"103"})+probe(560,1000,358,830,"r")+probe(600,1000,442,830,"k")+multimeter(480,640,{s:.42,d:"9.98",u:"kΩ",dial:30,jacks:["COM","VΩ"]});
+ return s; }});
+
+A("microsoudure-32",{title:"Remplacer un condensateur en court-circuit",h:1100,parts:[
+ ["Ligne VBAT","Ligne batterie, en court-circuit vers la masse.",500,300,440,30],
+ ["Condensateur chaud","Repéré au toucher, à l'alcool qui s'évapore vite ou à la caméra thermique.",620,390,80,80],
+ ["Avant : 0,1 Ω","Ligne mesurée vers la masse : quasi zéro = court-circuit.",360,780,160,240],
+ ["Après : 12 kΩ","Condensateur retiré puis remplacé : la ligne revient à une valeur normale.",640,780,160,240],
+ ["Condensateurs sains","Les autres condensateurs de la ligne restent en place.",420,400,160,80],
+],draw(){ let s=pcb(250,250,500,220,{seed:"m32",traces:6,smd:0})+rc(270,288,460,24,"url(#mqCu)",{rx:4})+tx(282,282,"VBAT",{s:16,c:"#fde68a",a:"start"});
+ [360,440,520].forEach(x=>s+=pa(`M${x} 312V420`,"none",{s:"#c8743c",sw:6})+smd(x,400,"C",56,{rot:90})); s+=pa("M620 312V420","none",{s:"#c8743c",sw:6})+heat(620,400,60)+smd(620,400,"C",56,{rot:90})+rc(584,360,72,84,"none",{s:"#ef4444",sw:4,rx:8});
+ s+=multimeter(270,640,{s:.42,d:"0.1",u:"Ω",dial:30})+multimeter(550,640,{s:.42,d:"12.4",u:"kΩ",dial:30})+bad(360,610,.7)+good(640,610,.7);
+ return s; }});
+
+A("microsoudure-33",{title:"Remplacer une diode ou une LED",h:1000,parts:[
+ ["Repère de cathode (carte)","Trait ou coin coupé sérigraphié sur la carte.",420,330,60,90],
+ ["Repère de cathode (diode)","Trait clair sur le composant.",590,300,40,80],
+ ["Diode neuve","Aligne son trait avec le repère de la carte avant de souder.",560,300,180,80],
+ ["Pastilles","Étame-les légèrement avant de poser.",420,420,240,40],
+ ["Flèche d'alignement","Cathode sur cathode : sinon la diode est montée à l'envers.",560,380,60,60],
+ ["LED montée à l'envers","Elle ne s'allume pas : vérifie toujours le sens.",500,790,200,100],
+],draw(){ let s=rc(270,360,460,120,"#1f6534",{rx:8})+pads(350,410,2,180,80,28)+rc(420,380,8,30,"#e8eef0")+tx(424,374,"K",{s:16,c:"#fff"});
+ s+=smd(560,280,"D",180)+arrow(588,330,600,400,"#ffb547",5)+arrow(424,320,424,380,"#ffb547",5);
+ s+=G(500,790,1,rc(-100,-30,200,60,"#1f6534",{rx:6})+smd(0,0,"LED",110,{rot:180}))+bad(640,760,.8);
+ return s; }});
+
+A("microsoudure-34",{title:"Remplacer une bobine ou un fusible",h:1100,parts:[
+ ["Connecteur de charge","Entrée VBUS 5 V.",500,150,170,90],
+ ["Fusible coupé","Point de coupure : aucun courant ne passe plus après lui.",500,380,110,60],
+ ["Bobine","Elle aussi peut s'ouvrir : vérifie sa continuité.",500,600,110,60],
+ ["Circuit de charge","Ne reçoit plus de tension si le fusible est coupé.",500,820,110,90],
+ ["Test de continuité","Pas de bip à travers le fusible = fusible à changer.",720,380,80,200,"r"],
+],draw(){ let s=pcb(300,80,400,880,{seed:"m34",traces:8,smd:10})+usbc(418,105,1,false)+smd(500,380,"F",110)+pa("M480 370L520 390","none",{s:"#ef4444",sw:6})+smd(500,600,"L",110,{code:"1R0"})+ic(445,770,110,100,"CHG",{pins:6,quad:1});
+ [[200,345],[415,565],[635,765]].forEach(([a,b],i)=>s+=arrow(500,a,500,b,i===0?"#ffb547":"#64748b",5)); s+=tx(560,330,"✂",{s:40,c:"#ef4444"});
+ s+=probe(780,560,460,380,"r")+probe(800,560,540,380,"k");
+ return s; }});
+
+A("microsoudure-35",{title:"Remplacer un connecteur FPC",h:1050,parts:[
+ ["Connecteur FPC (vu de dessus)","Corps plastique et rangée de broches fines.",500,300,320,90],
+ ["Broches alignées","Chaque broche doit tomber pile sur sa pastille.",500,370,300,30],
+ ["Pastilles de la carte","Nettoyées et légèrement étamées.",500,560,300,40],
+ ["Zone protégée (Kapton)","Kapton autour pour protéger les composants voisins.",500,560,420,140],
+ ["Pattes de fixation","Soude-les en premier pour tenir le connecteur.",340,320,40,60],
+],draw(){ let s=pcb(250,200,500,450,{seed:"m35",smd:30})+rc(270,490,460,140,"#d98a1a",{rx:6,op:.55})+rc(300,520,400,80,"#1f6534",{rx:4});
+ for(let i=0;i<24;i++) s+=rc(318+i*15.5,540,8,36,"url(#mqCu)",{rx:1});
+ s+=fpcConn(320,260,360,90)+pa("M500 380V500","none",{s:"#fde68a",sw:3,da:"6 6"})+arrow(500,400,500,520,"#ffb547",4);
+ return s; }});
+
+A("microsoudure-36",{title:"Connecteur USB-C en coupe",h:1050,parts:[
+ ["Coque métallique","Protège et tient le connecteur.",500,230,300,60],
+ ["Languette centrale","Porte les broches des deux faces.",500,320,180,40],
+ ["Broches de signal","24 broches : VBUS, GND, D+, D−, CC… Zoome pour lire chaque nom.",500,312,140,24],
+ ["Pattes de fixation","Soudées dans la carte : elles reprennent les efforts du câble.",290,290,40,60],
+ ["Pastilles de la carte","Fines et rapprochées : flux, étain et microscope obligatoires.",500,520,330,40],
+ ["Pastilles VBUS","Les plus sollicitées : elles chauffent si le connecteur est sale.",420,520,40,40],
+],draw(){ let s=usbc(255,190,3,true);
+ s+=pcb(260,480,480,120,{seed:"m36",traces:4,smd:6});
+ for(let i=0;i<12;i++){ s+=rc(320+i*30,500,16,40,i===3||i===8?"#e8b04a":"url(#mqCu)",{rx:2}); }
+ s+=rc(270,500,30,60,"url(#mqCu)",{rx:4})+rc(700,500,30,60,"url(#mqCu)",{rx:4});
+ return s; }});
+
+A("microsoudure-37",{title:"Contrôler un microphone",h:1100,parts:[
+ ["Orifice du micro","Le son entre par ce trou : il ne doit jamais être bouché.",500,240,40,40],
+ ["Boîtier métallique","Protège la membrane du micro MEMS.",500,300,260,140],
+ ["Membrane (MEMS)","Pièce interne qui vibre avec la voix.",500,360,140,30],
+ ["Pastilles","4 ou 5 pastilles : alimentation, masse, signal.",500,450,260,40],
+ ["Joint de caoutchouc","Fait l'étanchéité entre le micro et la coque.",500,200,200,30],
+ ["Liste des tests","Enregistreur vocal, appel, vidéo, mains libres.",712,830,10,260,"r"],
+],draw(){ let s=rc(330,190,340,24,"#222",{rx:10})+rc(480,190,40,24,"#0b0b0b")+G(500,300,1,rc(-130,-60,260,140,"url(#mqShield)",{rx:10,s:"#7f878b"})+ci(0,-60,14,"#111")+pa("M-70 60Q0 30 70 60","none",{s:"#c47a22",sw:6})+rc(-110,80,220,14,"#1f6534"));
+ for(let i=0;i<5;i++) s+=rc(380+i*50,440,26,20,"url(#mqCu)",{rx:3});
+ s+=paper(290,700,420,260,"Tests du micro",["Enregistreur vocal","Appel (l'autre t'entend ?)","Vidéo avec son","Mains libres"],true);
+ return s; }});
+
+A("microsoudure-38",{title:"Préparer les surfaces et les plages",h:1000,parts:[
+ ["Vernis (masque de soudure)","Couche verte isolante : il faut la gratter pour souder un fil.",500,300,420,24],
+ ["Cuivre","La piste conductrice sous le vernis.",500,330,420,20],
+ ["Support (FR4)","Le support isolant de la carte.",500,380,420,60],
+ ["Grattoir / lame","Gratte doucement le vernis jusqu'au cuivre brillant.",560,200,140,80],
+ ["Cuivre découvert","Zone brillante prête à être étamée.",420,300,80,20],
+],draw(){ let s=G(500,330,1,rc(-220,10,440,70,"url(#mqFr4)")+rc(-220,-10,440,22,"url(#mqCu)")+rc(-220,-30,440,22,"#1f8a4c",{op:.95})+rc(-120,-30,80,22,"url(#mqCu)")+pa("M-120 -30L-110 -40L-50 -40L-40 -30","none",{s:"#1f8a4c",sw:2}));
+ s+=G(560,220,1,rc(-10,-70,20,110,"url(#mqSteelV)")+pa("M-10 40L10 40L4 70L-4 70Z","url(#mqSteel)"),35)+arrow(520,290,420,290,"#ffb547",5);
+ return s; }});
+
+A("microsoudure-39",{title:"Reprise de soudure (joint fissuré)",h:1000,parts:[
+ ["Avant : joint fissuré","Fissure fine autour de la patte : faux contact au moindre choc.",380,330,180,120],
+ ["Après : joint refait","Flux, refonte, un peu d'étain frais : joint lisse et brillant.",620,330,180,120],
+ ["Flux","Toujours du flux avant de refondre un vieux joint.",500,640,240,60],
+ ["Fer","Chauffe 2 à 3 secondes, pas plus.",500,820,200,60],
+],draw(){ let s=joint(380,330,.6,"crack")+bad(470,260,.7)+joint(620,330,.6,"good")+good(710,260,.7)+arrow(470,340,530,340,"#ffb547",6)+syringe(520,640,0,{s:.8})+iron(520,820,0,{tip:"conique",hot:true,s:.6}); return s; }});
+
+A("microsoudure-40",{title:"Supprimer un pont d'étain",h:1100,parts:[
+ ["Pont d'étain","Deux broches voisines reliées : court-circuit.",450,250,100,50],
+ ["Flux ajouté","Le flux aide l'étain à se séparer.",500,520,200,60],
+ ["Panne qui tire l'étain","Panne propre, glissée vers l'extérieur des broches.",560,560,80,80],
+ ["Résultat séparé","Chaque broche a son propre joint.",500,880,300,80],
+],draw(){ const row=(y,bridge)=>{ let s=rc(280,y,440,80,"#1f6534",{rx:8})+rc(320,y-30,360,40,"url(#mqIC)",{rx:3}); for(let i=0;i<8;i++) s+=rc(336+i*44,y+10,16,46,"url(#mqCu)",{rx:2})+rc(338+i*44,y,12,30,"url(#mqTin)"); if(bridge) s+=el(447,y+32,40,16,"url(#mqSolder)"); else for(let i=0;i<8;i++) s+=el(344+i*44,y+30,10,8,"url(#mqSolder)"); return s; };
+ let s=row(220,true)+bad(660,180,.7)+row(540,true)+rc(300,520,400,100,"url(#mqFlux)",{rx:20,op:.45})+iron(560,580,-120,{tip:"couteau",hot:true,s:.5})+row(860,false)+good(660,820,.7); return s; }});
+})();
+
+/* ---------- scènes micro-soudure 41 à 60 ---------- */
+(function(){
+const M=window.MQ; const {rc,ci,el,pa,tx,G,arrow,tag,bad,good,card,pcb,shield,ic,smd,bga,btb,fpcConn,screw,usbc,microUsb,mic,battery,batConn,flexStrip,lens,coax,rfConn,
+ iron,hotAir,station,microscope,multimeter,probe,psu,tweezers,screwdriver,spudger,pick,suction,syringe,spool,wick,pump,kapton,alu,brush,bottle,wire,joint,thJoint,phoneBack,phoneFront,phoneInterior,cluster,seed,sym,box,chain,paper,lensC}=M;
+const A=M.add;
+const heat=(x,y,r)=>ci(x,y,r,"url(#mqHeat)");
+const uv=(x,y,ang=0)=>G(x,y,1,rc(-80,-14,120,28,"#5b21b6",{rx:6})+rc(40,-6,40,12,"url(#mqSteel)")+ci(-80,0,14,"#7c3aed")+tx(-20,6,"UV",{s:14,c:"#fff",w:800}),ang);
+const uvLamp=(x,y)=>G(x,y,1,rc(-24,-90,48,110,"#222",{rx:10})+ci(0,30,22,"#a78bfa",{op:.9})+ci(0,30,40,"#a78bfa",{op:.25}));
+const flow=(x,y,w,h,t,c)=>M.box(x,y,w,h,t,c||"#1e293b","#e2e8f0",16);
+const thermal=(x,y,w,h,hx,hy)=>{ let s=rc(x,y,w,h,"#140a38",{rx:10}); s+=rc(x,y,w,h,"#2a1a6e",{rx:10,op:.6}); for(let i=0;i<6;i++) s+=rc(x+20+i*((w-40)/6),y+30,(w-40)/7,h-60,"#3b2a8f",{rx:6,op:.5}); s+=ci(hx,hy,70,"#ff3d00",{op:.25})+ci(hx,hy,44,"#ff9a00",{op:.6})+ci(hx,hy,20,"#fff36b"); s+=rc(x+w-70,y+16,54,26,"#000",{rx:4,op:.6})+tx(x+w-43,y+35,"48 °C",{s:14,c:"#fff"}); return s; };
+
+A("microsoudure-41",{title:"Réparer une pastille arrachée",h:1050,parts:[
+ ["Pastille arrachée","La pastille de cuivre est partie avec le composant.",380,330,80,60],
+ ["Piste grattée","On gratte le vernis au début de la piste pour trouver le cuivre.",440,330,80,30],
+ ["Fil de liaison","Fil émaillé fin (0,02 à 0,05 mm) soudé de la piste à la patte du composant.",510,300,120,60],
+ ["Patte du composant","Le composant reposé, sa patte reçoit le fil.",600,300,60,60],
+ ["Colle UV","Une goutte de colle UV fixe le fil et la zone réparée.",500,560,200,60],
+ ["Lampe UV","Durcit la colle en 30 à 60 secondes.",680,760,80,150],
+],draw(){ let s=pcb(260,230,480,190,{seed:"m41",traces:4,smd:8})+rc(330,316,40,30,"#3d6a52",{rx:3})+pa("M332 330L346 318L360 334L368 320","none",{s:"#203d30",sw:2})+rc(370,322,120,14,"url(#mqCu)")+rc(370,322,40,14,"#e3a26a");
+ s+=smd(620,300,"C",90); s+=pa("M390 329C440 300 520 300 576 300","none",{s:"#e8c33a",sw:3});
+ s+=el(470,310,110,36,"#c4b5fd",{op:.35,s:"#a78bfa"})+uv(500,560)+uvLamp(680,760); return s; }});
+
+A("microsoudure-42",{title:"Réparer une piste coupée",h:1000,parts:[
+ ["Piste coupée","Coupure nette (choc, corrosion, griffure).",500,330,40,40],
+ ["Extrémités grattées","Gratte le vernis de chaque côté de la coupure.",440,330,120,30],
+ ["Fil soudé en pont","Fil fin étamé soudé d'un bout à l'autre.",500,300,180,40],
+ ["Colle UV","Recouvre et protège la réparation.",500,330,240,80],
+ ["Contrôle continuité","Bip entre les deux extrémités = réparation réussie.",650,700,160,240],
+],draw(){ let s=pcb(260,250,480,170,{seed:"m42",traces:4,smd:6})+rc(300,322,180,14,"url(#mqCu)")+rc(520,322,180,14,"url(#mqCu)")+rc(420,322,60,14,"#e3a26a")+rc(520,322,60,14,"#e3a26a")+pa("M484 318L500 340L516 318","none",{s:"#203d30",sw:3});
+ s+=pa("M430 326Q500 290 570 326","none",{s:"#e8c33a",sw:4})+el(500,320,130,40,"#c4b5fd",{op:.3,s:"#a78bfa"})+multimeter(560,580,{s:.42,d:"0.4",u:"Ω",m:"•)))",dial:110}); return s; }});
+
+A("microsoudure-43",{title:"Réaliser un jumper (fil de pontage)",h:1050,parts:[
+ ["Point de test A","Départ du signal (pastille ou patte de composant).",330,300,40,40],
+ ["Point de test B","Arrivée du signal.",660,650,40,40],
+ ["Fil jaune (jumper)","Fil émaillé, court et bien plaqué, qui contourne les composants.",520,430,160,200],
+ ["Obstacle évité","Le fil passe à côté des blindages, jamais dessus.",450,450,160,120],
+ ["Colle UV de fixation","Points de colle tous les 5 mm pour que le fil ne bouge pas.",600,420,40,40],
+],draw(){ let s=pcb(260,220,480,520,{seed:"m43",smd:50})+shield(380,390,160,130,"CPU")+ci(330,300,10,"url(#mqGold)",{s:"#fff",sw:2})+ci(660,650,10,"url(#mqGold)",{s:"#fff",sw:2});
+ s+=M.wire("M330 300C330 360 340 370 360 370H580Q600 370 600 400V600Q600 650 650 650")+[[460,370],[600,450],[600,560]].map(([x,y])=>el(x,y,10,7,"#c4b5fd",{op:.8})).join(""); return s; }});
+
+A("microsoudure-44",{title:"Inspecter une réparation",h:1050,parts:[
+ ["Continuité","Le signal passe d'un bout à l'autre.",292,330,10,40,"l"],
+ ["Isolement","Aucun contact avec la masse ou les voisins.",292,420,10,40,"l"],
+ ["Fixation","Fil et composants bien tenus (colle UV durcie).",292,510,10,40,"l"],
+ ["Fonction","La fonction réparée marche vraiment (charge, son, image…).",292,600,10,40,"l"],
+ ["Inspection au microscope","Dernier contrôle visuel de la zone.",640,860,160,200],
+],draw(){ let s=M.paper(290,230,420,460,"Contrôle de la réparation",["Continuité (bip)","Isolement (pas de court)","Fixation (colle UV)","Fonction testée"],true); s+=G(640,860,.4,microscope(0,0,1)); return s; }});
+
+A("microsoudure-45",{title:"Prendre en main le multimètre",h:1100,parts:[
+ ["Écran","Affiche la valeur et l'unité (V, Ω, A).",500,330,230,110],
+ ["Sélecteur rotatif","Choisis le mode AVANT de toucher la carte.",500,560,180,180],
+ ["Mode V⎓ (continu)","Pour la batterie et les lignes de la carte.",450,470,40,30],
+ ["Mode Ω (résistance)","Toujours carte hors tension.",560,500,40,30],
+ ["Mode diode / continuité","▶| et •))) : le plus utilisé en réparation.",590,560,50,50],
+ ["Borne COM","Pointe noire, toujours ici.",500,950,40,40],
+ ["Borne VΩ","Pointe rouge pour V, Ω et diode.",560,950,40,40],
+ ["Bornes A / mA","Seulement pour mesurer un courant : risque de fusible grillé.",410,950,90,40],
+],draw(){ return multimeter(350,270,{s:1,d:"0.512",u:"V",dial:-50,jacks:["COM","VΩ"]}); }});
+
+A("microsoudure-46",{title:"Mesurer la continuité",h:1050,parts:[
+ ["Piste saine","Les deux pointes sur la même piste : le multimètre bipe.",400,300,240,30],
+ ["Bip •)))","Bip = continuité, la piste est bonne.",620,190,120,60],
+ ["Piste coupée","Pas de bip : la piste est coupée entre les deux pointes.",400,640,240,30],
+ ["Affichage OL","OL = circuit ouvert.",620,560,120,60],
+],draw(){ let s=pcb(260,250,320,110,{seed:"m46a",traces:3,smd:0})+rc(280,292,280,14,"url(#mqCu)")+probe(330,180,300,298,"r")+probe(520,180,540,298,"k")+G(620,190,1,rc(-60,-30,120,60,"#14532d",{rx:10})+tx(0,10,"•))) BIP",{s:18,c:"#86efac"}))+good(720,190,.7);
+ s+=pcb(260,590,320,110,{seed:"m46b",traces:3,smd:0})+rc(280,632,130,14,"url(#mqCu)")+rc(430,632,130,14,"url(#mqCu)")+probe(330,520,300,638,"r")+probe(520,520,540,638,"k")+G(620,560,1,rc(-60,-30,120,60,"#450a0a",{rx:10})+tx(0,10,"OL",{s:22,c:"#fca5a5"}))+bad(720,560,.7);
+ s+=multimeter(400,780,{s:.35,d:"0.0",u:"Ω",m:"•)))",dial:110}); return s; }});
+
+A("microsoudure-47",{title:"Mesurer une ligne vers la masse",h:1100,parts:[
+ ["Carte saine : 540 Ω","Valeur normale de la ligne vers la masse (exemple pour VDD 1,8 V).",370,420,160,240],
+ ["Carte en panne : 2 Ω","Valeur très basse : court-circuit sur la ligne.",630,420,160,240],
+ ["Pointe rouge sur la ligne","Sur un condensateur de la ligne mesurée.",370,780,60,60],
+ ["Pointe noire à la masse","Sur un blindage ou une vis : c'est la masse.",450,760,60,60],
+ ["Carte hors tension","Toujours batterie débranchée pour mesurer en Ω.",500,860,440,140],
+],draw(){ let s=multimeter(290,300,{s:.42,d:"540",u:"Ω",dial:30})+multimeter(550,300,{s:.42,d:"2.0",u:"Ω",dial:30})+good(370,270,.7)+bad(630,270,.7);
+ s+=pcb(280,740,440,190,{seed:"m47",smd:30})+shield(420,750,120,90,"")+smd(370,790,"C",60)+probe(300,620,370,786,"r")+probe(330,620,450,770,"k"); return s; }});
+
+A("microsoudure-48",{title:"Mode diode sur le connecteur de charge",h:1100,parts:[
+ ["Connecteur de charge","Mesure chaque broche, carte hors tension.",500,220,380,200],
+ ["Pointe rouge à la masse","En mode diode, rouge sur la masse, noire sur la broche.",310,400,60,60],
+ ["VBUS : 0,45","Valeur normale (exemple).",380,560,100,40],
+ ["D+ / D− : 0,62","Valeurs normales (exemple).",500,620,100,40],
+ ["CC1 : 0,000 (anormal)","Zéro = court-circuit sur cette broche : diode ou condensateur à vérifier.",620,680,120,40],
+ ["Tableau de référence","Compare toujours avec une carte saine du même modèle.",500,900,420,180],
+],draw(){ let s=usbc(255,130,3,false)+probe(260,520,310,410,"r");
+ s+=G(380,560,1,rc(-60,-20,120,40,"#14532d",{rx:6})+tx(0,7,"VBUS 0,45",{s:15,c:"#86efac",mono:1}))+G(500,620,1,rc(-60,-20,120,40,"#14532d",{rx:6})+tx(0,7,"D± 0,62",{s:15,c:"#86efac",mono:1}))+G(620,680,1,rc(-70,-20,140,40,"#7f1d1d",{rx:6,s:"#ef4444",sw:2})+tx(0,7,"CC1 0,000",{s:15,c:"#fecaca",mono:1}));
+ s+=M.paper(290,820,420,190,"Valeurs (exemple)",["VBUS 0,45 · GND 0 · D± 0,62","CC1 0,58 · CC2 0,58"],false); return s; }});
+
+A("microsoudure-49",{title:"Mesurer une tension sur la carte",h:1100,parts:[
+ ["VBAT ≈ 3,8 V","Tension de la batterie, au connecteur batterie.",360,330,60,60],
+ ["Ligne 1,8 V","Alimente la logique (mémoire, capteurs).",500,420,60,60],
+ ["Ligne 3,3 V","Alimente certains périphériques.",620,330,60,60],
+ ["Pointe noire à la masse","Toujours sur la masse (blindage ou vis).",660,500,60,60],
+ ["Alimentation de labo","La carte est alimentée par l'alimentation de laboratoire.",500,950,360,200],
+],draw(){ let s=pcb(260,240,480,300,{seed:"m49",smd:50})+batConn(310,300,.6)+smd(500,420,"C",60)+smd(620,330,"C",60)+screw(660,500,14);
+ s+=tag(360,280,"3,8 V","#0f172a","#86efac",18)+tag(500,380,"1,8 V","#0f172a","#86efac",18)+tag(620,290,"3,3 V","#0f172a","#86efac",18);
+ s+=psu(320,850,{v:"3.80",a:"0.180"}); return s; }});
+
+A("microsoudure-50",{title:"Localiser un court-circuit",h:1100,parts:[
+ ["Alimentation de labo","Injecte 1 V (courant limité à 1 A) dans la ligne en court.",500,250,360,200],
+ ["Ligne en court","La pointe rouge sur la ligne, la noire à la masse.",500,500,80,60],
+ ["Caméra thermique","Montre le composant qui chauffe.",500,760,420,260],
+ ["Condensateur chaud","Le point rouge = le composant en court-circuit.",560,770,80,80],
+],draw(){ let s=psu(320,150,{v:"1.00",a:"0.980"})+pcb(330,460,340,90,{seed:"m50",smd:14})+pa("M420 350C420 420 470 450 480 480","none",{s:"#c62828",sw:6})+pa("M600 350C600 420 560 450 540 500","none",{s:"#111",sw:6});
+ s+=thermal(290,630,420,280,560,770)+smd(560,770,"C",60); return s; }});
+
+A("microsoudure-51",{title:"Lire un schéma électronique",h:1150,parts:[
+ ["Extrait du schéma","Le circuit de charge dessiné avec des symboles.",500,280,420,260],
+ ["Repère F1001","Le fusible sur le schéma et sur la carte porte le même nom.",420,240,80,40],
+ ["Repère U2301","Le circuit de charge.",580,300,90,70],
+ ["Position sur la carte","Les flèches relient chaque symbole à son composant réel.",500,780,420,260],
+],draw(){ let s=rc(290,150,420,260,"url(#mqPaper)",{rx:8,s:"#cfc8b6"})+pa("M310 240H360","none",{s:"#111",sw:3})+M.sym("F",420,240,"#111")+M.sym("U",580,300,"#111")+pa("M470 240H520V290H534","none",{s:"#111",sw:3})+tx(420,215,"F1001",{s:14,c:"#111",mono:1})+tx(580,255,"U2301",{s:14,c:"#111",mono:1})+tx(320,230,"VBUS",{s:13,c:"#b4442e",a:"start"});
+ s+=pcb(290,650,420,260,{seed:"m51",smd:40})+smd(420,720,"F",60)+ic(540,760,90,70,"U2301")+arrow(420,270,420,690,"#ffb547",4)+arrow(580,340,585,750,"#ffb547",4); return s; }});
+
+A("microsoudure-52",{title:"Utiliser une alimentation de laboratoire",h:1150,parts:[
+ ["Réglage tension : 4,20 V","Même tension qu'une batterie pleine.",400,280,140,60],
+ ["Courant affiché","Montre ce que la carte consomme à l'allumage.",560,280,140,60],
+ ["Pince rouge sur +","Sur la borne + du connecteur batterie.",380,620,60,60],
+ ["Pince noire sur −","Sur la borne − du connecteur batterie.",520,620,60,60],
+ ["Courbe d'un démarrage normal","0 → pic à 0,3 A → 0,1 A stable : le téléphone démarre.",500,920,420,220],
+],draw(){ let s=psu(320,200,{v:"4.20",a:"0.312"})+pcb(300,560,400,140,{seed:"m52",smd:20})+batConn(370,590,.8)+pa("M570 370C560 460 400 520 390 600","none",{s:"#c62828",sw:6})+pa("M630 370C640 460 540 520 520 600","none",{s:"#111",sw:6});
+ s+=rc(290,810,420,220,"#0f1720",{rx:10,s:"#2b3a4a"})+pa("M310 1000H690M310 1000V830","none",{s:"#64748b",sw:2})+pa("M310 1000L360 1000L380 880L420 900L450 940L690 950","none",{s:"#38d16a",sw:4})+tx(320,850,"A",{s:14,c:"#94a3b8",a:"start"})+tx(690,1022,"temps",{s:14,c:"#94a3b8",a:"end"}); return s; }});
+
+A("microsoudure-53",{title:"Entonnoir du diagnostic",h:1150,parts:[
+ ["Questions au client","Que s'est-il passé ? Chute, eau, réparation avant ?",292,180,10,80,"l"],
+ ["Observation","Regarde : oxydation, choc, composant brûlé.",708,350,10,80,"r"],
+ ["Test des pièces","Échange écran, batterie, connecteur avec des pièces sûres.",352,520,10,80,"l"],
+ ["Mesures sur carte","Multimètre, alimentation de labo, caméra thermique.",618,690,10,80,"r"],
+ ["Conclusion","La panne est trouvée : réparation et devis.",412,860,10,80,"l"],
+],draw(){ let s=""; [[420,"Questions"],[360,"Observation"],[300,"Test des pièces"],[240,"Mesures"],[180,"Conclusion"]].forEach(([w,t],i)=>{ const y=140+i*170; s+=flow(500-w/2,y,w,80,t,["#1e3a8a","#1e40af","#1d4ed8","#2563eb","#15803d"][i]); if(i<4) s+=arrow(500,y+86,500,y+164,"#ffb547",5); }); return s; }});
+
+A("microsoudure-54",{title:"Chemin de la charge",h:1250,parts:[
+ ["Chargeur","Donne 5 V (ou plus en charge rapide).",500,110,140,80],
+ ["Connecteur USB","Point de contrôle 1 : propre ? broches droites ?",500,280,170,90],
+ ["Fusible et diode de protection","Point 2 : fusible en continuité, diode pas en court.",500,460,200,60],
+ ["Circuit de charge","Point 3 : il reçoit VBUS et règle la charge.",500,640,110,90],
+ ["Connecteur batterie","Point 4 : la tension arrive à la batterie (4,2 à 4,4 V en fin de charge).",500,820,170,70],
+ ["Batterie","Point 5 : batterie saine, pas gonflée.",500,1040,260,180],
+],draw(){ let s=G(500,110,1,rc(-70,-40,140,80,"#f2f2f2",{rx:12,s:"#bbb"})+rc(-14,40,28,30,"url(#mqSteel)")+tx(0,6,"5 V",{s:22,c:"#333"}));
+ s+=usbc(418,240,1,false)+G(440,460,1,"")+smd(440,460,"F",80)+smd(560,460,"D",80)+ic(445,595,110,90,"CHG")+batConn(415,790,1)+battery(370,960,260,180);
+ [[180,235],[350,425],[495,590],[690,780],[880,950]].forEach(([a,b],i)=>s+=arrow(500,a,500,b,"#ffb547",5)+ci(640,(a+b)/2,16,"#c62828")+tx(640,(a+b)/2+6,String(i+1),{s:16,c:"#fff"})); return s; }});
+
+A("microsoudure-55",{title:"Arbre de décision : pas d'affichage",h:1150,parts:[
+ ["Écran noir","Point de départ : rien ne s'affiche.",372,140,10,70,"l"],
+ ["Le téléphone est allumé ?","Vibration, son, PC qui le reconnaît.",342,320,10,70,"l"],
+ ["Écran de test sûr ?","Branche un écran qui marche.",638,500,10,70,"r"],
+ ["Connecteur écran","Broches, oxydation, condensateurs autour.",252,700,10,70,"l"],
+ ["Rétroéclairage","Image très sombre visible à la lampe = rétroéclairage (LCD).",748,700,10,70,"r"],
+ ["Problème d'alimentation","Ne s'allume pas : diagnostic d'alimentation, pas d'écran.",704,320,10,30,"r"],
+],draw(){ let s=flow(370,105,260,70,"Écran noir","#7f1d1d")+arrow(500,180,500,280,"#ffb547",5)+flow(340,285,320,70,"Allumé ?")+arrow(500,360,500,460,"#ffb547",5)+tx(520,415,"oui",{s:16,c:"#86efac",a:"start"})+flow(360,465,280,70,"Écran de test OK ?")+arrow(450,540,380,660,"#ffb547",5)+arrow(550,540,620,660,"#ffb547",5)+tx(390,600,"oui",{s:16,c:"#86efac"})+tx(610,600,"image sombre",{s:15,c:"#fde68a"})+flow(250,665,220,70,"Connecteur")+flow(530,665,220,70,"Rétroéclairage");
+ s+=arrow(660,320,700,320,"#ef4444",5)+tx(680,300,"non",{s:16,c:"#fca5a5"}); s+=G(500,940,.35,phoneFront(-190,-400,1)); return s; }});
+
+A("microsoudure-56",{title:"Chaîne audio",h:1150,parts:[
+ ["Micro","Capte la voix. Point de test : tension de polarisation.",500,140,80,60],
+ ["Circuit audio (codec)","Transforme le son en signal numérique et inversement.",500,360,120,100],
+ ["Amplificateur","Rend le signal assez fort pour le haut-parleur.",500,580,100,80],
+ ["Haut-parleur","Point de test : environ 8 Ω au multimètre.",500,820,200,180],
+ ["Points de test","Mesure à chaque étape pour trouver où le son se perd.",640,470,60,260,"r"],
+],draw(){ let s=mic(470,110,1)+ic(440,310,120,100,"CODEC")+ic(450,540,100,80,"AMP")+G(500,820,1,rc(-100,-90,200,180,"#16181a",{rx:16,s:"#2f3337",sw:3})+rc(-80,-70,160,120,"url(#mqGrille)",{rx:8})+rc(-30,80,20,24,"url(#mqGold)")+rc(10,80,20,24,"url(#mqGold)"));
+ [[160,300],[420,530],[630,720]].forEach(([a,b])=>s+=arrow(500,a,500,b,"#ffb547",5)); [230,475,680].forEach(y=>s+=ci(640,y,12,"url(#mqGold)",{s:"#fff",sw:2})+pa(`M510 ${y}H628`,"none",{s:"#fde68a",sw:2,da:"5 5"})); return s; }});
+
+A("microsoudure-57",{title:"Arbre d'alimentation",h:1150,parts:[
+ ["Batterie (VBAT)","Source de toute l'énergie : 3,5 à 4,4 V.",500,140,260,120],
+ ["PMIC","Le circuit d'alimentation : il crée toutes les tensions.",500,400,140,120],
+ ["Ligne processeur (≈ 0,8 V)","Cœur du processeur.",330,720,120,70],
+ ["Ligne mémoire (1,1 V)","Mémoire RAM.",450,720,100,70],
+ ["Ligne écran (5,5 V / −5 V)","Alimentation de la dalle.",570,720,100,70],
+ ["Ligne audio (1,8 V)","Codec et amplificateur.",690,720,100,70],
+],draw(){ let s=G(500,140,.5,battery(-260,-120,520,240))+ic(430,340,140,120,"PMIC",{pins:8,quad:1});
+ [[330,"CPU"],[450,"RAM"],[570,"LCD"],[690,"AUDIO"]].forEach(([x,t])=>{ s+=pa(`M500 470C500 560 ${x} 580 ${x} 680`,"none",{s:"#ffb547",sw:5})+M.box(x-55,685,110,70,t,"#1e293b","#e2e8f0",17); });
+ s+=arrow(500,210,500,330,"#ffb547",6); return s; }});
+
+A("microsoudure-58",{title:"Tests après réparation",h:1150,parts:[
+ ["Écran et tactile","Toute la surface répond, pas de taches.",292,260,10,40,"l"],
+ ["Charge","Le pourcentage monte, courant normal au testeur.",292,350,10,40,"l"],
+ ["Son et micro","Appel, haut-parleur, enregistreur.",292,440,10,40,"l"],
+ ["Caméras","Avant et arrière, mise au point.",292,530,10,40,"l"],
+ ["Réseau, Wi-Fi, Bluetooth","Appel test, internet, appairage.",292,620,10,40,"l"],
+ ["Boutons et capteurs","Volume, marche, empreinte, proximité.",292,710,10,40,"l"],
+],draw(){ return M.paper(290,180,420,620,"Tests avant de rendre le téléphone",["Écran et tactile","Charge","Son et micro","Caméras","Réseau, Wi-Fi, Bluetooth","Boutons et capteurs"],true)+G(500,960,.3,phoneFront(-190,-400,1,{on:true})); }});
+
+A("microsoudure-59",{title:"Fiche de réparation",h:1150,parts:[
+ ["Modèle et client","Marque, modèle, IMEI, nom et téléphone du client.",272,250,10,50,"l"],
+ ["Panne décrite","Ce que dit le client, mot pour mot.",272,330,10,40,"l"],
+ ["Mesures","Valeurs relevées (exemple : VBUS 0,000 en mode diode).",272,410,10,40,"l"],
+ ["Photos avant / après","Deux photos de la zone réparée.",500,560,340,120],
+ ["Solution","Pièce changée ou réparation faite.",272,720,10,40,"l"],
+ ["Garantie","Durée et conditions de la garantie.",272,800,10,40,"l"],
+],draw(){ let s=card(270,170,460,700,"Fiche de réparation"); [["Modèle :","Tecno Spark 10"],["Panne :","Ne charge plus"],["Mesures :","CC1 0,000 (diode)"]].forEach(([a,b],i)=>s+=tx(290,260+i*80,a,{s:18,c:"#555",a:"start",w:700})+tx(420,260+i*80,b,{s:18,c:"#111",a:"start",w:500})+pa(`M290 ${280+i*80}H710`,"none",{s:"#d6cfbd",sw:2}));
+ s+=rc(340,500,140,110,"#333",{rx:6})+pcb(350,510,120,90,{seed:"f1",smd:10,rx:3})+rc(520,500,140,110,"#333",{rx:6})+pcb(530,510,120,90,{seed:"f2",smd:10,rx:3})+tx(410,630,"Avant",{s:15,c:"#555"})+tx(590,630,"Après",{s:15,c:"#555"});
+ [["Solution :","Diode TVS remplacée"],["Garantie :","3 mois"]].forEach(([a,b],i)=>s+=tx(290,730+i*80,a,{s:18,c:"#555",a:"start",w:700})+tx(420,730+i*80,b,{s:18,c:"#111",a:"start",w:500})); return s; }});
+
+A("microsoudure-60",{title:"Analyser une oxydation",h:1100,parts:[
+ ["Dépôts verts","Oxydation du cuivre (vert-de-gris) après contact avec l'eau.",380,300,80,60],
+ ["Dépôts blancs","Sels et résidus autour des composants.",470,360,80,60],
+ ["Composant rongé","Les extrémités du composant sont attaquées : à remplacer.",420,330,60,40],
+ ["Brosse + alcool","Brosse douce et alcool isopropylique 99 % (ou bac à ultrasons).",660,560,120,200],
+ ["Après nettoyage","Zone propre et sèche : on peut mesurer et tester.",500,860,420,200],
+],draw(){ let s=pcb(260,220,480,240,{seed:"m60a",smd:30})+ic(500,250,100,70,"U1")+smd(420,330,"C",70);
+ [[380,300],[400,320],[360,320],[470,360],[490,340],[450,380]].forEach(([x,y],i)=>s+=ci(x,y,14+i%3*4,i<3?"url(#mqOx)":"#f1f1ea",{op:.85})); s+=bad(700,250,.7);
+ s+=brush(660,560,-60,1)+bottle(560,600,"ALCOOL IPA 99 %",.6)+pcb(290,760,420,200,{seed:"m60a",smd:30})+ic(530,790,100,70,"U1")+smd(450,870,"C",70)+good(680,780,.7); return s; }});
+})();
+
+/* ---------- branchement dans le site ---------- */
+(function(){
+"use strict";
+const M=window.MQ;
+const LEGACY={tools:"outils",open:"ouvrir",charge:"charge",battery:"batterie",screen:"ecran",keypad:"touches",camera:"camera",solder:"soudure",board:"cartemere"};
+const RULES=[[/court-circuit|court circuit/,"microsoudure-50"],[/oxyd|tomb[ée] dans l.eau|mouill/,"microsoudure-60"],[/multim[eè]tre/,"microsoudure-45"],[/charg|usb|type-c/,"charge"],[/batter/,"batterie"],[/[ée]cran|lcd|oled|affich|tactile/,"ecran"],[/cam[ée]ra|photo|objectif/,"camera"],[/touche|clavier/,"touches"],[/micro\b|microphone|audio|haut-parleur|[ée]couteur|\bson\b/,"microsoudure-56"],[/alimentation|pmic/,"microsoudure-57"],[/soud|[ée]tain|flux/,"soudure"],[/ouvr|d[ée]mont|vitre arri/,"ouvrir"],[/outil/,"outils"]];
+function sceneFor(L){
+  if(!L) return "cartemere";
+  if(M.scenes[L.id]) return L.id;
+  if(L.svg && LEGACY[L.svg]) return LEGACY[L.svg];
+  const t=((L.t||"")+" "+(L.c||"")+" "+(L.i||"")).toLowerCase();
+  for(const [re,id] of RULES) if(re.test(t)) return id;
+  return "cartemere";
+}
+M.sceneFor=sceneFor;
+function boot(){
+  M.inject();
+  try{ if(typeof SVG==="object" && SVG){ Object.keys(LEGACY).forEach(k=>{ SVG[k]=M.html(LEGACY[k]); }); } }catch(e){}
+  window.schemaSVG=function(L){ return M.html(sceneFor(L)); };
+  try{ if(/\/schema/.test(location.hash) && typeof render==="function") render(); }catch(e){}
+}
+if(document.body) boot(); else document.addEventListener("DOMContentLoaded",boot);
+})();
+
+</script>
+<!-- ===== FIN DES MAQUETTES ===== -->
 </body>
 </html>
